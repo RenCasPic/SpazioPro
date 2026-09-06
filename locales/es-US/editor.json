@@ -56,5 +56,40 @@
   "catalog": "Catálogo",
   "details": "Detalles",
   "total_estimate": "Total estimado",
-  "view_estimate": "Ver estimado"
+  "view_estimate": "Ver estimado",
+  "studio": {
+    "pick_surface": "Toca una superficie para cambiar su material",
+    "change_material": "Cambiar material",
+    "materials_for": "Materiales para {surface}",
+    "all_materials": "Todos los materiales",
+    "surface_floor": "el piso",
+    "surface_wall": "las paredes",
+    "surface_ceiling": "el techo",
+    "looks": "Estilos",
+    "new_look": "Nuevo estilo",
+    "compare": "Comparar",
+    "compare_title": "Compara tus estilos",
+    "cost_chip": "Costo aprox.",
+    "calc": "Calcular remodelación",
+    "see_breakdown": "Ver desglose",
+    "empty_hint": "Elige una superficie abajo y luego un material para verlo aplicado."
+  },
+  "quality": {
+    "label": "Calidad",
+    "any": "Cualquiera",
+    "economy": "Económico",
+    "standard": "Estándar",
+    "premium": "Premium"
+  },
+  "range": {
+    "title": "Tu remodelación costaría alrededor de",
+    "planning_note": "Un rango de planificación — los presupuestos reales varían según las condiciones del sitio, los acabados y tu contratista.",
+    "materials": "Materiales",
+    "labor": "Mano de obra",
+    "demo": "Demolición y retiro",
+    "other": "Otros",
+    "confidence": "Confianza {level}",
+    "detail": "Ver detalle por partida",
+    "why": "¿Por qué un rango?"
+  }
 }

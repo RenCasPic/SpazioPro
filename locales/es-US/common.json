@@ -91,7 +91,10 @@
     "label": "Confianza del estimado",
     "high": "Confianza alta",
     "medium": "Confianza media",
-    "low": "Confianza baja"
+    "low": "Confianza baja",
+    "high_label": "alta",
+    "medium_label": "media",
+    "low_label": "baja"
   },
   "disclaimer": "Este estimado es únicamente orientativo. Los costos reales pueden variar según las mediciones verificadas, las condiciones del sitio, la disponibilidad de materiales, los precios de proveedores, los requisitos de mano de obra, los permisos y los impuestos locales.",
   "language": {

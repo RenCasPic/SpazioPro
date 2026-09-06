@@ -1,5 +1,7 @@
 {
   "title": "Configuración",
+  "advanced_mode": "Avanzado (herramientas de contratista)",
+  "advanced_hint": "Mano de obra, impuestos y extras",
   "profile": {
     "title": "Perfil de la empresa",
     "note": "Estos datos se usan automáticamente en tus estimados y PDFs.",

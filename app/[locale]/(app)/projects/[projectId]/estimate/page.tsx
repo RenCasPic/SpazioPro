@@ -7,7 +7,7 @@ import { useLiveEstimate, useScenarioTotals } from "@/hooks/use-estimate";
 import { ProjectShell } from "@/components/projects/project-shell";
 import { Button } from "@/components/ui/button";
 import { PriceDisclaimer } from "@/components/ui/disclaimer";
-import { ConfidencePill } from "@/components/budget/confidence-pill";
+import { CostRange } from "@/components/studio/cost-range";
 import { LaborEditor } from "@/components/budget/labor-editor";
 import { BudgetSettings } from "@/components/budget/budget-settings";
 import { ScenarioComparison } from "@/components/budget/scenario-comparison";
@@ -76,8 +76,6 @@ function Estimate({ bundle }: { bundle: ProjectBundle }) {
     }
   }
 
-  const CL = (k: string) => t(`estimates.cost_lines.${k}`);
-
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -102,10 +100,17 @@ function Estimate({ bundle }: { bundle: ProjectBundle }) {
         onAdd={(tier) => addScenario(tier)}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="space-y-6">
-          <section>
-            <h3 className="font-serif text-xl text-ink">{t("estimates.materials_and_furniture")}</h3>
+          {live && <CostRange totals={live.totals} confidence={live.confidence} className="lg:hidden" />}
+
+          <details className="group rounded-2xl border border-line bg-surface">
+            <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-3.5 text-sm font-medium text-ink">
+              {t("estimates.materials_and_furniture")}
+              <span className="text-xs text-muted group-open:hidden">{t("editor.range.detail")}</span>
+            </summary>
+          <section className="px-5 pb-5">
+            <h3 className="sr-only">{t("estimates.materials_and_furniture")}</h3>
             <div className="mt-3 overflow-x-auto rounded-2xl border border-line bg-surface">
               <table className="w-full min-w-[560px] text-sm">
                 <thead>
@@ -148,66 +153,46 @@ function Estimate({ bundle }: { bundle: ProjectBundle }) {
               </table>
             </div>
           </section>
+          </details>
 
-          <section className="rounded-2xl border border-line bg-surface p-5">
-            <LaborEditor bundle={bundle} />
-          </section>
+          <details className="group rounded-2xl border border-line bg-surface">
+            <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-3.5 text-sm font-medium text-ink">
+              {t("settings.advanced_mode")}
+              <span className="text-xs text-muted group-open:hidden">{t("settings.advanced_hint")}</span>
+            </summary>
+            <div className="space-y-5 px-5 pb-5">
+              <LaborEditor bundle={bundle} />
+              <BudgetSettings bundle={bundle} />
+            </div>
+          </details>
 
-          <section className="rounded-2xl border border-line bg-surface p-5">
-            <BudgetSettings bundle={bundle} />
-          </section>
-
-          <section>
-            <h3 className="mb-3 font-serif text-xl text-ink">{t("estimates.compare_scenarios")}</h3>
-            <ScenarioComparison bundle={bundle} totals={scenarioTotals} onSelect={setScenario} />
-          </section>
+          {bundle.scenarios.length > 1 && (
+            <section>
+              <h3 className="mb-3 font-serif text-xl text-ink">{t("editor.studio.compare_title")}</h3>
+              <ScenarioComparison bundle={bundle} totals={scenarioTotals} onSelect={setScenario} />
+            </section>
+          )}
         </div>
 
         <aside className="lg:sticky lg:top-4 lg:self-start">
-          <div className="rounded-2xl border border-line bg-surface p-5 shadow-[var(--shadow-card)]">
-            <h3 className="font-serif text-lg text-ink">{t("estimates.summary")}</h3>
-            {live ? (
-              <>
-                <dl className="mt-3 space-y-1.5 text-sm">
-                  <Line label={CL("materials")} value={money(live.totals.materials)} />
-                  <Line label={CL("labor")} value={money(live.totals.labor)} />
-                  {live.totals.equipment > 0 && <Line label={CL("equipment")} value={money(live.totals.equipment)} />}
-                  {live.totals.delivery > 0 && <Line label={CL("delivery")} value={money(live.totals.delivery)} />}
-                  {live.totals.disposal > 0 && <Line label={CL("disposal")} value={money(live.totals.disposal)} />}
-                  {live.totals.permits > 0 && <Line label={CL("permits")} value={money(live.totals.permits)} />}
-                  {live.totals.other > 0 && <Line label={CL("other")} value={money(live.totals.other)} />}
-                  <Line label={CL("subtotal")} value={money(live.totals.subtotal)} strong />
-                  {live.totals.discount > 0 && <Line label={CL("discount")} value={`−${money(live.totals.discount)}`} />}
-                  <Line label={`${CL("sales_tax")} ${bundle.config.settings.salesTaxRate}%`} value={money(live.totals.tax)} />
-                  <div className="flex items-baseline justify-between border-t border-line pt-2">
-                    <dt className="font-serif text-base text-ink">{CL("grand_total")}</dt>
-                    <dd className="font-serif text-xl text-clay tabular-nums">{money(live.totals.total)}</dd>
-                  </div>
-                </dl>
-                <div className="mt-3">
-                  <ConfidencePill report={live.confidence} />
-                </div>
-              </>
-            ) : (
-              <p className="mt-2 text-sm text-muted">…</p>
-            )}
-            <Button className="mt-4 w-full" onClick={() => generate("estimate")} disabled={!!busy || !items.length}>
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-              {t("common.actions.download_pdf")}
-            </Button>
-          </div>
+          {live ? (
+            <CostRange totals={live.totals} confidence={live.confidence} className="hidden lg:block" />
+          ) : (
+            <div className="hidden rounded-2xl border border-line bg-surface p-5 lg:block">
+              <p className="text-sm text-muted">…</p>
+            </div>
+          )}
+          <Button
+            className="mt-4 w-full"
+            onClick={() => generate("estimate")}
+            disabled={!!busy || !items.length}
+          >
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            {t("common.actions.download_pdf")}
+          </Button>
           <PriceDisclaimer className="mt-4" />
         </aside>
       </div>
-    </div>
-  );
-}
-
-function Line({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
-  return (
-    <div className="flex justify-between">
-      <dt className={strong ? "font-medium text-ink" : "text-ink-soft"}>{label}</dt>
-      <dd className={`tabular-nums ${strong ? "font-medium text-ink" : "text-ink-soft"}`}>{value}</dd>
     </div>
   );
 }

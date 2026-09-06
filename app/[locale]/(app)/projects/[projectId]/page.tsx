@@ -5,13 +5,13 @@ import { Pencil, ImageIcon, ReceiptText, Layers, Trash2 } from "lucide-react";
 import { ProjectShell } from "@/components/projects/project-shell";
 import { Button } from "@/components/ui/button";
 import { PriceDisclaimer } from "@/components/ui/disclaimer";
-import { ConfidencePill } from "@/components/budget/confidence-pill";
+import { CostRange } from "@/components/studio/cost-range";
 import { LocaleLink, useLocaleRouter } from "@/components/localization/locale-link";
 import { useT, useLocale } from "@/components/localization/i18n-provider";
 import { estimateService, type LiveEstimate } from "@/lib/services/estimate-service";
 import { projectService, type ProjectBundle } from "@/lib/services/project-service";
 import { clientService } from "@/lib/services/client-service";
-import { formatUsd, formatDate, formatArea, formatDimension } from "@/lib/format";
+import { formatDate, formatArea, formatDimension } from "@/lib/format";
 import type { Client } from "@/types";
 
 export default function ProjectOverviewPage({ params }: { params: Promise<{ projectId: string }> }) {
@@ -91,27 +91,16 @@ function Overview({ bundle, onDeleted }: { bundle: ProjectBundle; onDeleted: () 
       </div>
 
       <div className="space-y-5">
-        <div className="rounded-2xl border border-line bg-surface p-5">
-          <h3 className="font-serif text-lg text-ink">{t("projects.overview.estimated_total")}</h3>
-          {live ? (
-            <>
-              <p className="mt-1 font-serif text-3xl text-ink">{formatUsd(live.totals.total, locale)}</p>
-              <div className="mt-2">
-                <ConfidencePill report={live.confidence} />
-              </div>
-              <dl className="mt-3 space-y-1 text-sm">
-                <Row label={t("estimates.cost_lines.materials")} value={formatUsd(live.totals.materials, locale)} />
-                <Row label={t("estimates.cost_lines.labor")} value={formatUsd(live.totals.labor, locale)} />
-                <Row label={`${t("estimates.cost_lines.sales_tax")} ${project.stateCode}`} value={formatUsd(live.totals.tax, locale)} />
-              </dl>
-            </>
-          ) : (
-            <p className="mt-2 text-sm text-muted">{t("common.states.loading")}</p>
-          )}
-          <LocaleLink href={`/projects/${project.id}/estimate`} className="mt-4 inline-flex h-9 w-full items-center justify-center rounded-full bg-ink text-[13px] font-medium text-white hover:bg-ink/90">
-            {t("projects.overview.view_full_estimate")}
-          </LocaleLink>
-        </div>
+        {live ? (
+          <CostRange totals={live.totals} confidence={live.confidence} />
+        ) : (
+          <div className="rounded-2xl border border-line bg-surface p-5">
+            <p className="text-sm text-muted">{t("common.states.loading")}</p>
+          </div>
+        )}
+        <LocaleLink href={`/projects/${project.id}/estimate`} className="inline-flex h-10 w-full items-center justify-center rounded-full bg-ink text-[13px] font-medium text-white hover:bg-ink/90">
+          {t("projects.overview.view_full_estimate")}
+        </LocaleLink>
 
         <div className="rounded-2xl border border-line bg-surface p-5 text-sm">
           <h3 className="font-serif text-lg text-ink">{t("projects.overview.details")}</h3>

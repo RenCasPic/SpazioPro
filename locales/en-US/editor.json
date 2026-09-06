@@ -56,5 +56,40 @@
   "catalog": "Catalog",
   "details": "Details",
   "total_estimate": "Estimated total",
-  "view_estimate": "View estimate"
+  "view_estimate": "View estimate",
+  "studio": {
+    "pick_surface": "Tap a surface to change its material",
+    "change_material": "Change material",
+    "materials_for": "Materials for {surface}",
+    "all_materials": "All materials",
+    "surface_floor": "the floor",
+    "surface_wall": "the walls",
+    "surface_ceiling": "the ceiling",
+    "looks": "Looks",
+    "new_look": "New look",
+    "compare": "Compare",
+    "compare_title": "Compare your looks",
+    "cost_chip": "Est. cost",
+    "calc": "Calculate remodel",
+    "see_breakdown": "See breakdown",
+    "empty_hint": "Pick a surface below, then choose a material to see it applied."
+  },
+  "quality": {
+    "label": "Quality",
+    "any": "Any",
+    "economy": "Budget",
+    "standard": "Standard",
+    "premium": "Premium"
+  },
+  "range": {
+    "title": "Your remodel would cost about",
+    "planning_note": "A planning range — real quotes vary with site conditions, finishes and your contractor.",
+    "materials": "Materials",
+    "labor": "Labor",
+    "demo": "Demolition & haul-away",
+    "other": "Other",
+    "confidence": "{level} confidence",
+    "detail": "See itemized detail",
+    "why": "Why a range?"
+  }
 }

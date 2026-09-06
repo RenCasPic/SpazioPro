@@ -91,7 +91,10 @@
     "label": "Estimate confidence",
     "high": "High confidence",
     "medium": "Medium confidence",
-    "low": "Low confidence"
+    "low": "Low confidence",
+    "high_label": "High",
+    "medium_label": "Medium",
+    "low_label": "Low"
   },
   "disclaimer": "This estimate is for planning purposes only. Actual costs may vary based on verified measurements, site conditions, material availability, supplier pricing, labor requirements, permits, and local taxes.",
   "language": {

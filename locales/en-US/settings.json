@@ -1,5 +1,7 @@
 {
   "title": "Settings",
+  "advanced_mode": "Advanced (contractor tools)",
+  "advanced_hint": "Labor lines, tax & extras",
   "profile": {
     "title": "Company profile",
     "note": "These details are used automatically on your estimates and PDFs.",

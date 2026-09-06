@@ -17,6 +17,18 @@ export const formatMoney = (value: Money, locale: Locale = "en-US") =>
 export const formatUsd = (amount: number, locale: Locale = "en-US") =>
   formatMoney({ amount, currency: "USD" }, locale);
 
+/** Whole-dollar USD, no cents — for consumer-facing headline numbers. */
+export const formatUsd0 = (amount: number, locale: Locale = "en-US") =>
+  new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(Number.isFinite(amount) ? amount : 0);
+
+/** "$6,500 – $8,200" */
+export const formatUsdRange = (low: number, high: number, locale: Locale = "en-US") =>
+  `${formatUsd0(low, locale)} – ${formatUsd0(high, locale)}`;
+
 export const formatAmount = (amount: number, currency: CurrencyCode, locale: Locale = "en-US") =>
   formatMoney({ amount, currency }, locale);
 
