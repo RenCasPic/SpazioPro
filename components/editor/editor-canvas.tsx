@@ -9,9 +9,18 @@ import { useEditor, activeItems } from "@/hooks/use-editor";
 import { useT } from "@/components/localization/i18n-provider";
 import { CanvasObject } from "./canvas-object";
 import { SurfacePreview } from "./surface-preview";
+import { productById } from "@/data/catalog";
+import { materialPhoto } from "@/lib/media/material-photo";
 import { cn } from "@/lib/utils";
 
 const SURFACES: SurfaceKind[] = ["floor", "wall", "ceiling"];
+
+/** Where each surface sits in the photo — used for the composite material layers. */
+const SURFACE_REGION: Record<SurfaceKind, string> = {
+  ceiling: "polygon(0 0, 100% 0, 86% 33%, 14% 33%)",
+  wall: "polygon(14% 33%, 86% 33%, 88% 59%, 12% 59%)",
+  floor: "polygon(12% 58%, 88% 58%, 100% 100%, 0 100%)",
+};
 
 export function EditorCanvas({ bundle }: { bundle: ProjectBundle }) {
   const t = useT();
@@ -20,7 +29,9 @@ export function EditorCanvas({ bundle }: { bundle: ProjectBundle }) {
   const [zoom, setZoom] = useState(1);
 
   const original = bundle.images.find((i) => i.type === "original");
-  const objects = activeItems(bundle).filter((i) => i.kind === "object");
+  const items = activeItems(bundle);
+  const objects = items.filter((i) => i.kind === "object");
+  const surfaceItems = items.filter((i) => i.kind === "surface" && i.surface);
 
   return (
     <div className="relative flex h-full flex-col bg-[repeating-conic-gradient(#f0ece4_0%_25%,#f6f3ee_0%_50%)] bg-[length:22px_22px]">
@@ -71,6 +82,11 @@ export function EditorCanvas({ bundle }: { bundle: ProjectBundle }) {
           ) : (
             <SurfacePreview bundle={bundle} className="absolute inset-0 h-full w-full" />
           )}
+
+          {original &&
+            surfaceItems.map((item) => (
+              <SurfaceMaterialLayer key={item.id} surface={item.surface as SurfaceKind} productId={item.productId} />
+            ))}
 
           {original && <SurfaceHotspots active={activeSurface} onPick={setActiveSurface} />}
           <SurfaceOverlay surface={activeSurface} />
@@ -123,6 +139,33 @@ const SURFACE_CLIP: Record<SurfaceKind, string> = {
   wall: "polygon(0 30%, 100% 30%, 100% 62%, 0 62%)",
   floor: "polygon(12% 58%, 88% 58%, 100% 100%, 0 100%)",
 };
+
+/**
+ * Composite preview: the chosen material, masked to the surface region and
+ * blended into the photo so it reads as a real swap on that surface. A real
+ * inpainting provider replaces this with a photorealistic render — same seam.
+ */
+function SurfaceMaterialLayer({ surface, productId }: { surface: SurfaceKind; productId: string }) {
+  const product = productById(productId);
+  if (!product) return null;
+  const photo = materialPhoto(productId, product.category, 400);
+  return (
+    <div
+      className="animate-in pointer-events-none absolute inset-0"
+      style={{ clipPath: SURFACE_REGION[surface] }}
+    >
+      {/* hue shift toward the material — keeps the room's light and geometry */}
+      <div className="absolute inset-0" style={{ background: product.swatch, mixBlendMode: "color", opacity: 0.45 }} />
+      {/* faint texture grain from the product photo */}
+      {photo && (
+        <div
+          className="absolute inset-0"
+          style={{ background: `url(${photo})`, backgroundSize: "200px", mixBlendMode: "overlay", opacity: 0.22 }}
+        />
+      )}
+    </div>
+  );
+}
 
 /** Tap a region of the photo to change that surface's material (brief §17). */
 function SurfaceHotspots({

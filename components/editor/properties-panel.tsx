@@ -49,8 +49,6 @@ export function PropertiesPanel({ bundle }: { bundle: ProjectBundle }) {
 
   return (
     <div className="space-y-5 p-4">
-      <DimensionsForm bundle={bundle} />
-
       <div>
         <div className="flex items-center justify-between">
           <h3 className="font-serif text-lg text-ink">{t("editor.elements")}</h3>
@@ -99,9 +97,19 @@ export function PropertiesPanel({ bundle }: { bundle: ProjectBundle }) {
           href={`/projects/${bundle.project.id}/estimate`}
           className="mt-3 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-full bg-ink text-[13px] font-medium text-white hover:bg-ink/90"
         >
-          <FileText className="h-4 w-4" /> {t("editor.view_estimate")}
+          <FileText className="h-4 w-4" /> {t("editor.studio.calc")}
         </LocaleLink>
       </div>
+
+      <details className="group rounded-xl border border-line">
+        <summary className="flex cursor-pointer list-none items-center justify-between px-3 py-2 text-[13px] font-medium text-ink-soft">
+          {t("editor.dimensions")}
+          <span className="text-[11px] text-muted">{t("projects.analyze.ai_estimate")}</span>
+        </summary>
+        <div className="border-t border-line p-3">
+          <DimensionsForm bundle={bundle} />
+        </div>
+      </details>
 
       <PriceDisclaimer />
     </div>

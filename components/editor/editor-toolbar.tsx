@@ -83,8 +83,8 @@ export function EditorToolbar({ bundle }: { bundle: ProjectBundle }) {
         <LocaleLink href={`/projects/${bundle.project.id}/images`} className="hidden h-9 items-center gap-1.5 rounded-full border border-line-strong px-3 text-[13px] font-medium text-ink hover:border-ink/30 sm:inline-flex">
           <Columns2 className="h-4 w-4" /> {t("editor.before_after")}
         </LocaleLink>
-        <LocaleLink href={`/projects/${bundle.project.id}/estimate`} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-clay px-3.5 text-[13px] font-medium text-white hover:bg-clay-dark">
-          <FileText className="h-4 w-4" /> {t("common.actions.create_estimate")}
+        <LocaleLink href={`/projects/${bundle.project.id}/estimate`} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-accent px-3.5 text-[13px] font-medium text-white hover:bg-accent-dark">
+          <FileText className="h-4 w-4" /> {t("editor.studio.calc")}
         </LocaleLink>
       </div>
 
