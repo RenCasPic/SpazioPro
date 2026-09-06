@@ -22,6 +22,17 @@
       "analysis": "Analysis"
     }
   },
+  "start": {
+    "title": "What space do you want to remodel?",
+    "subtitle": "Upload a photo and the AI figures out the room, the surfaces and the rough size. No measuring required.",
+    "tab_photo": "Upload a photo",
+    "tab_dims": "Enter dimensions",
+    "dims_hint": "Don't have a photo? Give us the rough size of the room and we'll take it from there.",
+    "continue": "Start designing",
+    "where": "Where is the project?",
+    "where_hint": "Sets local pricing, labor rates and sales tax. You can change it later.",
+    "analyzed_done": "Got it — setting up your space…"
+  },
   "card": {
     "estimate": "Estimate",
     "edited": "Edited {date}"

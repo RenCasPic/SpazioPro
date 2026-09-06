@@ -22,6 +22,17 @@
       "analysis": "Análisis"
     }
   },
+  "start": {
+    "title": "¿Qué espacio quieres remodelar?",
+    "subtitle": "Sube una foto y la IA identifica la habitación, las superficies y el tamaño aproximado. No hace falta medir.",
+    "tab_photo": "Subir una foto",
+    "tab_dims": "Introducir medidas",
+    "dims_hint": "¿No tienes foto? Dinos el tamaño aproximado de la habitación y nosotros nos encargamos del resto.",
+    "continue": "Empezar a diseñar",
+    "where": "¿Dónde está el proyecto?",
+    "where_hint": "Define los precios locales, la mano de obra y el impuesto sobre ventas. Puedes cambiarlo después.",
+    "analyzed_done": "Listo — preparando tu espacio…"
+  },
   "card": {
     "estimate": "Estimado",
     "edited": "Editado {date}"
