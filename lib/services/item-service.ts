@@ -5,9 +5,38 @@ import { getCurrentUserId } from "@/lib/auth/auth";
 import { categoryMeta } from "@/data/categories";
 import { pricingService } from "@/lib/market/pricing-service";
 import { laborRateService } from "@/lib/market/labor-rate-service";
-import { baseSurfaceQuantity } from "@/lib/calculations/dimensions";
+import { baseSurfaceQuantity, surfaceAreas } from "@/lib/calculations/dimensions";
 import { calculateWaste } from "@/lib/calculations/materials";
+import type { RoomDimensions } from "@/types";
+import type { Database } from "@/lib/db/schema";
 import { uid } from "@/lib/utils";
+
+/**
+ * When a surface material is chosen we silently make sure the project also
+ * accounts for tearing out what's there and hauling it away — the consumer
+ * never has to think of these. Quantities track the surface area; we only
+ * ever raise auto values, never stomp a number the user set by hand.
+ */
+function planTeardown(store: Database, projectId: string, surface: SurfaceKind, dims: RoomDimensions) {
+  const config = store.configs.find((c) => c.projectId === projectId);
+  if (!config) return;
+  const a = surfaceAreas(dims);
+  const area = surface === "wall" ? a.wallAreaSqFt : surface === "ceiling" ? a.ceilingAreaSqFt : a.floorAreaSqFt;
+
+  const demo = config.laborLines.find((l) => l.category === "demolition");
+  if (demo && demo.fromMarket) {
+    demo.enabled = true;
+    demo.quantity = Math.max(demo.quantity, Math.round(area));
+  }
+  const cleaning = config.laborLines.find((l) => l.category === "cleaning");
+  if (cleaning) {
+    cleaning.enabled = true;
+    cleaning.quantity = Math.max(cleaning.quantity, 1);
+  }
+  if (config.settings.extras.disposal === 0) {
+    config.settings.extras.disposal = Math.max(150, Math.round(area * 1.25));
+  }
+}
 
 async function project(projectId: string) {
   const userId = await getCurrentUserId();
@@ -73,6 +102,9 @@ export const itemService = {
         );
       }
       store.items.push(item);
+      if (meta.kind === "surface" && surface) {
+        planTeardown(store, p.id, surface, dims);
+      }
       const proj = store.projects.find((x) => x.id === p.id)!;
       if (proj.status === "draft") proj.status = "designing";
     });
