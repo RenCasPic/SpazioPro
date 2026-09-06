@@ -155,12 +155,12 @@ function SurfaceMaterialLayer({ surface, productId }: { surface: SurfaceKind; pr
       style={{ clipPath: SURFACE_REGION[surface] }}
     >
       {/* hue shift toward the material — keeps the room's light and geometry */}
-      <div className="absolute inset-0" style={{ background: product.swatch, mixBlendMode: "color", opacity: 0.45 }} />
-      {/* faint texture grain from the product photo */}
-      {photo && (
+      <div className="absolute inset-0" style={{ background: product.swatch, mixBlendMode: "color", opacity: 0.4 }} />
+      {/* faint texture grain from the product photo (skip on the floor: reads as glare) */}
+      {photo && surface !== "floor" && (
         <div
           className="absolute inset-0"
-          style={{ background: `url(${photo})`, backgroundSize: "200px", mixBlendMode: "overlay", opacity: 0.22 }}
+          style={{ background: `url(${photo})`, backgroundSize: "200px", mixBlendMode: "overlay", opacity: 0.18 }}
         />
       )}
     </div>
