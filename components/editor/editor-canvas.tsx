@@ -72,6 +72,7 @@ export function EditorCanvas({ bundle }: { bundle: ProjectBundle }) {
             <SurfacePreview bundle={bundle} className="absolute inset-0 h-full w-full" />
           )}
 
+          {original && <SurfaceHotspots active={activeSurface} onPick={setActiveSurface} />}
           <SurfaceOverlay surface={activeSurface} />
 
           {objects
@@ -91,8 +92,8 @@ export function EditorCanvas({ bundle }: { bundle: ProjectBundle }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-center gap-2 border-t border-line bg-surface/80 p-3 backdrop-blur">
-        <span className="mr-1 text-xs text-muted">{t("editor.select_zone")}</span>
+      <div className="flex flex-wrap items-center justify-center gap-2 border-t border-line bg-surface/80 p-3 backdrop-blur">
+        <span className="mr-1 text-xs text-muted">{t("editor.studio.pick_surface")}</span>
         {SURFACES.map((s) => {
           const applied = activeItems(bundle).some((i) => i.kind === "surface" && i.surface === s);
           return (
@@ -104,15 +105,50 @@ export function EditorCanvas({ bundle }: { bundle: ProjectBundle }) {
               }}
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
-                activeSurface === s ? "border-clay bg-clay text-white" : "border-line-strong text-ink hover:border-ink/30",
+                activeSurface === s ? "border-accent bg-accent text-white" : "border-line-strong text-ink hover:border-ink/30",
               )}
             >
               {t(SURFACE_KEYS[s])}
-              {applied && <span className={cn("h-1.5 w-1.5 rounded-full", activeSurface === s ? "bg-white" : "bg-sage")} />}
+              {applied && <span className={cn("h-1.5 w-1.5 rounded-full", activeSurface === s ? "bg-white" : "bg-ok")} />}
             </button>
           );
         })}
       </div>
+    </div>
+  );
+}
+
+const SURFACE_CLIP: Record<SurfaceKind, string> = {
+  ceiling: "polygon(0 0, 100% 0, 88% 34%, 12% 34%)",
+  wall: "polygon(0 30%, 100% 30%, 100% 62%, 0 62%)",
+  floor: "polygon(12% 58%, 88% 58%, 100% 100%, 0 100%)",
+};
+
+/** Tap a region of the photo to change that surface's material (brief §17). */
+function SurfaceHotspots({
+  active,
+  onPick,
+}: {
+  active: SurfaceKind | null;
+  onPick: (s: SurfaceKind | null) => void;
+}) {
+  if (active) return null;
+  return (
+    <div className="absolute inset-0">
+      {(["ceiling", "wall", "floor"] as SurfaceKind[]).map((s) => (
+        <button
+          key={s}
+          onClick={(e) => {
+            e.stopPropagation();
+            onPick(s);
+          }}
+          aria-label={s}
+          className="group absolute inset-0 cursor-pointer"
+          style={{ clipPath: SURFACE_CLIP[s] }}
+        >
+          <span className="absolute inset-0 bg-accent/0 transition-colors group-hover:bg-accent/20" />
+        </button>
+      ))}
     </div>
   );
 }
@@ -128,7 +164,7 @@ function SurfaceOverlay({ surface }: { surface: SurfaceKind | null }) {
   return (
     <div
       className="pointer-events-none absolute inset-0 animate-pulse"
-      style={{ clipPath: clip, background: "rgba(180,83,42,0.28)", border: "2px solid rgba(180,83,42,0.7)", mixBlendMode: "multiply" }}
+      style={{ clipPath: clip, background: "rgba(31,77,64,0.28)", border: "2px solid rgba(31,77,64,0.75)", mixBlendMode: "multiply" }}
     />
   );
 }
