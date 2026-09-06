@@ -17,7 +17,7 @@ export function restoreProjectState(projectId: string, snapshot: EditorSnapshot)
     const config = db.configs.find((c) => c.projectId === projectId);
     if (config) {
       config.laborLines = snapshot.laborLines.map((l) => ({ ...l }));
-      config.settings = { ...snapshot.settings, transport: { ...snapshot.settings.transport } };
+      config.settings = { ...snapshot.settings, extras: { ...snapshot.settings.extras } };
     }
   });
 }

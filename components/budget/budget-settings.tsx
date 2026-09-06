@@ -1,116 +1,55 @@
 "use client";
 
 import type { ProjectBundle } from "@/lib/services/project-service";
+import type { EstimateExtras } from "@/types";
 import { useEditor } from "@/hooks/use-editor";
-import { Field, Input } from "@/components/ui/field";
+import { useT } from "@/components/localization/i18n-provider";
+import { Field, Input, Textarea } from "@/components/ui/field";
 import { taxService } from "@/lib/market/tax-service";
-import { transportService } from "@/lib/market/transport-service";
-import { currencyService } from "@/lib/market/currency-service";
+
+const EXTRA_KEYS: Array<keyof EstimateExtras> = ["equipment", "delivery", "disposal", "permits", "other"];
 
 export function BudgetSettings({ bundle }: { bundle: ProjectBundle }) {
+  const t = useT();
   const { updateSettings } = useEditor();
   const s = bundle.config.settings;
-  const rate = transportService.rateForCountry(bundle.project.countryCode);
-  const taxRates = taxService.ratesForCountry(bundle.project.countryCode);
-  const transportEstimate = transportService.estimate(bundle.project.countryCode, s.transport);
-  const money = (n: number) =>
-    currencyService.format({ amount: n, currency: bundle.project.currencyCode }, bundle.project.locale);
+  const loc = bundle.location;
+  const tax = loc ? taxService.getTaxRate({ stateCode: loc.stateCode, city: loc.city, zipCode: loc.zipCode }) : null;
 
   return (
     <div className="space-y-4">
-      <h3 className="font-serif text-xl text-ink">Ajustes del presupuesto</h3>
+      <h3 className="font-serif text-xl text-ink">{t("estimates.settings.title")}</h3>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Impuesto (%)" hint={`Mercado ${bundle.project.countryCode}`}>
-          <div className="flex gap-2">
+        <Field label={t("estimates.settings.sales_tax")} hint={tax ? t("estimates.settings.tax_note", { jurisdiction: tax.jurisdiction.name }) : undefined}>
+          <Input type="number" min="0" step="0.001" value={s.salesTaxRate} onChange={(e) => updateSettings({ salesTaxRate: Number(e.target.value) })} />
+        </Field>
+        <Field label={t("estimates.settings.discount")}>
+          <Input type="number" min="0" step="1" value={s.discountPercent} onChange={(e) => updateSettings({ discountPercent: Number(e.target.value) })} />
+        </Field>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        {EXTRA_KEYS.map((k) => (
+          <Field key={k} label={t(`estimates.settings.${k}`)}>
             <Input
               type="number"
               min="0"
-              step="0.5"
-              value={s.vatRate}
-              onChange={(e) => updateSettings({ vatRate: Number(e.target.value) })}
+              step="10"
+              value={s.extras[k]}
+              onChange={(e) => updateSettings({ extras: { ...s.extras, [k]: Number(e.target.value) } })}
             />
-            <select
-              value={s.vatRate}
-              onChange={(e) => updateSettings({ vatRate: Number(e.target.value) })}
-              className="h-10 rounded-xl border border-line-strong bg-surface px-2 text-xs"
-            >
-              {taxRates.map((t) => (
-                <option key={t.category} value={t.rate}>
-                  {t.name} ({t.rate}%)
-                </option>
-              ))}
-            </select>
-          </div>
-        </Field>
-        <Field label="Descuento (%)">
-          <Input
-            type="number"
-            min="0"
-            step="1"
-            value={s.discountPercent}
-            onChange={(e) => updateSettings({ discountPercent: Number(e.target.value) })}
-          />
-        </Field>
+          </Field>
+        ))}
       </div>
 
-      <div className="rounded-xl border border-line p-3">
-        <label className="flex items-center gap-2 text-sm font-medium text-ink">
-          <input
-            type="checkbox"
-            checked={s.transport.enabled}
-            onChange={(e) => updateSettings({ transport: { ...s.transport, enabled: e.target.checked } })}
-            className="h-4 w-4 accent-clay"
-          />
-          Transporte
-        </label>
-        {s.transport.enabled && (
-          <>
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-              <Field label="Distancia (km)">
-                <Input
-                  type="number"
-                  min="0"
-                  value={s.transport.distanceKm}
-                  onChange={(e) =>
-                    updateSettings({ transport: { ...s.transport, distanceKm: Number(e.target.value), manualOverride: null } })
-                  }
-                />
-              </Field>
-              <Field label="Volumen (m³)">
-                <Input
-                  type="number"
-                  min="0"
-                  value={s.transport.volumeM3}
-                  onChange={(e) =>
-                    updateSettings({ transport: { ...s.transport, volumeM3: Number(e.target.value), manualOverride: null } })
-                  }
-                />
-              </Field>
-              <Field label="Importe manual">
-                <Input
-                  type="number"
-                  min="0"
-                  placeholder="auto"
-                  value={s.transport.manualOverride ?? ""}
-                  onChange={(e) =>
-                    updateSettings({
-                      transport: {
-                        ...s.transport,
-                        manualOverride: e.target.value === "" ? null : Number(e.target.value),
-                      },
-                    })
-                  }
-                />
-              </Field>
-            </div>
-            <p className="mt-2 text-[11px] text-muted">
-              Tarifa {bundle.project.countryCode}: base {money(rate.baseFee)} + {money(rate.perKm)}/km +{" "}
-              {money(rate.perM3)}/m³ → <span className="font-medium text-ink">{money(transportEstimate)}</span>
-            </p>
-          </>
-        )}
-      </div>
+      <Field label={t("estimates.settings.scope_of_work")}>
+        <Textarea rows={4} defaultValue={s.scopeOfWork} key={s.scopeOfWork} onBlur={(e) => updateSettings({ scopeOfWork: e.target.value })} placeholder={"Remove existing flooring.\nPrepare subfloor.\nInstall new flooring.\nInstall baseboards.\nClean work area."} />
+      </Field>
+
+      <Field label={t("estimates.settings.notes")}>
+        <Textarea rows={2} defaultValue={s.notes} key={s.notes} onBlur={(e) => updateSettings({ notes: e.target.value })} />
+      </Field>
     </div>
   );
 }

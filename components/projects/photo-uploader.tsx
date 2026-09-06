@@ -4,24 +4,26 @@ import { useRef, useState } from "react";
 import { Upload, Camera, ImageIcon } from "lucide-react";
 import { fileToDataUrl } from "@/lib/image";
 import { Spinner } from "@/components/ui/states";
+import { useT } from "@/components/localization/i18n-provider";
 import { cn } from "@/lib/utils";
 
 type Phase = "idle" | "preparing" | "uploading" | "processing" | "done";
 
-const PHASE_LABEL: Record<Phase, string> = {
-  idle: "",
-  preparing: "Preparando…",
-  uploading: "Subiendo…",
-  processing: "Procesando…",
-  done: "Listo",
-};
-
 export function PhotoUploader({ onReady }: { onReady: (dataUrl: string) => void }) {
+  const t = useT();
   const [drag, setDrag] = useState(false);
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const cameraInput = useRef<HTMLInputElement>(null);
+
+  const phaseLabel: Record<Phase, string> = {
+    idle: "",
+    preparing: t("projects.upload.preparing"),
+    uploading: t("projects.upload.uploading"),
+    processing: t("projects.upload.processing"),
+    done: t("projects.upload.done"),
+  };
 
   async function handle(file?: File | null) {
     if (!file) return;
@@ -37,7 +39,7 @@ export function PhotoUploader({ onReady }: { onReady: (dataUrl: string) => void 
       onReady(dataUrl);
     } catch (e) {
       setPhase("idle");
-      setError(e instanceof Error ? e.message : "No se pudo cargar la imagen.");
+      setError(e instanceof Error ? e.message : "Upload failed.");
     }
   }
 
@@ -64,10 +66,8 @@ export function PhotoUploader({ onReady }: { onReady: (dataUrl: string) => void 
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-clay-tint text-clay-dark">
           {busy ? <Spinner className="h-6 w-6" /> : <ImageIcon className="h-6 w-6" />}
         </div>
-        <h3 className="mt-4 font-serif text-lg text-ink">
-          {busy ? PHASE_LABEL[phase] : "Sube una foto del espacio que quieres transformar"}
-        </h3>
-        <p className="mt-1 text-sm text-ink-soft">Arrastra una imagen, elígela o usa la cámara. JPG, PNG o WebP.</p>
+        <h3 className="mt-4 font-serif text-lg text-ink">{busy ? phaseLabel[phase] : t("projects.upload.title")}</h3>
+        <p className="mt-1 text-sm text-ink-soft">{t("projects.upload.hint")}</p>
 
         <div className="mt-5 flex flex-wrap justify-center gap-3">
           <button
@@ -76,7 +76,7 @@ export function PhotoUploader({ onReady }: { onReady: (dataUrl: string) => void 
             onClick={() => fileInput.current?.click()}
             className="inline-flex h-10 items-center gap-2 rounded-full bg-ink px-4 text-sm font-medium text-white hover:bg-ink/90 disabled:opacity-50"
           >
-            <Upload className="h-4 w-4" /> Elegir imagen
+            <Upload className="h-4 w-4" /> {t("projects.upload.choose")}
           </button>
           <button
             type="button"
@@ -84,7 +84,7 @@ export function PhotoUploader({ onReady }: { onReady: (dataUrl: string) => void 
             onClick={() => cameraInput.current?.click()}
             className="inline-flex h-10 items-center gap-2 rounded-full border border-line-strong bg-surface px-4 text-sm font-medium text-ink hover:border-ink/30 disabled:opacity-50"
           >
-            <Camera className="h-4 w-4" /> Usar cámara
+            <Camera className="h-4 w-4" /> {t("projects.upload.camera")}
           </button>
         </div>
 

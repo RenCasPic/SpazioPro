@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import type { EstimateTotals } from "@/types";
 import { estimateService, type LiveEstimate } from "@/lib/services/estimate-service";
 
-/** Live (non-persisted) estimate for the budget screen. Recomputes on refresh. */
 export function useLiveEstimate(projectId: string | undefined, scenarioId?: string, dep?: unknown) {
   const [data, setData] = useState<LiveEstimate | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,11 +25,7 @@ export function useLiveEstimate(projectId: string | undefined, scenarioId?: stri
   return { data, loading, refresh };
 }
 
-export function useScenarioTotals(
-  projectId: string | undefined,
-  scenarioIds: string[],
-  dep?: unknown,
-) {
+export function useScenarioTotals(projectId: string | undefined, scenarioIds: string[], dep?: unknown) {
   const [totals, setTotals] = useState<Record<string, EstimateTotals>>({});
 
   useEffect(() => {
@@ -40,9 +35,7 @@ export function useScenarioTotals(
       const entries = await Promise.all(
         scenarioIds.map(async (id) => [id, await estimateService.totalsForScenario(projectId, id)] as const),
       );
-      if (alive) {
-        setTotals(Object.fromEntries(entries.filter(([, t]) => t) as [string, EstimateTotals][]));
-      }
+      if (alive) setTotals(Object.fromEntries(entries.filter(([, t]) => t) as [string, EstimateTotals][]));
     })();
     return () => {
       alive = false;

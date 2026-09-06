@@ -1,0 +1,75 @@
+{
+  "title": "Estimado",
+  "list_title": "Estimados",
+  "generate": "Generar PDF del estimado",
+  "materials_and_furniture": "Materiales y mobiliario",
+  "table": {
+    "item": "Concepto",
+    "quantity": "Cantidad",
+    "price": "Precio",
+    "total": "Total"
+  },
+  "no_items": "Este escenario todavía no tiene elementos.",
+  "go_to_editor": "Ir al editor",
+  "labor": {
+    "title": "Mano de obra",
+    "add_line": "Agregar partida",
+    "note": "Tarifas prellenadas desde el mercado de {location}. Ajusta cantidades y precios.",
+    "new_line": "Nueva partida"
+  },
+  "cost_lines": {
+    "materials": "Materiales",
+    "labor": "Mano de obra",
+    "equipment": "Equipos",
+    "delivery": "Entrega",
+    "disposal": "Disposición",
+    "permits": "Permisos",
+    "other": "Otros",
+    "subtotal": "Subtotal",
+    "discount": "Descuento",
+    "sales_tax": "Impuesto sobre ventas",
+    "grand_total": "Total"
+  },
+  "settings": {
+    "title": "Ajustes del estimado",
+    "sales_tax": "Impuesto sobre ventas (%)",
+    "tax_note": "Resuelto desde {jurisdiction}",
+    "discount": "Descuento (%)",
+    "equipment": "Equipos ($)",
+    "delivery": "Entrega ($)",
+    "disposal": "Disposición ($)",
+    "permits": "Permisos ($)",
+    "other": "Otros ($)",
+    "notes": "Notas",
+    "scope_of_work": "Alcance del trabajo"
+  },
+  "compare_scenarios": "Comparar escenarios",
+  "recommended": "recomendado",
+  "summary": "Resumen",
+  "confidence_reasons": {
+    "ai_dimensions": "Las dimensiones se estimaron a partir de la imagen, no de una medición certificada.",
+    "converted_price": "Algunos precios provienen de una conversión de referencia, no de un precio local.",
+    "missing_price": "Hay elementos sin precio de mercado disponible.",
+    "demo_price": "El catálogo utiliza precios de demostración.",
+    "no_labor_rate": "Hay partidas de mano de obra sin tarifa asignada.",
+    "no_items": "El estimado todavía no tiene elementos.",
+    "no_tax": "No se ha resuelto una jurisdicción de impuesto para la ubicación del proyecto."
+  },
+  "detail": {
+    "snapshot_frozen": "Snapshot de mercado congelado",
+    "captured": "capturado {date}",
+    "reference_price": "precio de referencia",
+    "status": {
+      "draft": "Borrador",
+      "final": "Final",
+      "approved": "Aprobado",
+      "archived": "Archivado"
+    }
+  },
+  "generated": "Estimado {number} generado y descargado.",
+  "generate_failed": "No se pudo generar el estimado.",
+  "proposal": {
+    "generate": "Generar PDF de la propuesta",
+    "generated": "Propuesta generada y descargada."
+  }
+}

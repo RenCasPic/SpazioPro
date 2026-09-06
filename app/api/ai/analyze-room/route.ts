@@ -10,6 +10,6 @@ export async function POST(request: Request) {
     return ok(await getAIProvider().analyzeRoom(imageUrl, hint));
   } catch (e) {
     if (e instanceof Response) return e;
-    return badRequest("No pudimos analizar esta imagen.");
+    return badRequest("We couldn't analyze this image.");
   }
 }

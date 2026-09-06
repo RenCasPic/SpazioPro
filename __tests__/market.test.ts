@@ -1,74 +1,73 @@
 import { describe, expect, it } from "vitest";
-import { countryService } from "@/lib/market/country-service";
-import { currencyService } from "@/lib/market/currency-service";
+import { countryService, stateService } from "@/lib/market/country-service";
 import { taxService } from "@/lib/market/tax-service";
 import { pricingService } from "@/lib/market/pricing-service";
 import { laborRateService } from "@/lib/market/labor-rate-service";
 import { marketService } from "@/lib/market/market-service";
+import { formatUsd } from "@/lib/format";
 
-describe("multi-country market", () => {
-  it("each country resolves to its own currency", () => {
-    expect(countryService.require("ES").currencyCode).toBe("EUR");
-    expect(countryService.require("PY").currencyCode).toBe("PYG");
-    expect(countryService.require("MX").currencyCode).toBe("MXN");
-    expect(countryService.require("AR").currencyCode).toBe("ARS");
+describe("US market", () => {
+  it("the only seeded country is the United States (USD)", () => {
+    expect(countryService.default().code).toBe("US");
+    expect(countryService.default().currencyCode).toBe("USD");
+    expect(stateService.list()).toHaveLength(51); // 50 + DC
   });
 
-  it("tax rate comes from the market, not a universal constant", () => {
-    expect(taxService.defaultRate("ES")).toBe(21);
-    expect(taxService.defaultRate("PY")).toBe(10);
-    expect(taxService.defaultRate("MX")).toBe(16);
-    expect(taxService.defaultRate("US")).toBe(8);
+  it("sales tax resolves from the most specific jurisdiction (zip > city > state)", () => {
+    const stateOnly = taxService.getTaxRate({ stateCode: "TX" });
+    expect(stateOnly.matchedOn).toBe("state");
+
+    const city = taxService.getTaxRate({ stateCode: "IL", city: "Chicago" });
+    expect(city.matchedOn).toBe("city");
+    expect(city.rate).toBe(10.25);
+
+    const zip = taxService.getTaxRate({ stateCode: "CA", city: "Los Angeles", zipCode: "90001" });
+    expect(zip.matchedOn).toBe("zip");
+    expect(zip.rate).toBe(10.25);
   });
 
-  it("a local market price takes priority over FX conversion", () => {
-    // roble-natural has explicit ES/PY/MX prices, none for CL
-    const es = pricingService.resolve("flr-roble-natural", "ES");
-    const cl = pricingService.resolve("flr-roble-natural", "CL");
-    expect(es.source).toBe("market");
-    expect(es.money.currency).toBe("EUR");
-    expect(cl.source).toBe("converted");
-    expect(cl.money.currency).toBe("CLP");
-    expect(cl.convertedFrom?.currency).toBe("EUR");
+  it("no-sales-tax states resolve to 0%", () => {
+    expect(taxService.getTaxRate({ stateCode: "OR" }).rate).toBe(0);
+    expect(taxService.isNoSalesTaxState("MT")).toBe(true);
   });
 
-  it("the same product costs different amounts in different countries", () => {
-    const es = pricingService.resolve("sof-modular-3p", "ES").money.amount;
-    const py = pricingService.resolve("sof-modular-3p", "PY").money.amount;
-    expect(py).not.toBe(es);
-    expect(py).toBeGreaterThan(es); // PYG figures are far larger
+  it("a state market price beats the national fallback", () => {
+    const national = pricingService.resolve("flr-lvp-coastal", null);
+    const ca = pricingService.resolve("flr-lvp-coastal", "CA");
+    expect(national.money.currency).toBe("USD");
+    expect(ca.money.currency).toBe("USD");
+    expect(ca.money.amount).not.toBe(national.money.amount);
+    expect(ca.source).toBe("market");
   });
 
-  it("money always carries its currency and formats per locale", () => {
-    const formatted = currencyService.format({ amount: 1250.5, currency: "EUR" }, "es-ES");
-    expect(formatted).toMatch(/250,50/); // comma decimal separator (es-ES)
-    expect(formatted).toMatch(/€/);
-    // zero-decimal currencies render without decimals
-    expect(currencyService.format({ amount: 8250000, currency: "PYG" })).not.toMatch(/,\d\d/);
+  it("the same product costs more in CA than in AL", () => {
+    const ca = pricingService.resolve("kit-quartz-counter", "CA").money.amount;
+    const al = pricingService.resolve("kit-quartz-counter", "AL").money.amount;
+    expect(ca).toBeGreaterThan(al);
   });
 
-  it("FX conversion is reference-only and reversible-ish", () => {
-    const eur = { amount: 100, currency: "EUR" as const };
-    const usd = currencyService.convert(eur, "USD");
-    expect(usd.currency).toBe("USD");
-    expect(usd.amount).toBeCloseTo(108, 0);
+  it("prices format as USD in en-US and es-US", () => {
+    expect(formatUsd(1250.5, "en-US")).toBe("$1,250.50");
+    expect(formatUsd(1250.5, "es-US")).toMatch(/1,250\.50/);
   });
 
-  it("labour rates differ by country", () => {
-    const esPaint = laborRateService.cost("ES", "painting")!;
-    const pyPaint = laborRateService.cost("PY", "painting")!;
-    expect(esPaint).toBeGreaterThan(0);
-    expect(pyPaint).toBeGreaterThan(0);
-    expect(pyPaint).not.toBe(esPaint);
+  it("labor rates differ by state (cost-of-living index)", () => {
+    const nyPaint = laborRateService.cost("NY", "painting")!;
+    const alPaint = laborRateService.cost("AL", "painting")!;
+    expect(nyPaint).toBeGreaterThan(alPaint);
   });
 
-  it("a market snapshot freezes prices, taxes, labour and FX", () => {
-    const snap = marketService.snapshot("PY", 10, ["flr-roble-natural", "sof-modular-3p"]);
-    expect(snap.currencyCode).toBe("PYG");
-    expect(snap.taxRate).toBe(10);
+  it("market snapshot freezes tax, prices, labor, delivery and location", () => {
+    const snap = marketService.snapshot(
+      { stateCode: "TX", city: "Austin", zipCode: "78701" },
+      ["flr-lvp-coastal", "kit-quartz-counter"],
+    );
+    expect(snap.currencyCode).toBe("USD");
+    expect(snap.stateCode).toBe("TX");
+    expect(snap.salesTaxRate).toBe(8.25);
+    expect(snap.taxJurisdiction?.name).toContain("Austin");
     expect(snap.productPrices).toHaveLength(2);
     expect(snap.laborRates.length).toBeGreaterThan(0);
-    expect(snap.fxRates.length).toBeGreaterThan(0);
-    expect(snap.capturedAt).toBeTruthy();
+    expect(snap.deliveryRate.currencyCode).toBe("USD");
   });
 });

@@ -1,13 +1,13 @@
-import type { CurrencyCode, FxRate, LaborRate, TaxRate, TransportRate } from "./market";
+import type { CurrencyCode, DeliveryRate, FxRate, LaborRate, TaxJurisdiction, TaxRate } from "./market";
 import type { PriceSource, ProductCategory, Unit } from "./product";
 
 export type ScenarioType = "economy" | "standard" | "premium" | "custom";
 
-export const SCENARIO_LABELS: Record<ScenarioType, string> = {
-  economy: "Económico",
-  standard: "Estándar",
-  premium: "Premium",
-  custom: "Personalizado",
+export const SCENARIO_KEYS: Record<ScenarioType, string> = {
+  economy: "economy",
+  standard: "standard",
+  premium: "premium",
+  custom: "custom",
 };
 
 export interface DesignScenario {
@@ -16,7 +16,6 @@ export interface DesignScenario {
   name: string;
   description: string;
   type: ScenarioType;
-  /** cached headline total for lists; source of truth is a live calculation */
   totalEstimate: number;
   currencyCode: CurrencyCode;
   previewImageUrl: string | null;
@@ -26,10 +25,10 @@ export interface DesignScenario {
 
 /** Editor transform stored as fractions of the image box (resolution-independent). */
 export interface EditorTransform {
-  x: number; // 0..1
-  y: number; // 0..1
-  rotation: number; // degrees
-  scale: number; // multiplier
+  x: number;
+  y: number;
+  rotation: number;
+  scale: number;
 }
 
 export interface ProjectItem {
@@ -53,7 +52,6 @@ export interface ProjectItem {
   supplier: string | null;
   demoPrice: boolean;
   transform: EditorTransform;
-  /** z-order in the editor */
   layer: number;
   createdAt: string;
   updatedAt: string;
@@ -68,32 +66,39 @@ export interface LaborLine {
   unitCost: number;
   currencyCode: CurrencyCode;
   enabled: boolean;
-  /** true when the rate came from the market table rather than manual entry */
   fromMarket: boolean;
 }
 
-export interface TransportConfig {
-  enabled: boolean;
-  distanceKm: number;
-  volumeM3: number;
-  manualOverride: number | null;
+/** Flat additional cost buckets in the estimate. */
+export interface EstimateExtras {
+  equipment: number;
+  delivery: number;
+  disposal: number;
+  permits: number;
+  other: number;
 }
 
 export interface EstimateSettings {
-  vatRate: number;
+  /** sales-tax percentage resolved from the project location */
+  salesTaxRate: number;
   discountPercent: number;
-  transport: TransportConfig;
+  extras: EstimateExtras;
+  scopeOfWork: string;
   notes: string;
 }
 
-/** Frozen state of the market at the moment an estimate was generated. */
+/** Frozen state of the market when an estimate was generated. */
 export interface MarketSnapshot {
   countryCode: string;
   currencyCode: CurrencyCode;
-  taxRate: number;
+  stateCode: string;
+  city: string;
+  zipCode: string;
+  salesTaxRate: number;
+  taxJurisdiction: TaxJurisdiction | null;
   taxRates: TaxRate[];
   laborRates: LaborRate[];
-  transportRate: TransportRate;
+  deliveryRate: DeliveryRate;
   fxRates: FxRate[];
   productPrices: Array<{
     productId: string;
@@ -129,18 +134,28 @@ export interface EstimateItem {
 }
 
 export type EstimateStatus = "draft" | "final" | "approved" | "archived";
+export type EstimateKind = "estimate" | "proposal";
 
 export interface Estimate {
   id: string;
   projectId: string;
   scenarioId: string;
+  kind: EstimateKind;
   estimateNumber: string;
+  language: import("@/lib/i18n/config").Locale;
   countryCode: string;
+  stateCode: string;
+  city: string;
+  zipCode: string;
   currencyCode: CurrencyCode;
-  taxRate: number;
+  salesTaxRate: number;
+  scopeOfWork: string;
   subtotalMaterials: number;
   subtotalLabor: number;
-  subtotalTransport: number;
+  subtotalEquipment: number;
+  subtotalDelivery: number;
+  subtotalDisposal: number;
+  subtotalPermits: number;
   subtotalOther: number;
   discount: number;
   taxAmount: number;
@@ -157,13 +172,17 @@ export type ConfidenceLevel = "high" | "medium" | "low";
 
 export interface ConfidenceReport {
   level: ConfidenceLevel;
-  warnings: string[];
+  /** i18n keys under estimates.confidence_reasons */
+  reasons: string[];
 }
 
 export interface EstimateTotals {
   materials: number;
   labor: number;
-  transport: number;
+  equipment: number;
+  delivery: number;
+  disposal: number;
+  permits: number;
   other: number;
   subtotal: number;
   discount: number;

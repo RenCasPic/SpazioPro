@@ -1,0 +1,33 @@
+{
+  "title": "Settings",
+  "profile": {
+    "title": "Company profile",
+    "note": "These details are used automatically on your estimates and PDFs.",
+    "full_name": "Full name",
+    "company_name": "Company",
+    "email": "Email",
+    "phone": "Phone",
+    "city": "City",
+    "address": "Address",
+    "license": "License #",
+    "website": "Website",
+    "professional_type": "What do you do?",
+    "terms": "Terms & conditions (shown on the PDF)"
+  },
+  "preferences": {
+    "title": "Preferences",
+    "app_language": "App language",
+    "estimate_language": "Default estimate language",
+    "default_state": "Default state",
+    "default_zip": "Default ZIP",
+    "measurement": "Measurement system",
+    "measurement_imperial": "Imperial (ft, sq ft)",
+    "measurement_metric": "Metric (m, m²)"
+  },
+  "account": {
+    "title": "Account",
+    "demo": "You're in demo mode: data is stored in this browser. Configure Supabase for real persistence (see README).",
+    "supabase": "Session connected to Supabase.",
+    "sign_out": "Sign out"
+  }
+}

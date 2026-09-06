@@ -4,62 +4,67 @@ import type {
   NewProject,
   Profile,
   Project,
+  ProjectLocation,
   Room,
   RoomDimensions,
   ScenarioType,
 } from "@/types";
 import { uid } from "@/lib/utils";
-import { countryService } from "@/lib/market/country-service";
+import { stateService } from "@/lib/market/country-service";
 import { taxService } from "@/lib/market/tax-service";
-import { surfaceAreas } from "@/lib/calculations/quantities";
+import { surfaceAreas } from "@/lib/calculations/dimensions";
 import { defaultLaborLines } from "@/data/labor";
+import { DEFAULT_LOCALE } from "@/lib/i18n/config";
 import type { ProjectConfig } from "./schema";
 
-export function defaultSettings(): EstimateSettings {
+export function defaultSettings(salesTaxRate: number): EstimateSettings {
   return {
-    vatRate: 21,
+    salesTaxRate,
     discountPercent: 0,
-    transport: { enabled: true, distanceKm: 15, volumeM3: 6, manualOverride: null },
+    extras: { equipment: 0, delivery: 0, disposal: 0, permits: 0, other: 0 },
+    scopeOfWork: "",
     notes: "",
   };
 }
 
+const SCENARIO_NAMES: Record<ScenarioType, string> = {
+  economy: "Economy",
+  standard: "Standard",
+  premium: "Premium",
+  custom: "Custom",
+};
+
 export function createScenario(projectId: string, type: ScenarioType, name?: string): DesignScenario {
   const now = new Date().toISOString();
-  const labels: Record<ScenarioType, string> = {
-    economy: "Económico",
-    standard: "Estándar",
-    premium: "Premium",
-    custom: "Personalizado",
-  };
   return {
     id: uid("scn"),
     projectId,
-    name: name ?? labels[type],
+    name: name ?? SCENARIO_NAMES[type],
     description: "",
     type,
     totalEstimate: 0,
-    currencyCode: "EUR",
+    currencyCode: "USD",
     previewImageUrl: null,
     createdAt: now,
     updatedAt: now,
   };
 }
 
-export function createRoom(projectId: string, dims: RoomDimensions, name = "Espacio principal"): Room {
+/** Default room ≈ 12 ft × 15 ft × 9 ft. */
+export function createRoom(projectId: string, dims: RoomDimensions, name = "Main space"): Room {
   const now = new Date().toISOString();
   const a = surfaceAreas(dims);
   return {
     id: uid("room"),
     projectId,
     name,
-    width: dims.width,
-    length: dims.length,
-    height: dims.height,
-    floorArea: a.floorArea,
-    wallArea: a.wallArea,
-    ceilingArea: a.ceilingArea,
-    perimeter: a.perimeter,
+    widthIn: dims.widthIn,
+    lengthIn: dims.lengthIn,
+    heightIn: dims.heightIn,
+    floorAreaSqFt: a.floorAreaSqFt,
+    wallAreaSqFt: a.wallAreaSqFt,
+    ceilingAreaSqFt: a.ceilingAreaSqFt,
+    perimeterLinFt: a.perimeterLinFt,
     measurementSource: "ai_estimate",
     aiAnalysis: null,
     createdAt: now,
@@ -67,41 +72,63 @@ export function createRoom(projectId: string, dims: RoomDimensions, name = "Espa
   };
 }
 
+export function createLocation(projectId: string, input: NewProject): ProjectLocation {
+  const now = new Date().toISOString();
+  const state = stateService.get(input.stateCode);
+  return {
+    id: uid("loc"),
+    projectId,
+    address: input.address ?? "",
+    city: input.city,
+    state: state?.name ?? input.stateCode,
+    stateCode: input.stateCode.toUpperCase(),
+    county: null,
+    zipCode: input.zipCode,
+    latitude: null,
+    longitude: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
 export interface CreatedProject {
   project: Project;
+  location: ProjectLocation;
   room: Room;
   scenarios: DesignScenario[];
   config: ProjectConfig;
 }
 
 export function createProject(userId: string, input: NewProject): CreatedProject {
-  const country = countryService.require(input.countryCode);
   const now = new Date().toISOString();
   const id = uid("prj");
+  const stateCode = input.stateCode.toUpperCase();
+
+  const tax = taxService.getTaxRate({ stateCode, city: input.city, zipCode: input.zipCode });
 
   const scenarios = [
     createScenario(id, "standard"),
     createScenario(id, "economy"),
     createScenario(id, "premium"),
-  ].map((s) => ({ ...s, currencyCode: country.currencyCode }));
+  ];
 
-  const dims: RoomDimensions = { width: 4, length: 5, height: 2.6 };
+  const dims: RoomDimensions = { widthIn: 12 * 12, lengthIn: 15 * 12, heightIn: 9 * 12 };
   const room = createRoom(id, dims);
-  room.projectId = id;
 
   const project: Project = {
     id,
     userId,
     clientId: input.clientId,
-    name: input.name.trim() || "Proyecto sin título",
+    name: input.name.trim() || "Untitled Project",
     description: input.description,
     projectType: input.projectType,
     status: "draft",
-    countryCode: country.code,
-    currencyCode: country.currencyCode,
-    locale: country.locale,
-    taxRate: taxService.defaultRate(country.code),
-    measurementSystem: country.measurementSystem,
+    countryCode: "US",
+    stateCode,
+    currencyCode: "USD",
+    locale: "en-US",
+    measurementSystem: "imperial",
+    estimateLanguage: input.estimateLanguage ?? DEFAULT_LOCALE,
     activeScenarioId: scenarios[0].id,
     createdAt: now,
     updatedAt: now,
@@ -109,11 +136,11 @@ export function createProject(userId: string, input: NewProject): CreatedProject
 
   const config: ProjectConfig = {
     projectId: id,
-    laborLines: defaultLaborLines(country.code),
-    settings: { ...defaultSettings(), vatRate: project.taxRate },
+    laborLines: defaultLaborLines(stateCode),
+    settings: defaultSettings(tax.rate),
   };
 
-  return { project, room, scenarios, config };
+  return { project, location: createLocation(id, input), room, scenarios, config };
 }
 
 export function createProfile(id: string, email: string): Profile {
@@ -126,17 +153,20 @@ export function createProfile(id: string, email: string): Profile {
     email,
     avatarUrl: null,
     logoUrl: null,
-    countryCode: "ES",
-    currencyCode: "EUR",
-    locale: "es-ES",
+    countryCode: "US",
+    defaultStateCode: "TX",
+    defaultZip: "",
     city: "",
     address: "",
-    taxId: "",
+    currencyCode: "USD",
+    measurementSystem: "imperial",
+    appLanguage: "en-US",
+    estimateLanguage: "en-US",
+    licenseNumber: "",
     website: "",
     terms:
-      "Presupuesto válido durante 30 días. Forma de pago: 40% a la aceptación, 40% a mitad de obra, 20% a la entrega. No incluye licencias ni tasas municipales salvo indicación expresa.",
-    defaultTaxRate: 21,
-    professionalType: "interior_designer",
+      "Estimate valid for 30 days. Payment: 40% on acceptance, 40% at midpoint, 20% on completion. Permits and municipal fees not included unless stated.",
+    professionalType: "general_contractor",
     onboardingComplete: false,
     createdAt: now,
     updatedAt: now,

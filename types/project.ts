@@ -1,4 +1,5 @@
 import type { CurrencyCode, MeasurementSystem } from "./market";
+import type { Locale } from "@/lib/i18n/config";
 
 export type ProjectType =
   | "living_room"
@@ -12,18 +13,18 @@ export type ProjectType =
   | "whole_home"
   | "other";
 
-export const PROJECT_TYPE_LABELS: Record<ProjectType, string> = {
-  living_room: "Salón",
-  bedroom: "Dormitorio",
-  kitchen: "Cocina",
-  bathroom: "Baño",
-  office: "Oficina",
-  commercial: "Local comercial",
-  terrace: "Terraza",
-  exterior: "Exterior",
-  whole_home: "Vivienda completa",
-  other: "Otro",
-};
+export const PROJECT_TYPES: ProjectType[] = [
+  "kitchen",
+  "bathroom",
+  "living_room",
+  "bedroom",
+  "office",
+  "commercial",
+  "whole_home",
+  "exterior",
+  "terrace",
+  "other",
+];
 
 export type ProjectStatus =
   | "draft"
@@ -32,15 +33,6 @@ export type ProjectStatus =
   | "quoted"
   | "approved"
   | "completed";
-
-export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
-  draft: "Borrador",
-  designing: "Diseñando",
-  estimating: "Presupuestando",
-  quoted: "Cotizado",
-  approved: "Aprobado",
-  completed: "Completado",
-};
 
 export const PROJECT_STATUS_ORDER: ProjectStatus[] = [
   "draft",
@@ -53,23 +45,27 @@ export const PROJECT_STATUS_ORDER: ProjectStatus[] = [
 
 export type MeasurementSource = "manual" | "ai_estimate" | "mixed";
 
+/** Room dimensions stored in inches internally; UI works in ft + in. */
 export interface RoomDimensions {
-  width: number;
-  length: number;
-  height: number;
+  /** total inches */
+  widthIn: number;
+  lengthIn: number;
+  heightIn: number;
 }
 
 export interface Room {
   id: string;
   projectId: string;
   name: string;
-  width: number;
-  length: number;
-  height: number;
-  floorArea: number;
-  wallArea: number;
-  ceilingArea: number;
-  perimeter: number;
+  widthIn: number;
+  lengthIn: number;
+  heightIn: number;
+  /** areas in square feet */
+  floorAreaSqFt: number;
+  wallAreaSqFt: number;
+  ceilingAreaSqFt: number;
+  /** perimeter in linear feet */
+  perimeterLinFt: number;
   measurementSource: MeasurementSource;
   aiAnalysis: import("./ai").RoomAnalysis | null;
   createdAt: string;
@@ -86,7 +82,6 @@ export interface ProjectImage {
   originalUrl: string;
   processedUrl: string | null;
   thumbnailUrl: string | null;
-  /** CSS filter descriptor produced by the demo design generator */
   designFilter?: string;
   metadata: Record<string, unknown>;
   createdAt: string;
@@ -100,12 +95,14 @@ export interface Project {
   description: string;
   projectType: ProjectType;
   status: ProjectStatus;
+  /** frozen per-project market context — global setting changes don't touch this */
   countryCode: string;
+  stateCode: string;
   currencyCode: CurrencyCode;
   locale: string;
-  taxRate: number;
   measurementSystem: MeasurementSystem;
-  /** id of the scenario currently open in the editor */
+  /** language the estimate/proposal PDF is rendered in (independent of app UI) */
+  estimateLanguage: Locale;
   activeScenarioId: string;
   createdAt: string;
   updatedAt: string;
@@ -114,7 +111,11 @@ export interface Project {
 export interface NewProject {
   name: string;
   clientId: string | null;
-  countryCode: string;
   projectType: ProjectType;
   description: string;
+  address?: string;
+  city: string;
+  stateCode: string;
+  zipCode: string;
+  estimateLanguage: Locale;
 }

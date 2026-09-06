@@ -18,10 +18,11 @@ export interface RoomAnalysis {
   confidence: number;
   surfaces: DetectedSurface[];
   objects: DetectedObject[];
+  /** approximate dimensions in inches */
   approximateDimensions?: {
-    width?: number;
-    length?: number;
-    height?: number;
+    widthIn?: number;
+    lengthIn?: number;
+    heightIn?: number;
   };
   summary: string;
   isEstimate: true;
@@ -29,7 +30,6 @@ export interface RoomAnalysis {
 
 export interface SegmentationResult {
   target: string;
-  /** normalized polygon points (0..1) */
   polygon: Array<{ x: number; y: number }>;
   confidence: number;
 }
@@ -44,14 +44,13 @@ export interface DesignInput {
 
 export interface DesignResult {
   imageUrl?: string;
-  /** demo mode returns a CSS filter to apply over the original photo */
   cssFilter?: string;
   note: string;
 }
 
 export interface AiEstimationInput {
   roomType: ProjectType;
-  dimensions: { width: number; length: number; height: number };
+  dimensions: { widthIn: number; lengthIn: number; heightIn: number };
   materialCategories: string[];
   objectCount: number;
 }

@@ -1,30 +1,26 @@
-// Multi-country market model. Nothing in the app hard-codes a single market:
-// every currency, tax, labour and transport figure is resolved from data.
+// Market model. US-first: the initial (and only seeded) country is the United
+// States, priced in USD with imperial units and sales tax resolved from the
+// project's tax jurisdiction (state / county / city / ZIP). The shape stays
+// generic so other countries can be added later without touching core logic.
 
-export type CurrencyCode =
-  | "EUR"
-  | "PYG"
-  | "ARS"
-  | "CLP"
-  | "UYU"
-  | "MXN"
-  | "COP"
-  | "PEN"
-  | "USD"
-  | "BRL"
-  | "GBP";
+export type CurrencyCode = "USD" | "CAD" | "MXN" | "EUR" | "GBP";
 
-export type MeasurementSystem = "metric" | "imperial";
+export type MeasurementSystem = "imperial" | "metric";
 
 export interface Country {
   code: string; // ISO-3166 alpha-2
   name: string;
   currencyCode: CurrencyCode;
   currencySymbol: string;
-  locale: string; // BCP-47
+  locale: string;
   measurementSystem: MeasurementSystem;
-  defaultTaxRate: number; // percent
-  flag: string; // emoji flag (allowed for countries per the icon rules)
+  active: boolean;
+}
+
+export interface State {
+  countryCode: string;
+  code: string; // 2-letter USPS code
+  name: string;
   active: boolean;
 }
 
@@ -34,56 +30,86 @@ export interface Money {
   currency: CurrencyCode;
 }
 
+/** US remodeling / construction labour categories. */
 export type LaborCategory =
+  | "general_labor"
   | "painting"
-  | "flooring"
-  | "tiling"
+  | "drywall"
+  | "flooring_installation"
+  | "tile_installation"
   | "carpentry"
   | "electrical"
   | "plumbing"
-  | "masonry"
-  | "assembly"
+  | "hvac"
   | "demolition"
-  | "general";
+  | "framing"
+  | "cabinet_installation"
+  | "countertop_installation"
+  | "finish_carpentry"
+  | "cleaning"
+  | "delivery"
+  | "assembly";
+
+export type LaborUnit = "hour" | "day" | "sq_ft" | "linear_ft" | "unit" | "project";
 
 export interface LaborRate {
   countryCode: string;
+  stateCode: string | null; // null = national default
   category: LaborCategory;
-  unit: string; // m2 | ml | ud | h | day
-  cost: number; // in the country currency
+  unit: LaborUnit;
+  cost: number;
   currencyCode: CurrencyCode;
 }
 
-export interface TaxRate {
+export interface TaxJurisdiction {
+  id: string;
   countryCode: string;
-  name: string; // IVA, VAT, IGIC, IVA general…
-  rate: number; // percent
-  category: string; // 'standard' | 'reduced' | 'construction'
+  stateCode: string;
+  county: string | null;
+  city: string | null;
+  zipCode: string | null;
+  name: string;
   active: boolean;
 }
 
-export interface TransportRate {
+export interface TaxRate {
+  jurisdictionId: string;
+  /** combined rate as a percentage, e.g. 9.5 */
+  rate: number;
+  effectiveFrom: string;
+  effectiveUntil: string | null;
+  source: string;
+  active: boolean;
+}
+
+export interface TaxRateResult {
+  rate: number;
+  jurisdiction: TaxJurisdiction;
+  /** how specific the match was */
+  matchedOn: "zip" | "city" | "county" | "state" | "none";
+  source: string;
+}
+
+export interface DeliveryRate {
   countryCode: string;
-  /** base call-out fee in country currency */
+  stateCode: string | null;
   baseFee: number;
-  /** per-km fee */
-  perKm: number;
-  /** per m3 of volume */
-  perM3: number;
+  perMile: number;
+  perCuYd: number;
   currencyCode: CurrencyCode;
 }
 
-/** Reference FX only — never overrides a real local price. base = EUR. */
+/** Reference FX only (base USD). Not used in the US flow. */
 export interface FxRate {
   currency: CurrencyCode;
-  perEur: number; // 1 EUR = perEur <currency>
+  perUsd: number;
   capturedAt: string;
 }
 
 export interface Market {
   country: Country;
-  taxRates: TaxRate[];
+  states: State[];
   laborRates: LaborRate[];
-  transport: TransportRate;
+  delivery: DeliveryRate;
   fx: FxRate[];
 }

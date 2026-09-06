@@ -1,21 +1,22 @@
-import type { CurrencyCode } from "./market";
+import type { CurrencyCode, MeasurementSystem } from "./market";
+import type { Locale } from "@/lib/i18n/config";
 
 export type ProfessionalType =
-  | "architect"
+  | "general_contractor"
+  | "remodeler"
   | "interior_designer"
+  | "architect"
   | "builder"
-  | "renovation_company"
-  | "studio"
   | "other";
 
-export const PROFESSIONAL_TYPE_LABELS: Record<ProfessionalType, string> = {
-  architect: "Arquitecto/a",
-  interior_designer: "Diseñador/a de interiores",
-  builder: "Constructor/a",
-  renovation_company: "Empresa de reformas",
-  studio: "Estudio",
-  other: "Otro",
-};
+export const PROFESSIONAL_TYPES: ProfessionalType[] = [
+  "general_contractor",
+  "remodeler",
+  "interior_designer",
+  "architect",
+  "builder",
+  "other",
+];
 
 export interface Profile {
   id: string;
@@ -25,15 +26,21 @@ export interface Profile {
   email: string;
   avatarUrl: string | null;
   logoUrl: string | null;
+  /** market context */
   countryCode: string;
-  currencyCode: CurrencyCode;
-  locale: string;
+  defaultStateCode: string;
+  defaultZip: string;
   city: string;
   address: string;
-  taxId: string;
+  currencyCode: CurrencyCode;
+  measurementSystem: MeasurementSystem;
+  /** app UI language */
+  appLanguage: Locale;
+  /** default language for generated estimates */
+  estimateLanguage: Locale;
+  licenseNumber: string;
   website: string;
   terms: string;
-  defaultTaxRate: number;
   professionalType: ProfessionalType;
   onboardingComplete: boolean;
   createdAt: string;

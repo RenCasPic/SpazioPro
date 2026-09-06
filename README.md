@@ -1,196 +1,160 @@
-# SpazioPro — Visualiza. Presupuesta. Construye.
+# SpazioPro — Visualize. Estimate. Build.
 
-Plataforma para arquitectos, interioristas y empresas de reforma: convierte la
-**fotografía de un espacio** en una **propuesta de diseño** y en un
-**presupuesto profesional** con precios, impuestos, mano de obra y transporte
-del **mercado del proyecto**.
+A design + estimating platform for **US** remodeling and construction. Take a
+photo of a room, analyze it, visualize material changes, then generate a
+professional **estimate** or **proposal** in USD based on quantities, materials,
+labor, equipment, delivery, disposal, permits and **local sales tax**.
 
-> Estimación orientativa. Los precios y cantidades pueden variar en función de
-> las mediciones reales, condiciones del espacio, disponibilidad de materiales,
-> proveedor, ubicación y mano de obra.
+Fully **bilingual** (English `en-US` default, Español `es-US`) — and the estimate
+PDF language is independent of the app UI language.
+
+> This estimate is for planning purposes only. Actual costs may vary based on
+> verified measurements, site conditions, material availability, supplier
+> pricing, labor requirements, permits, and local taxes.
 
 ---
 
-## Arranque rápido (modo demo, sin servicios externos)
+## Quick start (demo mode — no external services)
 
 ```bash
 npm install
-cp .env.example .env.local     # opcional — el modo demo funciona sin nada
-npm run dev                     # http://localhost:3000
-npm test                        # tests de cálculos, mercado y permisos
+cp .env.example .env.local     # optional — demo mode works with nothing set
+npm run dev                    # http://localhost:3000  → redirects to /en-US
+npm test                       # 30 tests: imperial math, tax jurisdictions, snapshots, i18n
 ```
 
-Cuenta demo prellenada: `demo@spaziopro.app` / `demo`. Los datos se guardan en
-el navegador (localStorage) y las respuestas de IA se simulan localmente.
+Demo account (pre-filled on the login screen): `demo@spaziopro.app` / `demo`.
+Data is stored in the browser (localStorage); AI is simulated locally.
 
 ---
 
-## Flujo del producto
+## Market: United States
 
-```
-Fotografía → Análisis IA → Diseño → Materiales → Mediciones → Cantidades
-→ Precios locales → Mano de obra → Transporte → Impuestos → Presupuesto → PDF
-```
-
-| Área | Ruta |
+| | |
 | --- | --- |
-| Landing | `/` |
-| Auth (demo o Supabase) | `/login`, `/register` |
-| Onboarding (país obligatorio) | `/onboarding` |
-| Dashboard | `/dashboard` |
-| Clientes (CRUD) | `/clients` |
-| Catálogo (precios por mercado) | `/catalog` |
-| Presupuestos + snapshots | `/estimates`, `/estimates/[id]` |
-| Proyecto | `/projects/[id]` · `editor` · `images` · `budget` · `scenarios` · `settings` |
-| Nuevo proyecto (asistente) | `/projects/new` |
-| Perfil profesional | `/settings` |
+| Currency | **USD** (`Intl.NumberFormat`, never hand-concatenated `$`) |
+| Units | **Imperial** — ft, in, sq ft, linear ft, cu yd, gal. Stored internally in inches; presented in ft + in |
+| Sales tax | **No national rate.** Resolved from the project's jurisdiction: ZIP → city → county → state (`lib/market/tax-service.ts`, `TaxService.getTaxRate`). 5 no-sales-tax states handled |
+| Pricing | Per-state USD prices with supplier + availability + lead time. National fallback; never converted from other markets |
+| Labor | US categories (Painting, Drywall, Flooring/Tile Installation, Framing, Cabinet/Countertop Installation, Electrical, Plumbing, HVAC, Demolition, Finish Carpentry, …) priced per state |
+| Cost model | Materials · Labor · Equipment · Delivery · Disposal · Permits · Other → Subtotal → Discount → **Sales Tax** → Grand Total |
+
+The architecture supports adding countries later (`countries`, `Country` type),
+but the MVP is US-only by design.
 
 ---
 
-## Stack
+## Flow
 
-Next.js 16 (App Router) · React 19 · TypeScript estricto · Tailwind v4 ·
-shadcn-style components propios · Zustand (estado del editor + undo/redo) ·
-React Hook Form + Zod · TanStack Query · jsPDF · Recharts · Lucide.
+```
+Onboarding → State / City / ZIP → Create Project (property address)
+→ Upload Space → AI Analysis → Measure (ft/in) → Design → Materials → Furniture
+→ Quantities → Local US Prices → Labor → Equipment / Delivery / Disposal / Permits
+→ Sales Tax (from location) → Estimate → Proposal → PDF
+```
+
+## Routes (all locale-prefixed: `/en-US/...`, `/es-US/...`)
+
+`/` landing · `/login` `/register` · `/onboarding` · `/dashboard` · `/projects`
+`/projects/new` · `/projects/[id]` `…/editor` `…/images` `…/estimate`
+`…/scenarios` `…/settings` · `/catalog` · `/clients` · `/estimates` `/estimates/[id]`
+· `/settings`
 
 ---
 
-## Arquitectura
+## Internationalization
+
+- No hardcoded UI strings. Everything goes through `t("namespace.key")`.
+- Dictionaries: `locales/en-US/*.json`, `locales/es-US/*.json` (common, dashboard,
+  projects, editor, estimates, catalog, settings, onboarding, pdf).
+- `app/[locale]/` segment; `proxy.ts` redirects and detects locale (cookie →
+  `Accept-Language` → default). Header switcher (`EN` / `ES`) sets a cookie and
+  hard-swaps the path.
+- **App language ≠ market ≠ estimate language.** A user can run the app in
+  Español while every project stays USD / imperial / US suppliers / US tax, and
+  generate the PDF in English.
+- A test asserts both dictionaries expose the same keys.
+
+---
+
+## Architecture
 
 ```
-UI (app/, components/)
-  ↓
-hooks/                 use-editor · use-project · use-estimate · use-products · use-market · use-ai
-  ↓
-lib/services/          project · room · item · image · client · estimate · config · profile · pdf
-  ↓
-lib/market/            country · currency · tax · pricing · labor-rate · transport · catalog · market
-lib/calculations/      quantities · materials · labor · transport · taxes · estimate · money
-lib/ai/                provider (abstracción) + demo-provider (offline)
-  ↓
-lib/db/ (localStorage, modo demo)   ·   lib/supabase/ + supabase/migrations (backend)
+UI (app/[locale], components/)
+  → hooks/               use-editor · use-project · use-estimate · use-products · use-market · use-ai · use-session
+  → lib/services/        project · location · room · item · image · client · estimate · config · profile · pdf
+  → lib/market/          country/state · currency · tax · pricing · labor-rate · delivery · catalog · market
+  → lib/calculations/    units · conversions · dimensions · quantities · materials · labor · taxes · estimate · money
+  → lib/ai/              provider (VisionProvider/SegmentationProvider/ImageGenerationProvider/EstimationProvider) + demo-provider
+  → lib/i18n/            config · dictionaries · translate
+  → lib/db/ (localStorage, demo)   ·   lib/supabase/ + supabase/migrations (real backend)
 ```
 
-Nada de lógica de negocio en `page.tsx`. Los cálculos son funciones puras y
-testeadas en `__tests__/`.
+No business logic in `page.tsx`. Calculations are pure functions with tests.
 
-### Multi-país
+### Reproducible estimates
 
-15 mercados (`lib/market/data/`). Añadir un país = añadir sus filas de
-country / tax / labor / transport / fx. **La lógica nunca ramifica por código de
-país.** El país del proyecto determina moneda, locale, impuestos, catálogo,
-precios, mano de obra, transporte y sistema de medida.
+Generating an estimate freezes a `market_snapshot` — country, state, city, ZIP,
+sales-tax rate + jurisdiction, product prices, labor rates, delivery rates, FX —
+plus a `price_snapshot` per line. A historical estimate **never changes** because
+a price, tax, labor or delivery rate moves. Recalculation is explicit.
 
-### Precios
+### Changing a project's location
 
-Prioridad de resolución (`lib/market/pricing-service.ts`):
+`projectService.changeLocation()` re-resolves the state, sales-tax rate,
+per-item prices and labor rates — after the user confirms in
+`ChangeLocationDialog`. Existing estimates keep their snapshot. Covered by
+`__tests__/location-change.test.ts`.
 
-```
-1. Precio local de mercado del país
-2. Precio de proveedor local
-3. Precio de mercado almacenado
-4. Conversión de divisa — SOLO referencia, siempre marcada `source: "converted"`
-```
+### AI
 
-Un precio convertido **nunca** sustituye silenciosamente a un precio local.
-
-### Presupuestos reproducibles
-
-Al generar un presupuesto se congela un `market_snapshot` (precios, impuestos,
-tarifas de mano de obra, transporte y tipos de cambio) y un `price_snapshot` por
-línea. Un presupuesto histórico **no cambia** aunque después cambie un precio,
-un impuesto, una tarifa o un tipo de cambio. La recalculación es explícita.
-
-### Cambio de país de un proyecto
-
-`projectService.changeCountry()` recalcula moneda, impuestos, precios de cada
-elemento y tarifas de mano de obra — tras confirmación del usuario
-(`ChangeCountryDialog`). Nunca en silencio. Los presupuestos ya generados
-conservan su snapshot.
-
-### IA
-
-`lib/ai/provider.ts` define `VisionProvider`, `SegmentationProvider`,
-`ImageGenerationProvider`, `EstimationProvider`. `AI_PROVIDER=demo` (por
-defecto) usa `demo-provider.ts`, sin red ni claves, respetando exactamente las
-mismas interfaces que un proveedor real. Endpoints: `/api/ai/{analyze-room,
+`AI_PROVIDER=demo` (default) needs no network or key and implements the exact
+interfaces a real provider would. Endpoints: `POST /api/ai/{analyze-room,
 segment-room,generate-design,estimate}`.
-
----
-
-## Backend Supabase (opcional)
-
-1. Crea un proyecto Supabase.
-2. Aplica `supabase/migrations/001_initial_schema.sql` (tablas, índices,
-   **RLS**, trigger de alta de perfil).
-3. Aplica `supabase/seed.sql` (`npm run seed` lo regenera desde los mismos
-   módulos de datos que usa la app: 15 países, 30 productos, 150 precios de
-   mercado).
-4. Rellena `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-   `SUPABASE_SERVICE_ROLE_KEY` y pon `DEMO_MODE=false`.
-5. Storage: crea los buckets `project-images`, `project-renders`, `avatars`,
-   `pdfs`, `product-images` con políticas por propietario.
-
-Con Supabase configurado, las rutas `/api/projects` y `/api/estimates` operan
-contra la base de datos con autorización *server-side* + RLS; en modo demo
-responden `501` y la persistencia es del navegador (`lib/services/*`).
-
-### RLS
-
-Cada usuario solo accede a sus proyectos, clientes, habitaciones, imágenes,
-escenarios, items y presupuestos (`public.owns_project()`). El catálogo y los
-datos de mercado son de lectura pública; escritura solo con service role.
 
 ---
 
 ## API
 
 ```
-GET  /api/countries            GET /api/countries/[code]
-GET  /api/markets/[countryCode]
-GET  /api/products             GET /api/products/[id]   GET /api/products/[id]/price?country=PY
-GET  /api/labor-rates?country=PY   GET /api/tax-rates?country=PY
-POST /api/currency/convert
-GET/POST        /api/projects        GET/PATCH/DELETE /api/projects/[id]
-GET/POST        /api/estimates       GET             /api/estimates/[id]
+GET  /api/countries        GET /api/states        GET /api/states/[code]
+GET  /api/markets/[state]
+GET  /api/products         GET /api/products/[id]  GET /api/products/[id]/price?state=CA
+GET  /api/labor-rates?state=CA
+GET  /api/tax-rates?state=CA&city=Los%20Angeles&zip=90001
 POST /api/ai/analyze-room | segment-room | generate-design | estimate
-POST /api/pdf/estimate
+POST /api/pdf/estimate     POST /api/pdf/proposal
+GET/POST         /api/projects           GET/PATCH/DELETE /api/projects/[id]
+GET              /api/projects/[id]/location
+GET/POST         /api/estimates          GET             /api/estimates/[id]
 ```
 
-Todas las entradas se validan con Zod (`lib/validations/`). Las rutas que
-modifican datos comprueban sesión + propiedad; el `userId` nunca se toma del
-cliente.
+Inputs validated with Zod (`lib/validations/`). Mutating routes derive the user
+from the authenticated session — never from the request body. In demo mode the
+project/estimate routes return `501` and persistence is client-side.
 
 ---
 
-## Tests
+## Supabase backend (optional)
 
-```bash
-npm test
-```
-
-Cubren: superficies y desperdicio (`21,42 × 1,10 = 23,56 m²`), motor de
-presupuesto (descuento antes de impuestos, transporte configurable, moneda
-preservada), niveles de confianza, mercado multi-país (moneda / impuesto /
-mano de obra por país, prioridad de precio local sobre conversión, snapshot
-congelado) y aislamiento entre usuarios.
+1. Create a Supabase project.
+2. Apply `supabase/migrations/001_initial_schema.sql` (tables, indexes, **RLS**
+   keyed to `owns_project()`, auto-profile trigger).
+3. Apply `supabase/seed.sql` — `npm run seed` regenerates it from the same data
+   modules the app uses (51 states, 68 tax jurisdictions, 36 products, 1,188
+   per-state prices).
+4. Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+   `SUPABASE_SERVICE_ROLE_KEY`, `DEMO_MODE=false`.
+5. Storage buckets: `project-images`, `project-renders`, `avatars`, `pdfs`,
+   `product-images` with per-owner policies.
 
 ---
 
 ## Scripts
 
-| Script | Acción |
+| | |
 | --- | --- |
-| `npm run dev` | servidor de desarrollo |
-| `npm run build` / `npm start` | build de producción |
+| `npm run dev` / `build` / `start` | Next.js |
 | `npm test` | vitest |
-| `npm run seed` | regenera `supabase/seed.sql` desde los datos de la app |
+| `npm run seed` | regenerate `supabase/seed.sql` |
 | `npm run lint` | ESLint |
-
----
-
-## Roadmap (arquitectura preparada, no implementado)
-
-Integración con proveedores y catálogos oficiales, costes por ciudad, inflación
-y tipos de cambio en vivo, equipos multiusuario y roles, facturación y firma
-digital, seguimiento de obra, API pública, medición avanzada / BIM.

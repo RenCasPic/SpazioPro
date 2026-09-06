@@ -28,7 +28,6 @@ export function CanvasObject({
   const t = item.transform;
   const mode = useRef<Mode>(null);
   const start = useRef({ px: 0, py: 0, x: 0, y: 0, scale: 1, rotation: 0, cx: 0, cy: 0 });
-
   const rect = () => containerRef.current?.getBoundingClientRect();
 
   function down(e: React.PointerEvent, m: Mode) {
@@ -39,17 +38,10 @@ export function CanvasObject({
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     mode.current = m;
     start.current = {
-      px: e.clientX,
-      py: e.clientY,
-      x: t.x,
-      y: t.y,
-      scale: t.scale,
-      rotation: t.rotation,
-      cx: r.left + t.x * r.width,
-      cy: r.top + t.y * r.height,
+      px: e.clientX, py: e.clientY, x: t.x, y: t.y, scale: t.scale, rotation: t.rotation,
+      cx: r.left + t.x * r.width, cy: r.top + t.y * r.height,
     };
   }
-
   function move(e: React.PointerEvent) {
     if (!mode.current) return;
     const r = rect();
@@ -69,7 +61,6 @@ export function CanvasObject({
       onTransform({ scale: clamp((s.scale * d1) / d0, 0.3, 4) });
     }
   }
-
   function up(e: React.PointerEvent) {
     if (mode.current) onCommit();
     mode.current = null;
@@ -107,18 +98,10 @@ export function CanvasObject({
             <span className="pointer-events-none absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-ink px-2 py-0.5 text-[10px] font-medium text-white">
               {item.name}
             </span>
-            <button
-              onPointerDown={(e) => down(e, "rotate")}
-              className="absolute -top-9 left-1/2 grid h-6 w-6 -translate-x-1/2 cursor-grab place-items-center rounded-full border border-line bg-surface text-ink-soft shadow-sm"
-              title="Rotar"
-            >
+            <button onPointerDown={(e) => down(e, "rotate")} className="absolute -top-9 left-1/2 grid h-6 w-6 -translate-x-1/2 cursor-grab place-items-center rounded-full border border-line bg-surface text-ink-soft shadow-sm">
               <RotateCw className="h-3.5 w-3.5" />
             </button>
-            <button
-              onPointerDown={(e) => down(e, "scale")}
-              className="absolute -bottom-3 -right-3 grid h-6 w-6 cursor-nwse-resize place-items-center rounded-full border border-line bg-surface text-ink-soft shadow-sm"
-              title="Escalar"
-            >
+            <button onPointerDown={(e) => down(e, "scale")} className="absolute -bottom-3 -right-3 grid h-6 w-6 cursor-nwse-resize place-items-center rounded-full border border-line bg-surface text-ink-soft shadow-sm">
               <Maximize2 className="h-3.5 w-3.5" />
             </button>
             <span className="absolute -left-3 -top-3 grid h-6 w-6 place-items-center rounded-full border border-line bg-surface text-ink-soft shadow-sm">

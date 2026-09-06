@@ -14,11 +14,8 @@ export function useSession() {
     setLoading(true);
     try {
       const session = isDemoMode() ? demoAuth.currentSession() : null;
-      if (isDemoMode() && !session) {
-        setProfile(null);
-      } else {
-        setProfile(await profileService.get());
-      }
+      if (isDemoMode() && !session) setProfile(null);
+      else setProfile(await profileService.get());
     } finally {
       setLoading(false);
     }

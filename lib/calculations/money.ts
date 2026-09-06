@@ -1,6 +1,6 @@
 import type { CurrencyCode } from "@/types";
 
-const ZERO_DECIMAL: CurrencyCode[] = ["PYG", "CLP", "COP"];
+const ZERO_DECIMAL: CurrencyCode[] = [];
 
 /** Round to a currency's natural precision. Only for presentation / totals. */
 export function roundMoney(value: number, currency: CurrencyCode): number {

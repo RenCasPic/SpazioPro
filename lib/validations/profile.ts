@@ -1,31 +1,36 @@
 import { z } from "zod";
 
+const localeSchema = z.enum(["en-US", "es-US"]);
+
 export const onboardingSchema = z.object({
-  fullName: z.string().min(2, "Escribe tu nombre"),
+  fullName: z.string().min(2, "Enter your name"),
   companyName: z.string().max(160).optional(),
   phone: z.string().max(40).optional(),
-  countryCode: z.string().length(2, "Selecciona un país"),
-  city: z.string().max(120).optional(),
   professionalType: z.enum([
-    "architect",
+    "general_contractor",
+    "remodeler",
     "interior_designer",
+    "architect",
     "builder",
-    "renovation_company",
-    "studio",
     "other",
   ]),
+  defaultStateCode: z.string().length(2, "Select a state"),
+  city: z.string().max(120).optional(),
+  defaultZip: z.string().regex(/^\d{5}$/, "Enter a valid ZIP").or(z.literal("")).optional(),
+  appLanguage: localeSchema,
 });
 
 export const profileSchema = onboardingSchema.partial().extend({
+  email: z.string().email().optional(),
   address: z.string().max(200).optional(),
-  taxId: z.string().max(40).optional(),
+  licenseNumber: z.string().max(60).optional(),
   website: z.string().max(200).optional(),
   terms: z.string().max(4000).optional(),
-  defaultTaxRate: z.number().min(0).max(80).optional(),
-  logoUrl: z.string().nullable().optional(),
+  measurementSystem: z.enum(["imperial", "metric"]).optional(),
+  estimateLanguage: localeSchema.optional(),
 });
 
 export const credentialsSchema = z.object({
-  email: z.string().email("Email no válido"),
-  password: z.string().min(6, "Mínimo 6 caracteres"),
+  email: z.string().email("Invalid email"),
+  password: z.string().min(6, "At least 6 characters"),
 });

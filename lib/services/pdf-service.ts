@@ -1,10 +1,10 @@
 import { jsPDF } from "jspdf";
-import type { Client, Estimate, Profile, Project, ProjectImage } from "@/types";
-import { PROJECT_TYPE_LABELS } from "@/types";
-import { APP_NAME, APP_TAGLINE, PRICE_DISCLAIMER, UNIT_LABELS } from "@/lib/constants";
-import { countryByCode } from "@/lib/market/data/countries";
-import { currencyService } from "@/lib/market/currency-service";
-import { formatDateLong } from "@/lib/format";
+import type { Client, Estimate, Profile, Project, ProjectImage, ProjectLocation } from "@/types";
+import { UNIT_LABELS_EN, UNIT_LABELS_ES } from "@/lib/constants";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import { createTranslator } from "@/lib/i18n/translate";
+import type { Locale } from "@/lib/i18n/config";
+import { stateService } from "@/lib/market/country-service";
 
 const INK: [number, number, number] = [28, 25, 23];
 const CLAY: [number, number, number] = [180, 83, 42];
@@ -15,6 +15,7 @@ export interface PdfPayload {
   project: Project;
   client: Client | null;
   profile: Profile | null;
+  location: ProjectLocation | null;
   originalImage: ProjectImage | null;
 }
 
@@ -23,83 +24,106 @@ interface PdfImages {
   designPng?: string;
 }
 
-/** Pure jsPDF document builder — safe on the server (no DOM). */
+/** Pure jsPDF document builder — safe on the server (no DOM). Bilingual. */
 export function buildEstimatePdf(payload: PdfPayload, images: PdfImages = {}): Blob {
-  const { estimate, project, client, profile } = payload;
-  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const { estimate, project, client, profile, location } = payload;
+  const lang: Locale = estimate.language ?? "en-US";
+  const t = createTranslator(getDictionary(lang));
+  const unitLabel = lang === "es-US" ? UNIT_LABELS_ES : UNIT_LABELS_EN;
+  const nf = new Intl.NumberFormat(lang, { maximumFractionDigits: 2 });
+  const money = (n: number) =>
+    new Intl.NumberFormat(lang, { style: "currency", currency: "USD", minimumFractionDigits: 2 }).format(n);
+
+  const doc = new jsPDF({ unit: "mm", format: "letter" });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const M = 16;
   let y = 0;
-
-  const country = countryByCode(estimate.countryCode);
-  const fmt = (n: number) =>
-    currencyService.format({ amount: n, currency: estimate.currencyCode }, country?.locale);
+  const isProposal = estimate.kind === "proposal";
 
   doc.setFillColor(...INK);
   doc.rect(0, 0, pageW, 24, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
-  doc.text(APP_NAME, M, 11);
+  doc.text("SPAZIOPRO", M, 11);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
+  doc.setFontSize(9);
   doc.setTextColor(212, 200, 190);
-  doc.text(APP_TAGLINE, M, 17);
-  doc.text(`Presupuesto ${estimate.estimateNumber}`, pageW - M, 11, { align: "right" });
-  doc.text(formatDateLong(estimate.createdAt, country?.locale), pageW - M, 17, { align: "right" });
+  doc.text(isProposal ? t("pdf.proposal_title") : t("pdf.estimate_title"), M, 18);
+  const numberLabel = isProposal
+    ? t("pdf.proposal_number", { number: estimate.estimateNumber })
+    : t("pdf.estimate_number", { number: estimate.estimateNumber });
+  doc.text(numberLabel, pageW - M, 11, { align: "right" });
+  doc.text(
+    `${t("pdf.date")}: ${new Date(estimate.createdAt).toLocaleDateString(lang, { month: "long", day: "numeric", year: "numeric" })}`,
+    pageW - M,
+    18,
+    { align: "right" },
+  );
 
   y = 32;
   doc.setTextColor(...INK);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text(profile?.companyName || profile?.fullName || "Profesional", M, y);
-  doc.text("Cliente", pageW / 2, y);
+  doc.setFontSize(9);
+  doc.text(t("pdf.prepared_by"), M, y);
+  doc.text(t("pdf.client"), pageW / 2, y);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   doc.setTextColor(...SOFT);
-  col(doc, M, y + 5, [profile?.fullName, profile?.city, profile?.phone, profile?.email, profile?.taxId]);
-  col(doc, pageW / 2, y + 5, [client?.name, client?.company, client?.city, client?.phone, client?.email]);
+  col(doc, M, y + 5, [
+    profile?.companyName,
+    profile?.fullName,
+    profile?.licenseNumber ? `Lic. ${profile.licenseNumber}` : null,
+    profile?.phone,
+    profile?.email,
+  ]);
+  col(doc, pageW / 2, y + 5, [client?.name, client?.company, client?.email, client?.phone]);
 
-  y += 34;
+  y += 30;
   doc.setTextColor(...INK);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
+  doc.setFontSize(15);
   doc.text(project.name, M, y);
   y += 6;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...SOFT);
-  doc.text(
-    `${PROJECT_TYPE_LABELS[project.projectType]} · ${country?.name ?? project.countryCode} · ${estimate.currencyCode}`,
-    M,
-    y,
-  );
+  const addr = location
+    ? `${location.address}, ${location.city}, ${stateService.get(location.stateCode)?.name ?? location.stateCode} ${location.zipCode}`
+    : `${estimate.city}, ${estimate.stateCode} ${estimate.zipCode}`;
+  doc.text(`${t("pdf.property_address")}: ${addr}`, M, y);
   y += 8;
 
   if (images.originalPng || images.designPng) {
     const imgW = (pageW - M * 2 - 6) / 2;
-    const imgH = imgW * 0.7;
+    const imgH = imgW * 0.66;
     try {
       if (images.originalPng) doc.addImage(images.originalPng, "PNG", M, y, imgW, imgH);
       if (images.designPng) doc.addImage(images.designPng, "PNG", M + imgW + 6, y, imgW, imgH);
-      doc.setFontSize(7.5);
-      doc.setTextColor(...SOFT);
-      doc.text("Estado actual", M + 1, y + imgH + 4);
-      doc.text("Propuesta de diseño", M + imgW + 7, y + imgH + 4);
-      y += imgH + 10;
+      y += imgH + 8;
     } catch {
       /* ignore */
     }
   }
 
-  y = sectionTitle(doc, "Materiales, mobiliario y mano de obra", M, y, pageW);
-  y = tableHead(doc, M, y, pageW);
+  if (estimate.scopeOfWork.trim()) {
+    y = section(doc, t("pdf.scope_of_work"), M, y, pageW);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...SOFT);
+    const lines = doc.splitTextToSize(estimate.scopeOfWork, pageW - M * 2) as string[];
+    doc.text(lines, M, y);
+    y += lines.length * 4 + 4;
+  }
+
+  y = section(doc, t("pdf.line_items"), M, y, pageW);
+  y = tableHead(doc, M, y, pageW, t);
   for (const it of estimate.items) {
-    if (y > pageH - 46) {
+    if (y > pageH - 60) {
       doc.addPage();
       y = M;
-      y = tableHead(doc, M, y, pageW);
+      y = tableHead(doc, M, y, pageW, t);
     }
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
@@ -107,22 +131,22 @@ export function buildEstimatePdf(payload: PdfPayload, images: PdfImages = {}): B
     doc.text(doc.splitTextToSize(it.description, pageW - M * 2 - 74)[0] as string, M, y);
     doc.setTextColor(...SOFT);
     doc.setFontSize(7.5);
-    doc.text(`${num2(it.quantity)} ${UNIT_LABELS[it.unit]}`, pageW - M - 60, y, { align: "right" });
-    doc.text(fmt(it.unitPrice + it.laborPrice), pageW - M - 28, y, { align: "right" });
+    doc.text(`${nf.format(it.quantity)} ${unitLabel[it.unit]}`, pageW - M - 58, y, { align: "right" });
+    doc.text(money(it.unitPrice + it.laborPrice), pageW - M - 28, y, { align: "right" });
     doc.setTextColor(...INK);
     doc.setFontSize(8.5);
-    doc.text(fmt(it.total), pageW - M, y, { align: "right" });
+    doc.text(money(it.total), pageW - M, y, { align: "right" });
     if (it.priceSnapshot.source === "converted") {
       doc.setTextColor(...CLAY);
       doc.setFontSize(6.5);
-      doc.text("precio de referencia (conversión de divisa)", M, y + 3.4);
+      doc.text(t("pdf.reference_price_note"), M, y + 3.4);
       y += 8;
     } else {
       y += 6;
     }
   }
 
-  if (y > pageH - 78) {
+  if (y > pageH - 90) {
     doc.addPage();
     y = M;
   }
@@ -131,11 +155,24 @@ export function buildEstimatePdf(payload: PdfPayload, images: PdfImages = {}): B
   doc.setDrawColor(220, 214, 205);
   doc.line(bx, y, pageW - M, y);
   y += 6;
-  y = totalRow(doc, "Materiales", fmt(estimate.subtotalMaterials), bx, y, pageW, M);
-  y = totalRow(doc, "Mano de obra", fmt(estimate.subtotalLabor), bx, y, pageW, M);
-  y = totalRow(doc, "Transporte", fmt(estimate.subtotalTransport), bx, y, pageW, M);
-  if (estimate.discount > 0) y = totalRow(doc, "Descuento", `-${fmt(estimate.discount)}`, bx, y, pageW, M);
-  y = totalRow(doc, `${taxLabel(estimate.countryCode)} ${num2(estimate.taxRate)}%`, fmt(estimate.taxAmount), bx, y, pageW, M);
+  y = totalRow(doc, t("pdf.materials"), money(estimate.subtotalMaterials), bx, y, pageW, M);
+  y = totalRow(doc, t("pdf.labor"), money(estimate.subtotalLabor), bx, y, pageW, M);
+  if (estimate.subtotalEquipment > 0) y = totalRow(doc, t("pdf.equipment"), money(estimate.subtotalEquipment), bx, y, pageW, M);
+  if (estimate.subtotalDelivery > 0) y = totalRow(doc, t("pdf.delivery"), money(estimate.subtotalDelivery), bx, y, pageW, M);
+  if (estimate.subtotalDisposal > 0) y = totalRow(doc, t("pdf.disposal"), money(estimate.subtotalDisposal), bx, y, pageW, M);
+  if (estimate.subtotalPermits > 0) y = totalRow(doc, t("pdf.permits"), money(estimate.subtotalPermits), bx, y, pageW, M);
+  if (estimate.subtotalOther > 0) y = totalRow(doc, t("pdf.other"), money(estimate.subtotalOther), bx, y, pageW, M);
+  const subtotal =
+    estimate.subtotalMaterials +
+    estimate.subtotalLabor +
+    estimate.subtotalEquipment +
+    estimate.subtotalDelivery +
+    estimate.subtotalDisposal +
+    estimate.subtotalPermits +
+    estimate.subtotalOther;
+  y = totalRow(doc, t("pdf.subtotal"), money(round2(subtotal)), bx, y, pageW, M);
+  if (estimate.discount > 0) y = totalRow(doc, t("pdf.discount"), `-${money(estimate.discount)}`, bx, y, pageW, M);
+  y = totalRow(doc, `${t("pdf.sales_tax")} ${nf.format(estimate.salesTaxRate)}%`, money(estimate.taxAmount), bx, y, pageW, M);
   doc.setDrawColor(...CLAY);
   doc.setLineWidth(0.5);
   doc.line(bx, y, pageW - M, y);
@@ -143,33 +180,19 @@ export function buildEstimatePdf(payload: PdfPayload, images: PdfImages = {}): B
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
   doc.setTextColor(...CLAY);
-  doc.text("TOTAL", bx, y);
-  doc.text(fmt(estimate.total), pageW - M, y, { align: "right" });
+  doc.text(t("pdf.grand_total"), bx, y);
+  doc.text(money(estimate.total), pageW - M, y, { align: "right" });
   y += 12;
-
-  if (estimate.notes) {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
-    doc.setTextColor(...INK);
-    doc.text("Notas", M, y);
-    y += 4.5;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(...SOFT);
-    const lines = doc.splitTextToSize(estimate.notes, pageW - M * 2) as string[];
-    doc.text(lines, M, y);
-    y += lines.length * 4 + 3;
-  }
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.setTextColor(...INK);
-  doc.text("Condiciones", M, y);
+  doc.text(t("pdf.terms"), M, y);
   y += 4.5;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(7.2);
+  doc.setFontSize(7.4);
   doc.setTextColor(...SOFT);
-  for (const c of [PRICE_DISCLAIMER, profile?.terms || "Presupuesto válido durante 30 días desde la fecha de emisión."]) {
+  for (const c of [profile?.terms || t("pdf.default_terms"), t("common.disclaimer")]) {
     const lines = doc.splitTextToSize(`• ${c}`, pageW - M * 2) as string[];
     doc.text(lines, M, y);
     y += lines.length * 3.4 + 1.5;
@@ -177,12 +200,11 @@ export function buildEstimatePdf(payload: PdfPayload, images: PdfImages = {}): B
 
   doc.setFontSize(7);
   doc.setTextColor(...SOFT);
-  doc.text(`${APP_NAME} · ${APP_TAGLINE}`, M, pageH - 8);
+  doc.text("SpazioPro · Visualize. Estimate. Build.", M, pageH - 8);
 
   return doc.output("blob");
 }
 
-/** Client wrapper — bakes the photo + design preview then builds the PDF. */
 export const pdfService = {
   async generate(payload: PdfPayload): Promise<Blob> {
     const images: PdfImages = {};
@@ -202,21 +224,23 @@ async function bake(dataUrl: string, filter?: string): Promise<string | undefine
     await img.decode();
     const canvas = document.createElement("canvas");
     canvas.width = 1000;
-    canvas.height = 700;
+    canvas.height = 660;
     const ctx = canvas.getContext("2d");
     if (!ctx) return undefined;
     ctx.fillStyle = "#faf8f5";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     if (filter) ctx.filter = filter;
-    const ratio = Math.min(canvas.width / (img.naturalWidth || 1000), canvas.height / (img.naturalHeight || 700));
+    const ratio = Math.min(canvas.width / (img.naturalWidth || 1000), canvas.height / (img.naturalHeight || 660));
     const w = (img.naturalWidth || 1000) * ratio;
-    const h = (img.naturalHeight || 700) * ratio;
+    const h = (img.naturalHeight || 660) * ratio;
     ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
     return canvas.toDataURL("image/png");
   } catch {
     return undefined;
   }
 }
+
+type T = (k: string, v?: Record<string, string | number>) => string;
 
 function col(doc: jsPDF, x: number, y: number, items: (string | undefined | null)[]) {
   let cy = y;
@@ -225,7 +249,7 @@ function col(doc: jsPDF, x: number, y: number, items: (string | undefined | null
     cy += 4;
   }
 }
-function sectionTitle(doc: jsPDF, title: string, x: number, y: number, pageW: number) {
+function section(doc: jsPDF, title: string, x: number, y: number, pageW: number) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(...INK);
@@ -234,14 +258,14 @@ function sectionTitle(doc: jsPDF, title: string, x: number, y: number, pageW: nu
   doc.line(x, y + 2, pageW - x, y + 2);
   return y + 8;
 }
-function tableHead(doc: jsPDF, x: number, y: number, pageW: number) {
+function tableHead(doc: jsPDF, x: number, y: number, pageW: number, t: T) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.setTextColor(...SOFT);
-  doc.text("CONCEPTO", x, y);
-  doc.text("CANTIDAD", pageW - x - 60, y, { align: "right" });
-  doc.text("PRECIO", pageW - x - 28, y, { align: "right" });
-  doc.text("TOTAL", pageW - x, y, { align: "right" });
+  doc.text(t("pdf.concept").toUpperCase(), x, y);
+  doc.text(t("pdf.quantity").toUpperCase(), pageW - x - 56, y, { align: "right" });
+  doc.text(t("pdf.price").toUpperCase(), pageW - x - 28, y, { align: "right" });
+  doc.text(t("pdf.total").toUpperCase(), pageW - x, y, { align: "right" });
   return y + 5;
 }
 function totalRow(doc: jsPDF, label: string, value: string, x: number, y: number, pageW: number, m: number) {
@@ -253,9 +277,6 @@ function totalRow(doc: jsPDF, label: string, value: string, x: number, y: number
   doc.text(value, pageW - m, y, { align: "right" });
   return y + 5.5;
 }
-function taxLabel(code: string): string {
-  return code === "US" ? "Sales Tax" : code === "GB" ? "VAT" : "IVA";
-}
-function num2(n: number): string {
-  return new Intl.NumberFormat("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+function round2(n: number) {
+  return Math.round((n + Number.EPSILON) * 100) / 100;
 }

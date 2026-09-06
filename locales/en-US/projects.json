@@ -1,0 +1,95 @@
+{
+  "title": "Projects",
+  "new": {
+    "title": "New project",
+    "subtitle": "The property location sets the sales tax, pricing and labor rates for this project.",
+    "name": "Project name",
+    "name_placeholder": "Modern Kitchen Remodel",
+    "client": "Client",
+    "no_client": "No client",
+    "type": "Project type",
+    "description": "Description (optional)",
+    "description_placeholder": "Scope of the job, style direction, notes…",
+    "address": "Property address",
+    "address_placeholder": "123 Main St",
+    "city": "City",
+    "state": "State",
+    "zip": "ZIP code",
+    "estimate_language": "Estimate language",
+    "steps": {
+      "project": "Project",
+      "photo": "Photo",
+      "analysis": "Analysis"
+    }
+  },
+  "card": {
+    "estimate": "Estimate",
+    "edited": "Edited {date}"
+  },
+  "filters": {
+    "all": "All",
+    "search_placeholder": "Search project or client…"
+  },
+  "upload": {
+    "title": "Upload a photo of the space you want to transform",
+    "hint": "Drag an image, choose one, or use your camera. JPG, PNG or WebP.",
+    "choose": "Choose image",
+    "camera": "Use camera",
+    "preparing": "Preparing…",
+    "uploading": "Uploading…",
+    "processing": "Processing…",
+    "done": "Done"
+  },
+  "analyze": {
+    "running": "Analyzing your space…",
+    "phase_prepare": "Preparing…",
+    "phase_segment": "Segmenting walls, floor and ceiling…",
+    "phase_openings": "Identifying windows and doors…",
+    "phase_furniture": "Recognizing furniture…",
+    "phase_dimensions": "Estimating dimensions…",
+    "detected_room": "Detected room",
+    "surfaces": "Surfaces",
+    "objects": "Furniture & objects",
+    "dimensions": "Room dimensions",
+    "ai_estimate": "AI estimate",
+    "adjust_hint": "Adjust what you want to keep; you can also edit it in the editor.",
+    "dimensions_disclaimer": "AI-estimated dimensions are not a certified measurement. Enter real measurements when you have them to sharpen the estimate.",
+    "go_to_editor": "Go to editor"
+  },
+  "overview": {
+    "description": "Description",
+    "scenarios": "Scenarios",
+    "scope_of_work": "Scope of Work",
+    "estimated_total": "Estimated total",
+    "details": "Details",
+    "client": "Client",
+    "location": "Location",
+    "currency": "Currency",
+    "measurement": "Measurement",
+    "dimensions": "Dimensions",
+    "floor_area": "Floor area",
+    "created": "Created",
+    "view_full_estimate": "View full estimate",
+    "open_editor": "Open editor",
+    "images": "Images",
+    "danger_zone": "Danger zone",
+    "delete_warning": "Deleting the project removes its rooms, images, scenarios and estimates.",
+    "delete_project": "Delete project",
+    "delete_confirm": "Delete \"{name}\"? This can't be undone."
+  },
+  "tabs": {
+    "overview": "Overview",
+    "editor": "Editor",
+    "images": "Images",
+    "estimate": "Estimate",
+    "scenarios": "Scenarios",
+    "settings": "Settings"
+  },
+  "settings": {
+    "title": "Project settings",
+    "status": "Status",
+    "location_title": "Property location",
+    "location_note": "The location determines sales tax, pricing and labor rates. Existing estimates keep their snapshot and don't change.",
+    "estimate_language_note": "The estimate PDF can be generated in a different language than the app."
+  }
+}

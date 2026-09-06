@@ -1,30 +1,27 @@
 import { badRequest } from "@/lib/api/http";
 import { buildEstimatePdf, type PdfPayload } from "@/lib/services/pdf-service";
 
-/**
- * Builds the estimate PDF server-side (text, tables, totals, conditions).
- * The client route bakes the before/after images and can also build locally.
- */
+/** Builds the estimate/proposal PDF server-side (bilingual). */
 export async function POST(request: Request) {
   let payload: PdfPayload;
   try {
     payload = (await request.json()) as PdfPayload;
   } catch {
-    return badRequest("Cuerpo JSON no válido");
+    return badRequest("Invalid JSON body");
   }
   if (!payload?.estimate?.estimateNumber || !payload?.project?.name) {
-    return badRequest("Faltan datos del presupuesto");
+    return badRequest("Missing estimate data");
   }
-
   try {
     const blob = buildEstimatePdf(payload);
+    const kind = payload.estimate.kind === "proposal" ? "Proposal" : "Estimate";
     return new Response(blob, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="Presupuesto-${payload.estimate.estimateNumber}.pdf"`,
+        "Content-Disposition": `attachment; filename="${kind}-${payload.estimate.estimateNumber}.pdf"`,
       },
     });
   } catch {
-    return badRequest("No se pudo generar el PDF");
+    return badRequest("PDF generation failed");
   }
 }

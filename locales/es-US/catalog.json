@@ -1,0 +1,19 @@
+{
+  "title": "Catálogo",
+  "subtitle": "Precios de EE. UU. por proveedor. La disponibilidad y el tiempo de entrega varían según el mercado.",
+  "search_placeholder": "Buscar producto, marca, SKU…",
+  "all_brands": "Todas las marcas",
+  "any_style": "Cualquier estilo",
+  "all": "Todo",
+  "price_source": {
+    "market": "Precio de mercado",
+    "supplier": "Proveedor local",
+    "converted": "Conversión de referencia",
+    "missing": "Sin precio"
+  },
+  "no_stock": "sin stock",
+  "supplier": "Proveedor: {name}",
+  "lead_time": "entrega en {days} días",
+  "no_results": "Sin resultados",
+  "no_results_hint": "Prueba con otros filtros."
+}

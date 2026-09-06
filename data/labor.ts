@@ -1,31 +1,40 @@
-import type { LaborLine } from "@/types";
+import type { LaborCategory, LaborLine, Unit } from "@/types";
 import { uid } from "@/lib/utils";
-import { countryService } from "@/lib/market/country-service";
 import { laborRateService } from "@/lib/market/labor-rate-service";
 
-const DEFAULTS: Array<{ label: string; category: import("@/types").LaborCategory; unit: import("@/types").Unit }> = [
-  { label: "Instalación de suelo", category: "flooring", unit: "m2" },
-  { label: "Pintura de paredes y techo", category: "painting", unit: "m2" },
-  { label: "Alicatado", category: "tiling", unit: "m2" },
-  { label: "Montaje de mobiliario", category: "assembly", unit: "h" },
-  { label: "Instalación eléctrica", category: "electrical", unit: "h" },
-  { label: "Fontanería", category: "plumbing", unit: "h" },
-  { label: "Retirada de escombros", category: "demolition", unit: "m2" },
+const DEFAULTS: Array<{ label: string; category: LaborCategory; unit: Unit }> = [
+  { label: "Demolition & removal", category: "demolition", unit: "sq_ft" },
+  { label: "Flooring installation", category: "flooring_installation", unit: "sq_ft" },
+  { label: "Painting", category: "painting", unit: "sq_ft" },
+  { label: "Drywall repair", category: "drywall", unit: "sq_ft" },
+  { label: "Tile installation", category: "tile_installation", unit: "sq_ft" },
+  { label: "Cabinet installation", category: "cabinet_installation", unit: "linear_ft" },
+  { label: "Electrical", category: "electrical", unit: "hour" },
+  { label: "Plumbing", category: "plumbing", unit: "hour" },
+  { label: "Final cleaning", category: "cleaning", unit: "project" },
 ];
 
-/** Labour lines pre-filled from the country's market rates. */
-export function defaultLaborLines(countryCode: string): LaborLine[] {
-  const currency = countryService.require(countryCode).currencyCode;
+const UNIT_MAP: Record<string, Unit> = {
+  hour: "hour",
+  day: "day",
+  sq_ft: "sq_ft",
+  linear_ft: "linear_ft",
+  unit: "ea",
+  project: "project",
+};
+
+/** Labor line items pre-filled from the state's market rates (USD). */
+export function defaultLaborLines(stateCode: string): LaborLine[] {
   return DEFAULTS.map((d) => {
-    const rate = laborRateService.rate(countryCode, d.category);
+    const rate = laborRateService.rate(stateCode, d.category);
     return {
       id: uid("lab"),
       label: d.label,
       category: d.category,
-      unit: d.unit,
+      unit: rate ? (UNIT_MAP[rate.unit] ?? d.unit) : d.unit,
       quantity: 0,
       unitCost: rate?.cost ?? 0,
-      currencyCode: currency,
+      currencyCode: "USD" as const,
       enabled: false,
       fromMarket: !!rate,
     };

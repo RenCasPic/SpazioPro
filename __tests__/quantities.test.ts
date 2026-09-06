@@ -6,34 +6,40 @@ import {
   baseSurfaceQuantity,
 } from "@/lib/calculations/quantities";
 import { calculateWaste } from "@/lib/calculations/materials";
+import { toInches, fromInches } from "@/lib/calculations/units";
 
-describe("surface quantities", () => {
-  const room = { width: 4.2, length: 5.1, height: 2.6 };
+const ft = (feet: number, inches = 0) => toInches({ feet, inches });
 
-  it("floor area = width × length", () => {
-    expect(calculateFloorArea(room)).toBe(21.42);
+describe("imperial surface quantities", () => {
+  it("4 ft × 5 ft = 20 sq ft", () => {
+    const room = { widthIn: ft(4), lengthIn: ft(5), heightIn: ft(8) };
+    expect(calculateFloorArea(room)).toBe(20);
   });
 
-  it("perimeter = 2·(w+l)", () => {
-    expect(calculatePerimeter(room)).toBe(18.6);
+  it("12 ft × 15 ft = 180 sq ft", () => {
+    const room = { widthIn: ft(12), lengthIn: ft(15), heightIn: ft(9) };
+    expect(calculateFloorArea(room)).toBe(180);
+    expect(calculatePerimeter(room)).toBe(54); // linear ft
+    expect(calculateWallArea(room)).toBe(486); // 54 × 9
   });
 
-  it("wall area = perimeter × height", () => {
-    expect(calculateWallArea(room)).toBe(48.36);
+  it("180 sq ft + 10% waste = 198 sq ft", () => {
+    expect(calculateWaste(180, 10)).toBe(198);
   });
 
-  it("adds 10% waste → 21.42 becomes 23.56", () => {
-    expect(calculateWaste(calculateFloorArea(room), 10)).toBe(23.56);
+  it("handles feet + inches", () => {
+    const room = { widthIn: ft(10, 6), lengthIn: ft(12), heightIn: ft(8) };
+    expect(calculateFloorArea(room)).toBe(126); // 10.5 × 12
   });
 
-  it("waste is consistent and rounded to 2 decimals", () => {
-    expect(calculateWaste(45, 5)).toBe(47.25);
-    expect(calculateWaste(21.42, 8)).toBe(23.13);
+  it("ft/in round-trips", () => {
+    expect(fromInches(ft(8, 6))).toEqual({ feet: 8, inches: 6 });
   });
 
-  it("base quantity picks the surface it covers", () => {
-    expect(baseSurfaceQuantity("floor", room, "m2")).toBe(21.42);
-    expect(baseSurfaceQuantity("wall", room, "m2")).toBe(48.36);
-    expect(baseSurfaceQuantity("wall", room, "ml")).toBe(18.6);
+  it("base quantity picks the right surface + unit", () => {
+    const room = { widthIn: ft(12), lengthIn: ft(15), heightIn: ft(9) };
+    expect(baseSurfaceQuantity("floor", room, "sq_ft")).toBe(180);
+    expect(baseSurfaceQuantity("wall", room, "sq_ft")).toBe(486);
+    expect(baseSurfaceQuantity("wall", room, "linear_ft")).toBe(54);
   });
 });

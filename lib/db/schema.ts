@@ -3,15 +3,16 @@ import type {
   Client,
   DesignScenario,
   Estimate,
+  EstimateSettings,
+  LaborLine,
   Profile,
   Project,
   ProjectImage,
   ProjectItem,
+  ProjectLocation,
   Room,
 } from "@/types";
-import type { LaborLine, EstimateSettings } from "@/types";
 
-/** Per-project editor/budget config kept alongside the domain rows. */
 export interface ProjectConfig {
   projectId: string;
   laborLines: LaborLine[];
@@ -23,6 +24,7 @@ export interface Database {
   profile: Profile | null;
   clients: Client[];
   projects: Project[];
+  locations: ProjectLocation[];
   rooms: Room[];
   images: ProjectImage[];
   scenarios: DesignScenario[];
@@ -34,10 +36,11 @@ export interface Database {
 
 export function emptyDatabase(): Database {
   return {
-    version: 2,
+    version: 3,
     profile: null,
     clients: [],
     projects: [],
+    locations: [],
     rooms: [],
     images: [],
     scenarios: [],

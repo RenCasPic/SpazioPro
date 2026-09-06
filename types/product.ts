@@ -1,53 +1,80 @@
-import type { CurrencyCode, LaborCategory, Money } from "./market";
+import type { CurrencyCode, LaborCategory } from "./market";
 
 export type ProductCategory =
-  | "floor"
-  | "wall"
+  // Flooring
+  | "hardwood"
+  | "engineered_hardwood"
+  | "lvp"
+  | "laminate"
+  | "carpet"
+  | "floor_tile"
+  | "floor_stone"
+  // Walls
   | "paint"
-  | "tile"
-  | "stone"
-  | "wood"
-  | "microcement"
+  | "drywall"
   | "wallpaper"
-  | "sofa"
-  | "table"
-  | "chair"
-  | "bed"
-  | "wardrobe"
-  | "kitchen"
-  | "bathroom"
-  | "lighting"
+  | "wall_tile"
+  | "wall_stone"
+  | "wood_paneling"
+  | "wainscoting"
+  // Kitchen
+  | "cabinets"
+  | "countertops"
+  | "backsplash"
+  | "kitchen_sink"
+  | "faucet"
   | "appliance"
-  | "decoration"
-  | "construction"
+  // Bathroom
+  | "vanity"
+  | "toilet"
+  | "shower"
+  | "bathtub"
+  | "bath_tile"
+  | "fixture"
+  | "mirror"
+  // Furniture
+  | "sofa"
+  | "sectional"
+  | "chair"
+  | "table"
+  | "bed"
+  | "nightstand"
+  | "dresser"
+  | "desk"
+  // Lighting
+  | "pendant"
+  | "chandelier"
+  | "recessed"
+  | "wall_sconce"
+  | "floor_lamp"
+  | "table_lamp"
   | "other";
 
-export type ProductGroup =
-  | "materials"
-  | "furniture"
-  | "kitchen"
-  | "bathroom"
-  | "lighting"
-  | "decoration"
-  | "construction";
+export type ProductGroup = "flooring" | "walls" | "kitchen" | "bathroom" | "furniture" | "lighting";
 
-export type Unit = "m2" | "ml" | "m3" | "ud" | "l" | "h" | "day" | "global";
+export type Unit =
+  | "sq_ft"
+  | "linear_ft"
+  | "cu_ft"
+  | "cu_yd"
+  | "ea"
+  | "gallon"
+  | "hour"
+  | "day"
+  | "project";
 
-/** How a resolved price was obtained — surfaced in the UI and snapshots. */
-export type PriceSource =
-  | "market" // explicit local market price for the country
-  | "supplier" // a specific local supplier price
-  | "converted" // FX conversion from another currency (reference only)
-  | "missing"; // no price available
+export type PriceSource = "market" | "supplier" | "converted" | "missing";
 
 export interface ProductMarketPrice {
   productId: string;
   countryCode: string;
+  stateCode: string | null;
   price: number;
   currencyCode: CurrencyCode;
   supplier: string;
   available: boolean;
   minQuantity: number;
+  leadTimeDays: number;
   source: Exclude<PriceSource, "converted" | "missing">;
 }
 
@@ -61,30 +88,24 @@ export interface Product {
   subcategory: string;
   description: string;
   imageUrl: string | null;
-  /** CSS colour / gradient used as a swatch when there is no photo */
   swatch: string;
-  /** emoji sprite used only inside the editor canvas as a lightweight proxy */
   sprite?: string;
   unit: Unit;
   color: string;
   style: string;
-  /** which surface a material covers, if any */
   surface?: "floor" | "wall" | "ceiling";
-  /** labour category used to look up the market labour rate */
   laborCategory: LaborCategory;
-  /** recommended waste percentage for this kind of material */
   wastePercent: number;
   demo: boolean;
 }
 
-/** A price resolved for a given country at a given moment. */
 export interface ResolvedPrice {
   productId: string;
-  money: Money;
+  money: import("./market").Money;
   source: PriceSource;
   supplier: string | null;
   available: boolean;
-  /** set when source === 'converted' */
-  convertedFrom?: Money;
+  leadTimeDays: number;
+  convertedFrom?: import("./market").Money;
   capturedAt: string;
 }

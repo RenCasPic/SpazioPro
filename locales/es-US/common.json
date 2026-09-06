@@ -1,0 +1,107 @@
+{
+  "app": {
+    "name": "SpazioPro",
+    "tagline": "Visualiza. Presupuesta. Construye.",
+    "description": "Convierte la foto de una habitación en una propuesta de diseño y en un estimado profesional, todo en un solo lugar."
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "projects": "Proyectos",
+    "catalog": "Catálogo",
+    "clients": "Clientes",
+    "estimates": "Estimados",
+    "settings": "Configuración"
+  },
+  "actions": {
+    "new_project": "Nuevo proyecto",
+    "create_project": "Crear proyecto",
+    "open_project": "Abrir proyecto",
+    "continue": "Continuar",
+    "save": "Guardar",
+    "save_changes": "Guardar cambios",
+    "saved": "Guardado",
+    "saving": "Guardando…",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "duplicate": "Duplicar",
+    "edit": "Editar",
+    "back": "Volver",
+    "add": "Agregar",
+    "apply": "Aplicar",
+    "upload_space": "Subir espacio",
+    "analyze_space": "Analizar espacio",
+    "add_material": "Agregar material",
+    "add_furniture": "Agregar mobiliario",
+    "generate_design": "Generar diseño",
+    "create_estimate": "Crear estimado",
+    "generate_proposal": "Generar propuesta",
+    "export_pdf": "Exportar PDF",
+    "download_pdf": "Descargar PDF",
+    "retry": "Intentar de nuevo",
+    "search": "Buscar"
+  },
+  "project_type": {
+    "living_room": "Sala",
+    "bedroom": "Dormitorio",
+    "kitchen": "Cocina",
+    "bathroom": "Baño",
+    "office": "Oficina",
+    "commercial": "Local comercial",
+    "terrace": "Terraza",
+    "exterior": "Exterior",
+    "whole_home": "Casa completa",
+    "other": "Otro"
+  },
+  "project_status": {
+    "draft": "Borrador",
+    "designing": "Diseñando",
+    "estimating": "Estimando",
+    "quoted": "Cotizado",
+    "approved": "Aprobado",
+    "completed": "Completado"
+  },
+  "professional_type": {
+    "general_contractor": "Contratista general",
+    "remodeler": "Remodelador",
+    "interior_designer": "Diseñador/a de interiores",
+    "architect": "Arquitecto/a",
+    "builder": "Constructor/a",
+    "other": "Otro"
+  },
+  "unit": {
+    "sqft": "pies²",
+    "linft": "pies lin.",
+    "cuft": "pies³",
+    "cuyd": "yd³",
+    "ft": "ft",
+    "in": "in",
+    "ea": "u",
+    "gal": "gal",
+    "hour": "h",
+    "day": "día",
+    "project": "proyecto"
+  },
+  "surface": {
+    "floor": "Piso",
+    "walls": "Paredes",
+    "ceiling": "Techo"
+  },
+  "confidence": {
+    "label": "Confianza del estimado",
+    "high": "Confianza alta",
+    "medium": "Confianza media",
+    "low": "Confianza baja"
+  },
+  "disclaimer": "Este estimado es únicamente orientativo. Los costos reales pueden variar según las mediciones verificadas, las condiciones del sitio, la disponibilidad de materiales, los precios de proveedores, los requisitos de mano de obra, los permisos y los impuestos locales.",
+  "language": {
+    "label": "Idioma",
+    "app_language": "Idioma de la aplicación",
+    "estimate_language": "Idioma del estimado"
+  },
+  "states": {
+    "loading": "Cargando…",
+    "empty": "Todavía no hay nada aquí",
+    "error": "Algo salió mal",
+    "not_found": "No encontramos esto."
+  }
+}

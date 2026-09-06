@@ -4,9 +4,9 @@ import type { PdfPayload } from "./pdf-service";
 import { pdfService } from "./pdf-service";
 
 /**
- * Generates the estimate PDF and prompts a download.
- * Tries the server route first (so the endpoint is exercised), then falls
- * back to client-side generation — which also bakes the design preview image.
+ * Generates the estimate/proposal PDF and prompts a download. Tries the server
+ * route first (so the endpoint is exercised), then falls back to client-side
+ * generation — which also bakes the before/after preview images.
  */
 export async function downloadEstimatePdf(payload: PdfPayload): Promise<void> {
   let blob: Blob;
@@ -25,7 +25,8 @@ export async function downloadEstimatePdf(payload: PdfPayload): Promise<void> {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `Presupuesto-${payload.estimate.estimateNumber}.pdf`;
+  const kind = payload.estimate.kind === "proposal" ? "Proposal" : "Estimate";
+  a.download = `${kind}-${payload.estimate.estimateNumber}.pdf`;
   document.body.appendChild(a);
   a.click();
   a.remove();

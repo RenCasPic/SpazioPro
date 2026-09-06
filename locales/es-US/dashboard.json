@@ -1,0 +1,23 @@
+{
+  "greeting": {
+    "morning": "Buenos días",
+    "afternoon": "Buenas tardes",
+    "evening": "Buenas noches"
+  },
+  "subtitle_has_projects": "Continúa donde lo dejaste o empieza un proyecto nuevo.",
+  "subtitle_empty": "Empieza creando tu primer proyecto.",
+  "stats": {
+    "active_projects": "Proyectos activos",
+    "estimates": "Estimados",
+    "completed": "Completados",
+    "estimated_value": "Valor estimado"
+  },
+  "recent_projects": "Proyectos recientes",
+  "recent_estimates": "Estimados recientes",
+  "view_all": "Ver todos",
+  "empty": {
+    "title": "Todavía no tienes proyectos",
+    "description": "Crea tu primer proyecto: sube una foto del espacio, diséñalo y genera el estimado.",
+    "cta": "Crear mi primer proyecto"
+  }
+}

@@ -7,7 +7,7 @@ export function GET(request: Request) {
     const q = parseQuery(request, catalogQuerySchema);
     return ok(
       catalogService.search({
-        countryCode: q.country,
+        stateCode: q.state ? q.state.toUpperCase() : null,
         group: q.group as never,
         category: q.category as never,
         query: q.q,
@@ -19,6 +19,6 @@ export function GET(request: Request) {
     );
   } catch (e) {
     if (e instanceof Response) return e;
-    return badRequest("Petición no válida");
+    return badRequest("Bad request");
   }
 }

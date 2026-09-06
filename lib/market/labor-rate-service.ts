@@ -1,15 +1,14 @@
 import type { LaborCategory, LaborRate } from "@/types";
-import { laborRate, laborRatesForCountry } from "./data/labor-rates";
+import { laborRate, laborRatesForState } from "./data/labor-rates";
 
 export const laborRateService = {
-  forCountry(code: string): LaborRate[] {
-    return laborRatesForCountry(code);
+  forState(stateCode: string | null | undefined): LaborRate[] {
+    return laborRatesForState(stateCode);
   },
-  rate(code: string, category: LaborCategory): LaborRate | undefined {
-    return laborRate(code, category);
+  rate(stateCode: string | null | undefined, category: LaborCategory): LaborRate | undefined {
+    return laborRate(stateCode, category);
   },
-  /** Cost per unit for a labour category in a country, or null if none defined. */
-  cost(code: string, category: LaborCategory): number | null {
-    return laborRate(code, category)?.cost ?? null;
+  cost(stateCode: string | null | undefined, category: LaborCategory): number | null {
+    return laborRate(stateCode, category)?.cost ?? null;
   },
 };

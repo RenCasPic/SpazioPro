@@ -1,4 +1,5 @@
 export * from "./market";
+export * from "./location";
 export * from "./product";
 export * from "./client";
 export * from "./project";

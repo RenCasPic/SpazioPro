@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { LayoutGrid, SlidersHorizontal, X } from "lucide-react";
 import { useEditor } from "@/hooks/use-editor";
+import { useT } from "@/components/localization/i18n-provider";
+import { LocaleLink } from "@/components/localization/locale-link";
 import { EditorToolbar } from "./editor-toolbar";
 import { EditorCanvas } from "./editor-canvas";
 import { EditorSidebar } from "./editor-sidebar";
@@ -11,6 +12,7 @@ import { PropertiesPanel } from "./properties-panel";
 import { cn } from "@/lib/utils";
 
 export function Editor({ projectId }: { projectId: string }) {
+  const t = useT();
   const { bundle, status, load } = useEditor();
   const [sheet, setSheet] = useState<"catalog" | "props" | null>(null);
 
@@ -30,16 +32,14 @@ export function Editor({ projectId }: { projectId: string }) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  if (status === "loading" || status === "idle") {
-    return <Center>Cargando editor…</Center>;
-  }
+  if (status === "loading" || status === "idle") return <Center>{t("common.states.loading")}</Center>;
   if (status === "missing" || !bundle) {
     return (
       <Center>
-        No encontramos este proyecto.{" "}
-        <Link href="/projects" className="text-clay underline">
-          Volver
-        </Link>
+        {t("common.states.not_found")}{" "}
+        <LocaleLink href="/projects" className="text-clay underline">
+          {t("projects.title")}
+        </LocaleLink>
       </Center>
     );
   }
@@ -62,10 +62,10 @@ export function Editor({ projectId }: { projectId: string }) {
 
       <div className="flex items-center gap-2 border-t border-line bg-surface p-2 lg:hidden">
         <button onClick={() => setSheet("catalog")} className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-ink text-sm font-medium text-white">
-          <LayoutGrid className="h-4 w-4" /> Catálogo
+          <LayoutGrid className="h-4 w-4" /> {t("editor.catalog")}
         </button>
         <button onClick={() => setSheet("props")} className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-line-strong text-sm font-medium text-ink">
-          <SlidersHorizontal className="h-4 w-4" /> Detalles
+          <SlidersHorizontal className="h-4 w-4" /> {t("editor.details")}
         </button>
       </div>
 
@@ -74,7 +74,7 @@ export function Editor({ projectId }: { projectId: string }) {
           <div className="absolute inset-0 bg-ink/40" onClick={() => setSheet(null)} />
           <div className="absolute inset-x-0 bottom-0 flex h-[82vh] flex-col rounded-t-2xl border border-line bg-surface">
             <div className="flex items-center justify-between border-b border-line px-4 py-2.5">
-              <span className="font-serif text-lg text-ink">{sheet === "catalog" ? "Catálogo" : "Detalles"}</span>
+              <span className="font-serif text-lg text-ink">{sheet === "catalog" ? t("editor.catalog") : t("editor.details")}</span>
               <button onClick={() => setSheet(null)} className="rounded-full p-1.5 text-muted hover:bg-ink/5">
                 <X className="h-4 w-4" />
               </button>

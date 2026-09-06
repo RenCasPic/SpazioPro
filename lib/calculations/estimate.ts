@@ -7,12 +7,10 @@ import type {
   MeasurementSource,
   ProjectItem,
   RoomDimensions,
-  TransportRate,
 } from "@/types";
-import { baseSurfaceQuantity } from "./quantities";
+import { baseSurfaceQuantity } from "./dimensions";
 import { calculateWaste, calculateMaterialCost } from "./materials";
 import { calculateItemLabor, calculateLabor } from "./labor";
-import { calculateTransport } from "./transport";
 import { applyDiscount, calculateTaxes } from "./taxes";
 import { round, sum } from "./money";
 
@@ -21,9 +19,10 @@ export interface EstimateInput {
   dimensions: RoomDimensions;
   measurementSource: MeasurementSource;
   laborLines: LaborLine[];
-  transportRate: TransportRate;
   settings: EstimateSettings;
   currency: CurrencyCode;
+  /** whether a sales-tax jurisdiction was resolved for the project location */
+  hasTaxJurisdiction: boolean;
 }
 
 export interface ItemBreakdown {
@@ -57,13 +56,14 @@ export function calculateEstimate(input: EstimateInput): {
   const itemLabor = sum(breakdown.map((b) => b.laborCost));
   const extraLabor = calculateLabor(input.laborLines);
   const labor = round(itemLabor + extraLabor);
-  const transport = calculateTransport(input.transportRate, input.settings.transport);
-  const other = 0;
 
-  const subtotal = round(materials + labor + transport + other);
+  const { equipment, delivery, disposal, permits, other } = input.settings.extras;
+  const extrasTotal = round(equipment + delivery + disposal + permits + other);
+
+  const subtotal = round(materials + labor + extrasTotal);
   const discount = applyDiscount(subtotal, input.settings.discountPercent);
   const taxable = round(subtotal - discount);
-  const tax = calculateTaxes(taxable, input.settings.vatRate);
+  const tax = calculateTaxes(taxable, input.settings.salesTaxRate);
   const total = round(taxable + tax);
 
   return {
@@ -71,8 +71,11 @@ export function calculateEstimate(input: EstimateInput): {
     totals: {
       materials,
       labor,
-      transport,
-      other,
+      equipment: round(equipment),
+      delivery: round(delivery),
+      disposal: round(disposal),
+      permits: round(permits),
+      other: round(other),
       subtotal,
       discount,
       taxable,
@@ -83,34 +86,24 @@ export function calculateEstimate(input: EstimateInput): {
   };
 }
 
+/** Returns i18n keys under `estimates.confidence_reasons`. */
 export function confidenceReport(input: EstimateInput): ConfidenceReport {
-  const warnings: string[] = [];
+  const reasons: string[] = [];
 
-  if (input.measurementSource !== "manual") {
-    warnings.push("Las dimensiones son una estimación aproximada por IA, no una medición certificada.");
-  }
-  if (input.items.some((i) => i.priceSource === "converted")) {
-    warnings.push("Algunos precios proceden de una conversión de divisa de referencia, no de un precio local.");
-  }
-  if (input.items.some((i) => i.priceSource === "missing")) {
-    warnings.push("Hay elementos sin precio de mercado disponible.");
-  }
-  if (input.items.some((i) => i.demoPrice)) {
-    warnings.push("El catálogo utiliza precios de demostración.");
-  }
-  if (input.laborLines.some((l) => l.enabled && !l.fromMarket && l.unitCost === 0)) {
-    warnings.push("Hay partidas de mano de obra sin tarifa asignada.");
-  }
-  if (!input.items.length) {
-    warnings.push("El presupuesto todavía no tiene elementos.");
-  }
+  if (input.measurementSource !== "manual") reasons.push("ai_dimensions");
+  if (input.items.some((i) => i.priceSource === "converted")) reasons.push("converted_price");
+  if (input.items.some((i) => i.priceSource === "missing")) reasons.push("missing_price");
+  if (input.items.some((i) => i.demoPrice)) reasons.push("demo_price");
+  if (input.laborLines.some((l) => l.enabled && !l.fromMarket && l.unitCost === 0)) reasons.push("no_labor_rate");
+  if (!input.items.length) reasons.push("no_items");
+  if (!input.hasTaxJurisdiction) reasons.push("no_tax");
 
   const level: ConfidenceReport["level"] =
-    input.items.some((i) => i.priceSource === "missing") || warnings.length >= 4
+    input.items.some((i) => i.priceSource === "missing") || reasons.length >= 4
       ? "low"
-      : warnings.length >= 1
+      : reasons.length >= 1
         ? "medium"
         : "high";
 
-  return { level, warnings };
+  return { level, reasons };
 }

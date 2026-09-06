@@ -1,24 +1,13 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import type { Country, Market } from "@/types";
-import { countryService } from "@/lib/market/country-service";
-import { marketService } from "@/lib/market/market-service";
+import type { State } from "@/types";
+import { stateService } from "@/lib/market/country-service";
+import { taxService } from "@/lib/market/tax-service";
 
-/** Countries are static data — resolved locally, no request needed. */
-export function useCountries(): Country[] {
-  return countryService.list();
+export function useStates(): State[] {
+  return stateService.list();
 }
 
-export function useMarket(countryCode: string | undefined) {
-  return useQuery<Market>({
-    queryKey: ["market", countryCode],
-    enabled: !!countryCode,
-    queryFn: async () => {
-      const res = await fetch(`/api/markets/${countryCode}`);
-      if (!res.ok) return marketService.get(countryCode!);
-      return res.json();
-    },
-    initialData: countryCode ? marketService.get(countryCode) : undefined,
-  });
+export function useTaxRate(query: { stateCode?: string; city?: string; zipCode?: string }) {
+  return taxService.getTaxRate(query);
 }

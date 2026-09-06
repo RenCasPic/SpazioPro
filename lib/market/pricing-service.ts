@@ -1,64 +1,55 @@
-import type { Money, ResolvedPrice } from "@/types";
-import { BASE_PRICE_EUR } from "@/data/catalog";
+import type { ResolvedPrice } from "@/types";
 import { marketPrice } from "@/data/product-prices";
-import { countryService } from "./country-service";
-import { currencyService } from "./currency-service";
+import { BASE_PRICE_USD } from "@/data/catalog";
 
 /**
- * Resolves a product price for a country following a strict priority:
- *
- *   1. explicit local market price for the country
- *   2. explicit local supplier price (same table, source === "supplier")
- *   3. stored market price in another currency (not used in demo)
- *   4. FX conversion from the EUR reference price — REFERENCE ONLY, flagged
- *
- * A converted price NEVER silently replaces a real local price.
+ * Resolves a US product price in USD for a state.
+ *   1. explicit state market price
+ *   2. explicit state supplier price
+ *   3. national US market price
+ *   4. (future) FX conversion — flagged as reference only
  */
 export const pricingService = {
-  resolve(productId: string, countryCode: string): ResolvedPrice {
-    const country = countryService.require(countryCode);
+  resolve(productId: string, stateCode: string | null | undefined): ResolvedPrice {
     const capturedAt = new Date().toISOString();
+    const row = marketPrice(productId, stateCode);
 
-    const local = marketPrice(productId, countryCode);
-    if (local) {
+    if (row) {
       return {
         productId,
-        money: { amount: local.price, currency: local.currencyCode },
-        source: local.source, // "market" | "supplier"
-        supplier: local.supplier,
-        available: local.available,
+        money: { amount: row.price, currency: row.currencyCode },
+        source: row.source,
+        supplier: row.supplier,
+        available: row.available,
+        leadTimeDays: row.leadTimeDays,
         capturedAt,
       };
     }
 
-    const baseEur = BASE_PRICE_EUR[productId];
-    if (baseEur == null) {
+    const base = BASE_PRICE_USD[productId];
+    if (base == null) {
       return {
         productId,
-        money: { amount: 0, currency: country.currencyCode },
+        money: { amount: 0, currency: "USD" },
         source: "missing",
         supplier: null,
         available: false,
+        leadTimeDays: 0,
         capturedAt,
       };
     }
-
-    const from: Money = { amount: baseEur, currency: "EUR" };
-    const converted = currencyService.convert(from, country.currencyCode);
     return {
       productId,
-      money: converted,
-      source: "converted",
+      money: { amount: base, currency: "USD" },
+      source: "market",
       supplier: null,
       available: true,
-      convertedFrom: from,
+      leadTimeDays: 5,
       capturedAt,
     };
   },
 
-  resolveMany(productIds: string[], countryCode: string): Record<string, ResolvedPrice> {
-    return Object.fromEntries(
-      productIds.map((id) => [id, this.resolve(id, countryCode)]),
-    );
+  resolveMany(productIds: string[], stateCode: string | null | undefined): Record<string, ResolvedPrice> {
+    return Object.fromEntries(productIds.map((id) => [id, this.resolve(id, stateCode)]));
   },
 };

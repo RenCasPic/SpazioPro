@@ -1,8 +1,5 @@
 import type { CurrencyCode, Money } from "@/types";
 import { FX_RATES } from "./data/fx-rates";
-import { countryByCode, COUNTRIES } from "./data/countries";
-
-const ZERO_DECIMAL: CurrencyCode[] = ["PYG", "CLP", "COP"];
 
 export const currencyService = {
   rates() {
@@ -10,49 +7,33 @@ export const currencyService = {
   },
 
   symbol(currency: CurrencyCode): string {
-    return COUNTRIES.find((c) => c.currencyCode === currency)?.currencySymbol ?? currency;
+    return { USD: "$", CAD: "$", MXN: "$", EUR: "€", GBP: "£" }[currency] ?? currency;
   },
 
-  fractionDigits(currency: CurrencyCode): number {
-    return ZERO_DECIMAL.includes(currency) ? 0 : 2;
-  },
-
-  /**
-   * Reference conversion only. The result must always be treated as
-   * informational — a real local price takes precedence (see pricing-service).
-   */
+  /** Reference conversion only — a real local price always wins (pricing-service). */
   convert(value: Money, to: CurrencyCode): Money {
     if (value.currency === to) return value;
     const from = FX_RATES.find((r) => r.currency === value.currency);
     const dest = FX_RATES.find((r) => r.currency === to);
-    if (!from || !dest) throw new Error(`Sin tipo de cambio para ${value.currency}→${to}`);
-    const inEur = value.amount / from.perEur;
-    const amount = inEur * dest.perEur;
-    return { amount: round(amount, to), currency: to };
+    if (!from || !dest) throw new Error(`No FX rate for ${value.currency}→${to}`);
+    const inUsd = value.amount / from.perUsd;
+    return { amount: round(inUsd * dest.perUsd), currency: to };
   },
 
-  format(value: Money, locale?: string): string {
-    const loc =
-      locale ??
-      COUNTRIES.find((c) => c.currencyCode === value.currency)?.locale ??
-      "es-ES";
-    return new Intl.NumberFormat(loc, {
+  format(value: Money, locale = "en-US"): string {
+    return new Intl.NumberFormat(locale, {
       style: "currency",
       currency: value.currency,
-      maximumFractionDigits: this.fractionDigits(value.currency),
-      minimumFractionDigits: this.fractionDigits(value.currency),
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(Number.isFinite(value.amount) ? value.amount : 0);
   },
 
-  formatFor(amount: number, countryCode: string): string {
-    const country = countryByCode(countryCode);
-    if (!country) return String(amount);
-    return this.format({ amount, currency: country.currencyCode }, country.locale);
+  formatUsd(amount: number, locale = "en-US"): string {
+    return this.format({ amount, currency: "USD" }, locale);
   },
 };
 
-function round(value: number, currency: CurrencyCode): number {
-  const d = ZERO_DECIMAL.includes(currency) ? 0 : 2;
-  const f = Math.pow(10, d);
-  return Math.round((value + Number.EPSILON) * f) / f;
+function round(v: number): number {
+  return Math.round((v + Number.EPSILON) * 100) / 100;
 }

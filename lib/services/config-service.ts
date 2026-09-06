@@ -12,8 +12,8 @@ function ensure(projectId: string): ProjectConfig {
     const project = db.projects.find((p) => p.id === projectId);
     config = {
       projectId,
-      laborLines: defaultLaborLines(project?.countryCode ?? "ES"),
-      settings: { ...defaultSettings(), vatRate: project?.taxRate ?? 21 },
+      laborLines: defaultLaborLines(project?.stateCode ?? "TX"),
+      settings: defaultSettings(0),
     };
     mutateDb((store) => store.configs.push(config!));
   }
@@ -29,35 +29,38 @@ export const configService = {
     ensure(projectId);
     mutateDb((db) => {
       const config = db.configs.find((c) => c.projectId === projectId)!;
-      config.settings = { ...config.settings, ...patch };
+      config.settings = {
+        ...config.settings,
+        ...patch,
+        extras: { ...config.settings.extras, ...(patch.extras ?? {}) },
+      };
     });
   },
 
   async updateLaborLine(projectId: string, lineId: string, patch: Partial<LaborLine>): Promise<void> {
     ensure(projectId);
     mutateDb((db) => {
-      const config = db.configs.find((c) => c.projectId === projectId)!;
-      const line = config.laborLines.find((l) => l.id === lineId);
+      const line = db.configs.find((c) => c.projectId === projectId)?.laborLines.find((l) => l.id === lineId);
       if (line) Object.assign(line, patch);
     });
   },
 
   async addLaborLine(projectId: string): Promise<void> {
     ensure(projectId);
-    const currencyCode = readDb().projects.find((p) => p.id === projectId)?.currencyCode ?? "EUR";
     mutateDb((db) => {
-      const c = db.configs.find((x) => x.projectId === projectId)!;
-      c.laborLines.push({
-        id: uid("lab"),
-        label: "Nueva partida",
-        category: "general",
-        unit: "global",
-        quantity: 1,
-        unitCost: 0,
-        currencyCode,
-        enabled: true,
-        fromMarket: false,
-      });
+      db.configs
+        .find((c) => c.projectId === projectId)!
+        .laborLines.push({
+          id: uid("lab"),
+          label: "New line item",
+          category: "general_labor",
+          unit: "hour",
+          quantity: 1,
+          unitCost: 0,
+          currencyCode: "USD",
+          enabled: true,
+          fromMarket: false,
+        });
     });
   },
 

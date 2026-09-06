@@ -17,7 +17,7 @@ export function useRoomAnalysis() {
       setAnalysis(result);
       return result;
     } catch {
-      setError("No pudimos analizar esta imagen. Verifica que tenga buena iluminación y que el espacio sea visible.");
+      setError("We couldn't analyze this image. Check that it's well lit and the space is visible.");
       return null;
     } finally {
       setRunning(false);

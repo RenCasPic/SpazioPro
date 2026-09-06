@@ -16,6 +16,6 @@ export async function POST(request: Request) {
     return ok(await getAIProvider().generateDesign(body));
   } catch (e) {
     if (e instanceof Response) return e;
-    return badRequest("No pudimos generar la propuesta.");
+    return badRequest("Design generation failed.");
   }
 }

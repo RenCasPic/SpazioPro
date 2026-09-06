@@ -1,0 +1,95 @@
+{
+  "title": "Proyectos",
+  "new": {
+    "title": "Nuevo proyecto",
+    "subtitle": "La ubicación de la propiedad define el impuesto sobre ventas, los precios y las tarifas de mano de obra de este proyecto.",
+    "name": "Nombre del proyecto",
+    "name_placeholder": "Remodelación de cocina moderna",
+    "client": "Cliente",
+    "no_client": "Sin cliente",
+    "type": "Tipo de proyecto",
+    "description": "Descripción (opcional)",
+    "description_placeholder": "Alcance del trabajo, estilo deseado, notas…",
+    "address": "Dirección de la propiedad",
+    "address_placeholder": "123 Main St",
+    "city": "Ciudad",
+    "state": "Estado",
+    "zip": "Código ZIP",
+    "estimate_language": "Idioma del estimado",
+    "steps": {
+      "project": "Proyecto",
+      "photo": "Fotografía",
+      "analysis": "Análisis"
+    }
+  },
+  "card": {
+    "estimate": "Estimado",
+    "edited": "Editado {date}"
+  },
+  "filters": {
+    "all": "Todos",
+    "search_placeholder": "Buscar proyecto o cliente…"
+  },
+  "upload": {
+    "title": "Sube una foto del espacio que quieres transformar",
+    "hint": "Arrastra una imagen, elígela o usa la cámara. JPG, PNG o WebP.",
+    "choose": "Elegir imagen",
+    "camera": "Usar cámara",
+    "preparing": "Preparando…",
+    "uploading": "Subiendo…",
+    "processing": "Procesando…",
+    "done": "Listo"
+  },
+  "analyze": {
+    "running": "Analizando tu espacio…",
+    "phase_prepare": "Preparando…",
+    "phase_segment": "Segmentando paredes, piso y techo…",
+    "phase_openings": "Identificando ventanas y puertas…",
+    "phase_furniture": "Reconociendo mobiliario…",
+    "phase_dimensions": "Estimando dimensiones…",
+    "detected_room": "Habitación detectada",
+    "surfaces": "Superficies",
+    "objects": "Mobiliario y objetos",
+    "dimensions": "Dimensiones del espacio",
+    "ai_estimate": "Estimación IA",
+    "adjust_hint": "Ajusta lo que quieras conservar; también podrás editarlo en el editor.",
+    "dimensions_disclaimer": "Las dimensiones estimadas por IA no son una medición certificada. Introduce las medidas reales cuando las tengas para afinar el estimado.",
+    "go_to_editor": "Ir al editor"
+  },
+  "overview": {
+    "description": "Descripción",
+    "scenarios": "Escenarios",
+    "scope_of_work": "Alcance del trabajo",
+    "estimated_total": "Total estimado",
+    "details": "Detalles",
+    "client": "Cliente",
+    "location": "Ubicación",
+    "currency": "Moneda",
+    "measurement": "Medición",
+    "dimensions": "Dimensiones",
+    "floor_area": "Superficie de piso",
+    "created": "Creado",
+    "view_full_estimate": "Ver estimado completo",
+    "open_editor": "Abrir editor",
+    "images": "Imágenes",
+    "danger_zone": "Zona de peligro",
+    "delete_warning": "Eliminar el proyecto borra sus habitaciones, imágenes, escenarios y estimados.",
+    "delete_project": "Eliminar proyecto",
+    "delete_confirm": "¿Eliminar \"{name}\"? Esta acción no se puede deshacer."
+  },
+  "tabs": {
+    "overview": "Resumen",
+    "editor": "Editor",
+    "images": "Imágenes",
+    "estimate": "Estimado",
+    "scenarios": "Escenarios",
+    "settings": "Configuración"
+  },
+  "settings": {
+    "title": "Configuración del proyecto",
+    "status": "Estado",
+    "location_title": "Ubicación de la propiedad",
+    "location_note": "La ubicación determina el impuesto sobre ventas, los precios y las tarifas de mano de obra. Los estimados ya generados conservan su snapshot y no cambian.",
+    "estimate_language_note": "El PDF del estimado puede generarse en un idioma distinto al de la aplicación."
+  }
+}

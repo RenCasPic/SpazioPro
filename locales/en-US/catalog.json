@@ -1,0 +1,19 @@
+{
+  "title": "Catalog",
+  "subtitle": "US pricing by supplier. Availability and lead time vary by market.",
+  "search_placeholder": "Search product, brand, SKU…",
+  "all_brands": "All brands",
+  "any_style": "Any style",
+  "all": "All",
+  "price_source": {
+    "market": "Market price",
+    "supplier": "Local supplier",
+    "converted": "Reference conversion",
+    "missing": "No price"
+  },
+  "no_stock": "out of stock",
+  "supplier": "Supplier: {name}",
+  "lead_time": "{days}-day lead time",
+  "no_results": "No results",
+  "no_results_hint": "Try other filters."
+}

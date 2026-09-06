@@ -1,0 +1,23 @@
+{
+  "greeting": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening"
+  },
+  "subtitle_has_projects": "Pick up where you left off or start a new project.",
+  "subtitle_empty": "Start by creating your first project.",
+  "stats": {
+    "active_projects": "Active projects",
+    "estimates": "Estimates",
+    "completed": "Completed",
+    "estimated_value": "Estimated value"
+  },
+  "recent_projects": "Recent Projects",
+  "recent_estimates": "Recent Estimates",
+  "view_all": "View all",
+  "empty": {
+    "title": "You don't have any projects yet",
+    "description": "Create your first project: upload a photo of the space, design it, and generate the estimate.",
+    "cta": "Create my first project"
+  }
+}

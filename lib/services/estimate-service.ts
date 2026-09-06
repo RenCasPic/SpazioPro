@@ -2,14 +2,16 @@ import type {
   ConfidenceReport,
   Estimate,
   EstimateItem,
+  EstimateKind,
   EstimateTotals,
   ProjectItem,
 } from "@/types";
+import type { Locale } from "@/lib/i18n/config";
 import { mutateDb, readDb } from "@/lib/db/local-store";
 import { getCurrentUserId } from "@/lib/auth/auth";
 import { projectService, type ProjectBundle } from "./project-service";
-import { transportService } from "@/lib/market/transport-service";
 import { marketService } from "@/lib/market/market-service";
+import { taxService } from "@/lib/market/tax-service";
 import {
   calculateEstimate,
   confidenceReport,
@@ -19,19 +21,32 @@ import {
 import { nextEstimateNumber } from "@/lib/format";
 import { uid } from "@/lib/utils";
 
+function taxResolved(bundle: ProjectBundle) {
+  const loc = bundle.location;
+  if (!loc) return { rate: 0, matchedOn: "none" as const };
+  const r = taxService.getTaxRate({
+    stateCode: loc.stateCode,
+    city: loc.city,
+    zipCode: loc.zipCode,
+    county: loc.county ?? undefined,
+  });
+  return { rate: r.rate, matchedOn: r.matchedOn };
+}
+
 function inputFor(bundle: ProjectBundle, scenarioId: string): EstimateInput {
   const room = bundle.rooms[0];
   const dimensions = room
-    ? { width: room.width, length: room.length, height: room.height }
-    : { width: 4, length: 5, height: 2.6 };
+    ? { widthIn: room.widthIn, lengthIn: room.lengthIn, heightIn: room.heightIn }
+    : { widthIn: 144, lengthIn: 180, heightIn: 108 };
+  const tax = taxResolved(bundle);
   return {
     items: bundle.items.filter((i) => i.scenarioId === scenarioId),
     dimensions,
     measurementSource: room?.measurementSource ?? "ai_estimate",
     laborLines: bundle.config.laborLines,
-    transportRate: transportService.rateForCountry(bundle.project.countryCode),
     settings: bundle.config.settings,
-    currency: bundle.project.currencyCode,
+    currency: "USD",
+    hasTaxJurisdiction: tax.matchedOn !== "none",
   };
 }
 
@@ -42,7 +57,6 @@ export interface LiveEstimate {
 }
 
 export const estimateService = {
-  /** Non-persisted totals for the budget screen (recalculates on every read). */
   async computeLive(projectId: string, scenarioId?: string): Promise<LiveEstimate | null> {
     const bundle = await projectService.get(projectId);
     if (!bundle) return null;
@@ -70,11 +84,9 @@ export const estimateService = {
   async list(projectId?: string): Promise<Estimate[]> {
     const userId = await getCurrentUserId();
     const db = readDb();
-    const ownProjects = new Set(
-      db.projects.filter((p) => p.userId === userId).map((p) => p.id),
-    );
+    const own = new Set(db.projects.filter((p) => p.userId === userId).map((p) => p.id));
     return db.estimates
-      .filter((e) => ownProjects.has(e.projectId) && (!projectId || e.projectId === projectId))
+      .filter((e) => own.has(e.projectId) && (!projectId || e.projectId === projectId))
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   },
 
@@ -87,46 +99,60 @@ export const estimateService = {
     return project?.userId === userId ? estimate : null;
   },
 
-  /**
-   * Generate a NEW estimate. Freezes a full market snapshot and a per-line
-   * price snapshot so the document never changes retroactively.
-   */
-  async generate(projectId: string, scenarioId?: string): Promise<Estimate> {
+  async generate(
+    projectId: string,
+    opts: { scenarioId?: string; kind?: EstimateKind; language?: Locale } = {},
+  ): Promise<Estimate> {
     const userId = await getCurrentUserId();
     const bundle = await projectService.get(projectId);
-    if (!bundle || bundle.project.userId !== userId) throw new Error("Proyecto no encontrado");
+    if (!bundle || bundle.project.userId !== userId) throw new Error("Project not found");
 
-    const sid = scenarioId ?? bundle.project.activeScenarioId;
+    const sid = opts.scenarioId ?? bundle.project.activeScenarioId;
+    const kind: EstimateKind = opts.kind ?? "estimate";
+    const language: Locale = opts.language ?? bundle.project.estimateLanguage;
     const input = inputFor(bundle, sid);
     const { totals, breakdown } = calculateEstimate(input);
     const now = new Date().toISOString();
 
+    const loc = bundle.location;
+    const location = {
+      stateCode: loc?.stateCode ?? bundle.project.stateCode,
+      city: loc?.city ?? "",
+      zipCode: loc?.zipCode ?? "",
+      county: loc?.county ?? null,
+    };
     const productIds = [...new Set(input.items.map((i) => i.productId))];
-    const snapshot = marketService.snapshot(
-      bundle.project.countryCode,
-      bundle.config.settings.vatRate,
-      productIds,
-    );
+    const snapshot = marketService.snapshot(location, productIds);
 
     const estimateId = uid("est");
     const items: EstimateItem[] = breakdown.map((b) => lineFrom(b.item, b, estimateId, now));
+    const s = bundle.config.settings;
 
     const estimate: Estimate = {
       id: estimateId,
       projectId,
       scenarioId: sid,
+      kind,
       estimateNumber: nextEstimateNumber(readDb().estimates.map((e) => e.estimateNumber)),
-      countryCode: bundle.project.countryCode,
-      currencyCode: bundle.project.currencyCode,
-      taxRate: bundle.config.settings.vatRate,
+      language,
+      countryCode: "US",
+      stateCode: location.stateCode,
+      city: location.city,
+      zipCode: location.zipCode,
+      currencyCode: "USD",
+      salesTaxRate: s.salesTaxRate,
+      scopeOfWork: s.scopeOfWork,
       subtotalMaterials: totals.materials,
       subtotalLabor: totals.labor,
-      subtotalTransport: totals.transport,
+      subtotalEquipment: totals.equipment,
+      subtotalDelivery: totals.delivery,
+      subtotalDisposal: totals.disposal,
+      subtotalPermits: totals.permits,
       subtotalOther: totals.other,
       discount: totals.discount,
       taxAmount: totals.tax,
       total: totals.total,
-      notes: bundle.config.settings.notes,
+      notes: s.notes,
       status: "final",
       marketSnapshot: snapshot,
       items,
@@ -136,15 +162,13 @@ export const estimateService = {
 
     mutateDb((db) => {
       db.estimates.push(estimate);
-      const scenario = db.scenarios.find((s) => s.id === sid);
+      const scenario = db.scenarios.find((x) => x.id === sid);
       if (scenario) {
         scenario.totalEstimate = totals.total;
         scenario.updatedAt = now;
       }
       const project = db.projects.find((p) => p.id === projectId)!;
-      if (project.status === "draft" || project.status === "designing" || project.status === "estimating") {
-        project.status = "quoted";
-      }
+      if (["draft", "designing", "estimating"].includes(project.status)) project.status = "quoted";
       project.updatedAt = now;
     });
 

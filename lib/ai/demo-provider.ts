@@ -7,28 +7,28 @@ import type {
   RoomAnalysis,
   SegmentationResult,
 } from "@/types";
-import { PRICE_DISCLAIMER } from "@/lib/constants";
 import type { AIProvider } from "./provider";
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const ft = (feet: number, inches = 0) => feet * 12 + inches;
 
 const ROOM_PRESETS: Record<
   ProjectType,
   { objects: string[]; w: number; l: number; h: number }
 > = {
-  living_room: { objects: ["Sofá", "Mesa de centro", "Estantería", "Lámpara de pie", "TV", "Alfombra"], w: 4.2, l: 5.1, h: 2.6 },
-  kitchen: { objects: ["Muebles bajos", "Muebles altos", "Campana", "Frigorífico", "Mesa"], w: 3.4, l: 4.0, h: 2.6 },
-  bathroom: { objects: ["Lavabo", "Inodoro", "Bañera", "Espejo"], w: 2.1, l: 2.8, h: 2.5 },
-  bedroom: { objects: ["Cama", "Mesillas", "Armario", "Cómoda"], w: 3.4, l: 3.8, h: 2.6 },
-  office: { objects: ["Escritorio", "Silla", "Estantería", "Archivador"], w: 3.0, l: 3.6, h: 2.7 },
-  commercial: { objects: ["Mostrador", "Expositores", "Iluminación de raíl"], w: 5.0, l: 8.0, h: 3.2 },
-  terrace: { objects: ["Mesa exterior", "Sillas", "Jardineras"], w: 3.0, l: 4.0, h: 2.8 },
-  exterior: { objects: ["Pavimento", "Vegetación"], w: 6.0, l: 8.0, h: 3.0 },
-  whole_home: { objects: ["Salón", "Cocina", "Dormitorios", "Baños"], w: 8.0, l: 10.0, h: 2.6 },
-  other: { objects: ["Mobiliario"], w: 3.5, l: 4.5, h: 2.6 },
+  living_room: { objects: ["Sofa", "Coffee table", "Bookshelf", "Floor lamp", "TV", "Area rug"], w: ft(14), l: ft(17), h: ft(9) },
+  kitchen: { objects: ["Base cabinets", "Wall cabinets", "Range hood", "Refrigerator", "Island"], w: ft(11), l: ft(13), h: ft(9) },
+  bathroom: { objects: ["Vanity", "Toilet", "Bathtub", "Mirror"], w: ft(7), l: ft(9), h: ft(8) },
+  bedroom: { objects: ["Bed", "Nightstands", "Dresser", "Closet"], w: ft(11), l: ft(12), h: ft(9) },
+  office: { objects: ["Desk", "Chair", "Bookshelf", "Filing cabinet"], w: ft(10), l: ft(12), h: ft(9) },
+  commercial: { objects: ["Counter", "Displays", "Track lighting"], w: ft(16), l: ft(26), h: ft(11) },
+  terrace: { objects: ["Outdoor table", "Chairs", "Planters"], w: ft(10), l: ft(13), h: ft(9) },
+  exterior: { objects: ["Paving", "Landscaping"], w: ft(20), l: ft(26), h: ft(10) },
+  whole_home: { objects: ["Living", "Kitchen", "Bedrooms", "Baths"], w: ft(26), l: ft(33), h: ft(9) },
+  other: { objects: ["Furniture"], w: ft(12), l: ft(14), h: ft(9) },
 };
 
-const GUESSES: ProjectType[] = ["living_room", "kitchen", "bathroom", "bedroom", "office"];
+const GUESSES: ProjectType[] = ["kitchen", "bathroom", "living_room", "bedroom", "office"];
 
 export const demoProvider: AIProvider = {
   id: "demo",
@@ -45,12 +45,12 @@ export const demoProvider: AIProvider = {
       roomType,
       confidence: 0.82,
       surfaces: [
-        { type: "floor", label: "Suelo", confidence: 0.94 },
-        { type: "wall", label: "Pared frontal", confidence: 0.9 },
-        { type: "wall", label: "Pared izquierda", confidence: 0.86 },
-        { type: "wall", label: "Pared derecha", confidence: 0.83 },
-        { type: "ceiling", label: "Techo", confidence: 0.8 },
-        { type: "window", label: "Ventana", confidence: 0.77 },
+        { type: "floor", label: "Floor", confidence: 0.94 },
+        { type: "wall", label: "Front wall", confidence: 0.9 },
+        { type: "wall", label: "Left wall", confidence: 0.86 },
+        { type: "wall", label: "Right wall", confidence: 0.83 },
+        { type: "ceiling", label: "Ceiling", confidence: 0.8 },
+        { type: "window", label: "Window", confidence: 0.77 },
       ],
       objects: preset.objects.map((label, i) => ({
         type: label.toLowerCase(),
@@ -58,8 +58,8 @@ export const demoProvider: AIProvider = {
         confidence: 0.68 + ((i * 7) % 22) / 100,
         boundingBox: { x: 0.1 + (i % 3) * 0.28, y: 0.45, width: 0.22, height: 0.3 },
       })),
-      approximateDimensions: { width: preset.w, length: preset.l, height: preset.h },
-      summary: `Hemos detectado 4 paredes, suelo, techo, 1 ventana y ${preset.objects.length} elementos de mobiliario.`,
+      approximateDimensions: { widthIn: preset.w, lengthIn: preset.l, heightIn: preset.h },
+      summary: `Detected 4 walls, floor, ceiling, 1 window and ${preset.objects.length} furniture items.`,
       isEstimate: true,
     };
   },
@@ -101,7 +101,7 @@ export const demoProvider: AIProvider = {
           : "saturate(1.04) brightness(1.02)";
     return {
       cssFilter,
-      note: `Vista previa demo: "${productName}" aplicado a ${label(surface)} (tono base ${tint}). Con un proveedor real se generaría un render fotorrealista conservando perspectiva, sombras y reflejos.`,
+      note: `Demo preview: "${productName}" applied to the ${surface ?? "selected area"} (base tone ${tint}). A real provider would render a photorealistic result preserving perspective, shadows and reflections.`,
     };
   },
 
@@ -109,23 +109,20 @@ export const demoProvider: AIProvider = {
     await wait(600);
     const wastePercentByCategory: Record<string, number> = {};
     for (const c of materialCategories) {
-      wastePercentByCategory[c] = c === "tile" || c === "stone" ? 12 : c === "paint" ? 5 : c === "wood" ? 8 : 10;
+      wastePercentByCategory[c] = /tile|stone|backsplash/.test(c) ? 12 : /paint/.test(c) ? 5 : /wood|hardwood|lvp|laminate/.test(c) ? 8 : 10;
     }
     return {
       wastePercentByCategory,
       suggestedLaborHours: 24,
       suggestedItems: [
-        { label: "Preparación de superficies", category: "general", quantity: 1, unit: "global" },
-        { label: `Acabados ${roomType}`, category: "painting", quantity: 1, unit: "global" },
+        { label: "Surface prep", category: "general_labor", quantity: 1, unit: "project" },
+        { label: `${roomType} finish work`, category: "finish_carpentry", quantity: 1, unit: "project" },
       ],
-      disclaimer: PRICE_DISCLAIMER,
+      disclaimer:
+        "This estimate is for planning purposes only. Actual costs may vary based on verified measurements, site conditions, material availability, supplier pricing, labor requirements, permits, and local taxes.",
     };
   },
 };
-
-function label(s?: string) {
-  return s === "floor" ? "el suelo" : s === "wall" ? "las paredes" : s === "ceiling" ? "el techo" : "la zona seleccionada";
-}
 
 function hashString(s: string): number {
   let h = 0;

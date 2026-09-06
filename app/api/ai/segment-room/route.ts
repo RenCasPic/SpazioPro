@@ -10,6 +10,6 @@ export async function POST(request: Request) {
     return ok(await getAIProvider().segment(imageUrl, target));
   } catch (e) {
     if (e instanceof Response) return e;
-    return badRequest("No pudimos segmentar la imagen.");
+    return badRequest("Segmentation failed.");
   }
 }

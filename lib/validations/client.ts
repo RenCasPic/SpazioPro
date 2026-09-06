@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const clientSchema = z.object({
-  name: z.string().min(2, "Escribe un nombre").max(160),
-  email: z.union([z.string().email("Email no válido"), z.literal("")]),
+  name: z.string().min(2, "Enter a name").max(160),
+  email: z.union([z.string().email("Invalid email"), z.literal("")]),
   phone: z.string().max(40),
   company: z.string().max(160),
   address: z.string().max(200),

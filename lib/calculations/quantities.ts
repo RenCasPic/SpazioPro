@@ -1,61 +1,24 @@
 import type { RoomDimensions } from "@/types";
-import type { SurfaceKind } from "@/lib/constants";
+import { inchesToFeet } from "./units";
 import { round } from "./money";
 
-export interface SurfaceAreas {
-  floorArea: number;
-  ceilingArea: number;
-  wallArea: number;
-  perimeter: number;
-  volume: number;
-}
+export * from "./dimensions";
 
+/** width × length, in square feet. */
 export function calculateFloorArea(d: RoomDimensions): number {
-  return round(d.width * d.length);
+  return round(inchesToFeet(d.widthIn) * inchesToFeet(d.lengthIn));
 }
 
 export function calculateCeilingArea(d: RoomDimensions): number {
-  return round(d.width * d.length);
+  return calculateFloorArea(d);
 }
 
+/** 2·(w+l), in linear feet. */
 export function calculatePerimeter(d: RoomDimensions): number {
-  return round(2 * (d.width + d.length));
+  return round(2 * (inchesToFeet(d.widthIn) + inchesToFeet(d.lengthIn)));
 }
 
+/** perimeter × height, in square feet. */
 export function calculateWallArea(d: RoomDimensions): number {
-  return round(calculatePerimeter(d) * d.height);
-}
-
-export function calculateVolume(d: RoomDimensions): number {
-  return round(d.width * d.length * d.height);
-}
-
-export function surfaceAreas(d: RoomDimensions): SurfaceAreas {
-  return {
-    floorArea: calculateFloorArea(d),
-    ceilingArea: calculateCeilingArea(d),
-    wallArea: calculateWallArea(d),
-    perimeter: calculatePerimeter(d),
-    volume: calculateVolume(d),
-  };
-}
-
-/** Base quantity (before waste) for a surface material in its own unit. */
-export function baseSurfaceQuantity(
-  surface: SurfaceKind | undefined,
-  d: RoomDimensions,
-  unit: string,
-): number {
-  const a = surfaceAreas(d);
-  if (unit === "ml") return a.perimeter;
-  if (unit === "m3") return a.volume;
-  switch (surface) {
-    case "wall":
-      return a.wallArea;
-    case "ceiling":
-      return a.ceilingArea;
-    case "floor":
-    default:
-      return a.floorArea;
-  }
+  return round(calculatePerimeter(d) * inchesToFeet(d.heightIn));
 }

@@ -1,0 +1,33 @@
+{
+  "title": "Configuración",
+  "profile": {
+    "title": "Perfil de la empresa",
+    "note": "Estos datos se usan automáticamente en tus estimados y PDFs.",
+    "full_name": "Nombre completo",
+    "company_name": "Empresa",
+    "email": "Email",
+    "phone": "Teléfono",
+    "city": "Ciudad",
+    "address": "Dirección",
+    "license": "N.º de licencia",
+    "website": "Sitio web",
+    "professional_type": "¿A qué te dedicas?",
+    "terms": "Términos y condiciones (aparecen en el PDF)"
+  },
+  "preferences": {
+    "title": "Preferencias",
+    "app_language": "Idioma de la aplicación",
+    "estimate_language": "Idioma predeterminado del estimado",
+    "default_state": "Estado predeterminado",
+    "default_zip": "ZIP predeterminado",
+    "measurement": "Sistema de medidas",
+    "measurement_imperial": "Imperial (ft, pies²)",
+    "measurement_metric": "Métrico (m, m²)"
+  },
+  "account": {
+    "title": "Cuenta",
+    "demo": "Estás en modo demo: los datos se guardan en este navegador. Configura Supabase para persistencia real (ver README).",
+    "supabase": "Sesión conectada a Supabase.",
+    "sign_out": "Cerrar sesión"
+  }
+}

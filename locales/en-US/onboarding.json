@@ -1,0 +1,30 @@
+{
+  "auth": {
+    "sign_in": "Sign in",
+    "sign_in_subtitle": "Welcome back. Demo account pre-filled.",
+    "create_account": "Create your account",
+    "create_subtitle": "Start designing and estimating in minutes.",
+    "email": "Email",
+    "password": "Password",
+    "enter": "Enter",
+    "entering": "Signing in…",
+    "creating": "Creating…",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?",
+    "forgot": "I forgot my password",
+    "panel_text": "The platform where a photo of a space becomes a design proposal and a professional estimate."
+  },
+  "welcome": "Welcome to SpazioPro",
+  "title": "Tell us about your work",
+  "subtitle": "We use this to set up your market — sales tax, pricing and labor rates — and to fill in your estimates.",
+  "what_you_do": "What do you do?",
+  "where_you_work": "Where do you work?",
+  "state": "State",
+  "city": "City",
+  "zip": "ZIP",
+  "preferred_language": "Preferred language",
+  "full_name": "Full name",
+  "company": "Company",
+  "phone": "Phone",
+  "finish": "Enter SpazioPro"
+}

@@ -3,13 +3,13 @@ import { CATALOG, productById } from "@/data/catalog";
 import { pricingService } from "./pricing-service";
 
 export interface CatalogFilter {
-  countryCode: string;
+  stateCode: string | null;
   group?: ProductGroup;
   category?: ProductCategory;
   query?: string;
   brand?: string;
   style?: string;
-  maxPrice?: number; // in country currency
+  maxPrice?: number;
   availableOnly?: boolean;
 }
 
@@ -32,7 +32,6 @@ export const catalogService = {
     return [...new Set(CATALOG.map((p) => p.style))].sort();
   },
 
-  /** Catalog with each product priced for the requested market. */
   search(filter: CatalogFilter): CatalogEntry[] {
     const q = filter.query?.trim().toLowerCase();
     return CATALOG.filter((p) => {
@@ -46,7 +45,7 @@ export const catalogService = {
       }
       return true;
     })
-      .map((product) => ({ product, price: pricingService.resolve(product.id, filter.countryCode) }))
+      .map((product) => ({ product, price: pricingService.resolve(product.id, filter.stateCode) }))
       .filter((e) => {
         if (filter.availableOnly && !e.price.available) return false;
         if (filter.maxPrice != null && e.price.money.amount > filter.maxPrice) return false;
@@ -54,8 +53,8 @@ export const catalogService = {
       });
   },
 
-  priceRange(countryCode: string): [number, number] {
-    const prices = CATALOG.map((p) => pricingService.resolve(p.id, countryCode).money.amount);
+  priceRange(stateCode: string | null): [number, number] {
+    const prices = CATALOG.map((p) => pricingService.resolve(p.id, stateCode).money.amount);
     return [Math.min(...prices), Math.max(...prices)];
   },
 };

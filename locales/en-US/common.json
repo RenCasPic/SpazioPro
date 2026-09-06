@@ -1,0 +1,107 @@
+{
+  "app": {
+    "name": "SpazioPro",
+    "tagline": "Visualize. Estimate. Build.",
+    "description": "Turn a photo of a room into a design proposal and a professional estimate — all in one place."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "catalog": "Catalog",
+    "clients": "Clients",
+    "estimates": "Estimates",
+    "settings": "Settings"
+  },
+  "actions": {
+    "new_project": "New project",
+    "create_project": "Create Project",
+    "open_project": "Open Project",
+    "continue": "Continue",
+    "save": "Save",
+    "save_changes": "Save changes",
+    "saved": "Saved",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "duplicate": "Duplicate",
+    "edit": "Edit",
+    "back": "Back",
+    "add": "Add",
+    "apply": "Apply",
+    "upload_space": "Upload Space",
+    "analyze_space": "Analyze Space",
+    "add_material": "Add Material",
+    "add_furniture": "Add Furniture",
+    "generate_design": "Generate Design",
+    "create_estimate": "Create Estimate",
+    "generate_proposal": "Generate Proposal",
+    "export_pdf": "Export PDF",
+    "download_pdf": "Download PDF",
+    "retry": "Try again",
+    "search": "Search"
+  },
+  "project_type": {
+    "living_room": "Living Room",
+    "bedroom": "Bedroom",
+    "kitchen": "Kitchen",
+    "bathroom": "Bathroom",
+    "office": "Office",
+    "commercial": "Commercial Space",
+    "terrace": "Terrace",
+    "exterior": "Exterior",
+    "whole_home": "Whole Home",
+    "other": "Other"
+  },
+  "project_status": {
+    "draft": "Draft",
+    "designing": "Designing",
+    "estimating": "Estimating",
+    "quoted": "Quoted",
+    "approved": "Approved",
+    "completed": "Completed"
+  },
+  "professional_type": {
+    "general_contractor": "General Contractor",
+    "remodeler": "Remodeler",
+    "interior_designer": "Interior Designer",
+    "architect": "Architect",
+    "builder": "Builder",
+    "other": "Other"
+  },
+  "unit": {
+    "sqft": "sq ft",
+    "linft": "linear ft",
+    "cuft": "cu ft",
+    "cuyd": "cu yd",
+    "ft": "ft",
+    "in": "in",
+    "ea": "ea",
+    "gal": "gal",
+    "hour": "hr",
+    "day": "day",
+    "project": "project"
+  },
+  "surface": {
+    "floor": "Floor",
+    "walls": "Walls",
+    "ceiling": "Ceiling"
+  },
+  "confidence": {
+    "label": "Estimate confidence",
+    "high": "High confidence",
+    "medium": "Medium confidence",
+    "low": "Low confidence"
+  },
+  "disclaimer": "This estimate is for planning purposes only. Actual costs may vary based on verified measurements, site conditions, material availability, supplier pricing, labor requirements, permits, and local taxes.",
+  "language": {
+    "label": "Language",
+    "app_language": "App language",
+    "estimate_language": "Estimate language"
+  },
+  "states": {
+    "loading": "Loading…",
+    "empty": "Nothing here yet",
+    "error": "Something went wrong",
+    "not_found": "We couldn't find this."
+  }
+}

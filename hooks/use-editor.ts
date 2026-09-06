@@ -6,6 +6,7 @@ import type {
   EditorTransform,
   EstimateSettings,
   LaborLine,
+  NewLocation,
   Product,
   ProjectItem,
   RoomDimensions,
@@ -46,7 +47,7 @@ interface EditorState {
   setDimensions: (dims: Partial<RoomDimensions>) => Promise<void>;
   setScenario: (id: string) => Promise<void>;
   addScenario: (type: ScenarioType, name?: string) => Promise<DesignScenario | undefined>;
-  changeCountry: (code: string) => Promise<void>;
+  changeLocation: (loc: NewLocation) => Promise<void>;
 
   updateLaborLine: (id: string, patch: Partial<LaborLine>) => Promise<void>;
   addLaborLine: () => Promise<void>;
@@ -63,7 +64,7 @@ function snapshot(bundle: ProjectBundle): EditorSnapshot {
   return {
     items: bundle.items.map((i) => structuredClone(i)),
     laborLines: bundle.config.laborLines.map((l) => ({ ...l })),
-    settings: { ...bundle.config.settings, transport: { ...bundle.config.settings.transport } },
+    settings: { ...bundle.config.settings, extras: { ...bundle.config.settings.extras } },
   };
 }
 
@@ -165,8 +166,7 @@ export const useEditor = create<EditorState>((set, get) => ({
   },
 
   async setDimensions(dims) {
-    const bundle = get().bundle;
-    const room = bundle?.rooms[0];
+    const room = get().bundle?.rooms[0];
     if (!room) return;
     pushHistory(get, set);
     await roomService.setDimensions(room.id, dims, "manual");
@@ -190,10 +190,10 @@ export const useEditor = create<EditorState>((set, get) => ({
     return scenario;
   },
 
-  async changeCountry(code) {
+  async changeLocation(loc) {
     const bundle = get().bundle;
     if (!bundle) return;
-    await projectService.changeCountry(bundle.project.id, code);
+    await projectService.changeLocation(bundle.project.id, loc);
     await get().reload();
   },
 
@@ -245,16 +245,12 @@ export const useEditor = create<EditorState>((set, get) => ({
   },
 }));
 
-function pushHistory(
-  get: () => EditorState,
-  set: (partial: Partial<EditorState>) => void,
-) {
+function pushHistory(get: () => EditorState, set: (partial: Partial<EditorState>) => void) {
   const bundle = get().bundle;
   if (!bundle) return;
   set({ past: [...get().past, snapshot(bundle)].slice(-MAX_HISTORY), future: [] });
 }
 
-/** Items of the currently active scenario. */
 export function activeItems(bundle: ProjectBundle): ProjectItem[] {
   return bundle.items.filter((i) => i.scenarioId === bundle.project.activeScenarioId);
 }

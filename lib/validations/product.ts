@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const catalogQuerySchema = z.object({
-  country: z.string().length(2).transform((s) => s.toUpperCase()),
+  state: z.string().optional(),
   group: z.string().optional(),
   category: z.string().optional(),
   q: z.string().optional(),

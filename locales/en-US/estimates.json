@@ -1,0 +1,75 @@
+{
+  "title": "Estimate",
+  "list_title": "Estimates",
+  "generate": "Generate estimate PDF",
+  "materials_and_furniture": "Materials & furniture",
+  "table": {
+    "item": "Item",
+    "quantity": "Quantity",
+    "price": "Price",
+    "total": "Total"
+  },
+  "no_items": "This scenario has no items yet.",
+  "go_to_editor": "Go to editor",
+  "labor": {
+    "title": "Labor",
+    "add_line": "Add line item",
+    "note": "Rates pre-filled from the {location} market. Adjust quantities and prices.",
+    "new_line": "New line item"
+  },
+  "cost_lines": {
+    "materials": "Materials",
+    "labor": "Labor",
+    "equipment": "Equipment",
+    "delivery": "Delivery",
+    "disposal": "Disposal",
+    "permits": "Permits",
+    "other": "Other",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "sales_tax": "Sales Tax",
+    "grand_total": "Grand Total"
+  },
+  "settings": {
+    "title": "Estimate settings",
+    "sales_tax": "Sales tax (%)",
+    "tax_note": "Resolved from {jurisdiction}",
+    "discount": "Discount (%)",
+    "equipment": "Equipment ($)",
+    "delivery": "Delivery ($)",
+    "disposal": "Disposal ($)",
+    "permits": "Permits ($)",
+    "other": "Other ($)",
+    "notes": "Notes",
+    "scope_of_work": "Scope of Work"
+  },
+  "compare_scenarios": "Compare scenarios",
+  "recommended": "recommended",
+  "summary": "Summary",
+  "confidence_reasons": {
+    "ai_dimensions": "Room dimensions were estimated from the uploaded image, not a certified measurement.",
+    "converted_price": "Some prices come from a reference conversion, not a local price.",
+    "missing_price": "Some items have no market price available.",
+    "demo_price": "The catalog uses demo pricing.",
+    "no_labor_rate": "Some labor line items have no rate assigned.",
+    "no_items": "The estimate has no items yet.",
+    "no_tax": "No sales-tax jurisdiction has been resolved for the project location."
+  },
+  "detail": {
+    "snapshot_frozen": "Market snapshot frozen",
+    "captured": "captured {date}",
+    "reference_price": "reference price",
+    "status": {
+      "draft": "Draft",
+      "final": "Final",
+      "approved": "Approved",
+      "archived": "Archived"
+    }
+  },
+  "generated": "Estimate {number} generated and downloaded.",
+  "generate_failed": "Couldn't generate the estimate.",
+  "proposal": {
+    "generate": "Generate proposal PDF",
+    "generated": "Proposal generated and downloaded."
+  }
+}

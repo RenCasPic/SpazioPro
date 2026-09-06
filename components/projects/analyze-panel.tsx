@@ -3,20 +3,12 @@
 import { useEffect, useState } from "react";
 import { Check, ScanSearch, Sparkles } from "lucide-react";
 import type { RoomAnalysis, RoomDimensions } from "@/types";
-import { PROJECT_TYPE_LABELS } from "@/types";
 import { useRoomAnalysis } from "@/hooks/use-ai";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { PriceDisclaimer } from "@/components/ui/disclaimer";
-
-const PHASES = [
-  "Preparando…",
-  "Analizando tu espacio…",
-  "Segmentando paredes, suelo y techo…",
-  "Identificando ventanas y puertas…",
-  "Reconociendo mobiliario…",
-  "Estimando dimensiones…",
-];
+import { useT } from "@/components/localization/i18n-provider";
+import { fromInches, toInches } from "@/lib/calculations/units";
 
 export function AnalyzePanel({
   image,
@@ -27,30 +19,38 @@ export function AnalyzePanel({
   hint: string;
   onConfirm: (analysis: RoomAnalysis, dimensions: RoomDimensions) => void;
 }) {
+  const t = useT();
   const { analyze, running, error } = useRoomAnalysis();
   const [analysis, setAnalysis] = useState<RoomAnalysis | null>(null);
   const [phase, setPhase] = useState(0);
-  const [dims, setDims] = useState<RoomDimensions>({ width: 4, length: 5, height: 2.6 });
-  const [keepSurfaces, setKeepSurfaces] = useState<Record<number, boolean>>({});
-  const [keepObjects, setKeepObjects] = useState<Record<number, boolean>>({});
+  const [ft, setFt] = useState({ w: 12, wi: 0, l: 15, li: 0, h: 9, hi: 0 });
+  const [keepS, setKeepS] = useState<Record<number, boolean>>({});
+  const [keepO, setKeepO] = useState<Record<number, boolean>>({});
+
+  const phases = [
+    t("projects.analyze.phase_prepare"),
+    t("projects.analyze.running"),
+    t("projects.analyze.phase_segment"),
+    t("projects.analyze.phase_openings"),
+    t("projects.analyze.phase_furniture"),
+    t("projects.analyze.phase_dimensions"),
+  ];
 
   useEffect(() => {
-    const t = setInterval(() => setPhase((p) => (p + 1) % PHASES.length), 600);
+    const timer = setInterval(() => setPhase((p) => (p + 1) % phases.length), 600);
     analyze(image, hint).then((r) => {
-      clearInterval(t);
+      clearInterval(timer);
       if (!r) return;
       setAnalysis(r);
-      setKeepSurfaces(Object.fromEntries(r.surfaces.map((_, i) => [i, true])));
-      setKeepObjects(Object.fromEntries(r.objects.map((_, i) => [i, true])));
-      if (r.approximateDimensions?.width) {
-        setDims({
-          width: r.approximateDimensions.width ?? 4,
-          length: r.approximateDimensions.length ?? 5,
-          height: r.approximateDimensions.height ?? 2.6,
-        });
+      setKeepS(Object.fromEntries(r.surfaces.map((_, i) => [i, true])));
+      setKeepO(Object.fromEntries(r.objects.map((_, i) => [i, true])));
+      const d = r.approximateDimensions;
+      if (d?.widthIn) {
+        const w = fromInches(d.widthIn ?? 144), l = fromInches(d.lengthIn ?? 180), h = fromInches(d.heightIn ?? 108);
+        setFt({ w: w.feet, wi: w.inches, l: l.feet, li: l.inches, h: h.feet, hi: h.inches });
       }
     });
-    return () => clearInterval(t);
+    return () => clearInterval(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -59,13 +59,13 @@ export function AnalyzePanel({
       <div className="overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
         <div className="relative aspect-video overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={image} alt="Espacio en análisis" className="h-full w-full object-cover" />
+          <img src={image} alt="" className="h-full w-full object-cover" />
           <div className="absolute inset-0 bg-ink/45 backdrop-blur-[1px]" />
           <div className="scanline absolute left-0 right-0 h-24 bg-gradient-to-b from-transparent via-clay/40 to-transparent" />
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white">
             <ScanSearch className="h-8 w-8 animate-pulse" />
-            <p className="mt-3 font-serif text-xl">Analizando tu espacio…</p>
-            <p className="mt-1 text-sm text-white/80">{PHASES[phase]}</p>
+            <p className="mt-3 font-serif text-xl">{t("projects.analyze.running")}</p>
+            <p className="mt-1 text-sm text-white/80">{phases[phase]}</p>
           </div>
         </div>
         {error && <p className="p-4 text-sm text-red-600">{error}</p>}
@@ -73,33 +73,37 @@ export function AnalyzePanel({
     );
   }
 
+  const dims: RoomDimensions = {
+    widthIn: toInches({ feet: ft.w, inches: ft.wi }),
+    lengthIn: toInches({ feet: ft.l, inches: ft.li }),
+    heightIn: toInches({ feet: ft.h, inches: ft.hi }),
+  };
+
   return (
     <div className="space-y-5">
       <div className="overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
         <div className="relative aspect-video overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={image} alt="Espacio analizado" className="h-full w-full object-cover" />
+          <img src={image} alt="" className="h-full w-full object-cover" />
           <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-ink/80 px-3 py-1 text-xs font-medium text-white">
-            <Sparkles className="h-3.5 w-3.5" /> {PROJECT_TYPE_LABELS[analysis.roomType]} ·{" "}
-            {Math.round(analysis.confidence * 100)}%
+            <Sparkles className="h-3.5 w-3.5" /> {t(`common.project_type.${analysis.roomType}`)} · {Math.round(analysis.confidence * 100)}%
           </div>
         </div>
         <div className="p-5">
           <p className="font-serif text-lg text-ink">{analysis.summary}</p>
-          <p className="mt-1 text-sm text-ink-soft">Ajusta lo que quieras conservar; podrás editarlo también en el editor.</p>
-
+          <p className="mt-1 text-sm text-ink-soft">{t("projects.analyze.adjust_hint")}</p>
           <div className="mt-4 grid gap-5 sm:grid-cols-2">
             <ToggleList
-              title="Superficies"
+              title={t("projects.analyze.surfaces")}
               items={analysis.surfaces.map((s) => ({ label: s.label, meta: `${Math.round(s.confidence * 100)}%` }))}
-              state={keepSurfaces}
-              setState={setKeepSurfaces}
+              state={keepS}
+              setState={setKeepS}
             />
             <ToggleList
-              title="Mobiliario y objetos"
+              title={t("projects.analyze.objects")}
               items={analysis.objects.map((o) => ({ label: o.label, meta: `${Math.round(o.confidence * 100)}%` }))}
-              state={keepObjects}
-              setState={setKeepObjects}
+              state={keepO}
+              setState={setKeepO}
             />
           </div>
         </div>
@@ -107,32 +111,41 @@ export function AnalyzePanel({
 
       <div className="rounded-2xl border border-line bg-surface p-5 shadow-[var(--shadow-card)]">
         <div className="flex items-center justify-between">
-          <p className="font-serif text-lg text-ink">Dimensiones del espacio</p>
+          <p className="font-serif text-lg text-ink">{t("projects.analyze.dimensions")}</p>
           <span className="rounded-full bg-clay-tint px-2.5 py-1 text-[11px] font-medium text-clay-dark">
-            Estimación aproximada por IA
+            {t("projects.analyze.ai_estimate")}
           </span>
         </div>
         <div className="mt-4 grid grid-cols-3 gap-3">
-          {(["width", "length", "height"] as const).map((k) => (
-            <Field key={k} label={{ width: "Ancho (m)", length: "Largo (m)", height: "Altura (m)" }[k]}>
-              <Input
-                type="number"
-                step="0.01"
-                min="0"
-                value={dims[k]}
-                onChange={(e) => setDims((d) => ({ ...d, [k]: Number(e.target.value) }))}
-              />
+          {(["w", "l", "h"] as const).map((axis) => (
+            <Field key={axis} label={{ w: t("editor.width"), l: t("editor.length"), h: t("editor.height") }[axis]}>
+              <div className="flex items-center gap-1">
+                <Input
+                  type="number"
+                  min="0"
+                  className="text-center"
+                  value={ft[axis]}
+                  onChange={(e) => setFt({ ...ft, [axis]: Number(e.target.value) })}
+                />
+                <span className="text-xs text-muted">ft</span>
+                <Input
+                  type="number"
+                  min="0"
+                  max="11"
+                  className="text-center"
+                  value={ft[`${axis}i` as "wi" | "li" | "hi"]}
+                  onChange={(e) => setFt({ ...ft, [`${axis}i`]: Number(e.target.value) })}
+                />
+                <span className="text-xs text-muted">in</span>
+              </div>
             </Field>
           ))}
         </div>
-        <PriceDisclaimer
-          className="mt-4"
-          text="Las dimensiones estimadas por IA no son una medición certificada. Introduce las medidas reales cuando las tengas para afinar el presupuesto."
-        />
+        <PriceDisclaimer className="mt-4" text={t("projects.analyze.dimensions_disclaimer")} />
       </div>
 
       <Button size="lg" className="w-full" onClick={() => onConfirm(analysis, dims)}>
-        <Check className="h-4 w-4" /> Ir al editor
+        <Check className="h-4 w-4" /> {t("projects.analyze.go_to_editor")}
       </Button>
     </div>
   );
