@@ -2,7 +2,7 @@
   "app": {
     "name": "SpazioPro",
     "tagline": "Visualiza. Presupuesta. Construye.",
-    "description": "Convierte la foto de una habitación en una propuesta de diseño y en un estimado profesional, todo en un solo lugar."
+    "description": "Sube la foto de cualquier habitación, prueba materiales reales con IA y ve cuánto costaría la remodelación — sin medir y sin adivinar."
   },
   "nav": {
     "dashboard": "Panel",

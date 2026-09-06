@@ -2,7 +2,7 @@
   "app": {
     "name": "SpazioPro",
     "tagline": "Visualize. Estimate. Build.",
-    "description": "Turn a photo of a room into a design proposal and a professional estimate — all in one place."
+    "description": "Upload a photo of any room, try real materials with AI, and see what the remodel would cost — no measuring, no guesswork."
   },
   "nav": {
     "dashboard": "Dashboard",

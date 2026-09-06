@@ -3,7 +3,8 @@
 import type { ProjectBundle } from "@/lib/services/project-service";
 import type { EstimateTotals } from "@/types";
 import { useT, useLocale } from "@/components/localization/i18n-provider";
-import { formatUsd } from "@/lib/format";
+import { formatUsd0 } from "@/lib/format";
+import { lookName } from "@/components/editor/scenario-switcher";
 import { cn } from "@/lib/utils";
 
 const ROWS: Array<{ key: "materials" | "labor" | "equipment" | "delivery" | "disposal" | "permits" | "tax" | "total"; labelKey: string }> = [
@@ -28,7 +29,6 @@ export function ScenarioComparison({
 }) {
   const t = useT();
   const locale = useLocale();
-  const recommended = bundle.scenarios.find((s) => s.type === "standard")?.id;
   const rows = ROWS.filter((r) => r.key === "total" || r.key === "materials" || r.key === "labor" || r.key === "tax" || Object.values(totals).some((v) => v[r.key] > 0));
 
   return (
@@ -37,11 +37,10 @@ export function ScenarioComparison({
         <thead>
           <tr className="border-b border-line">
             <th className="px-4 py-3 text-left text-[11px] uppercase tracking-wide text-muted">{t("estimates.table.item")}</th>
-            {bundle.scenarios.map((s) => (
+            {bundle.scenarios.map((s, i) => (
               <th key={s.id} className="px-4 py-3 text-right">
                 <button onClick={() => onSelect(s.id)} className="inline-flex flex-col items-end">
-                  <span className={cn("font-medium", s.id === bundle.project.activeScenarioId ? "text-clay-dark" : "text-ink")}>{s.name}</span>
-                  {s.id === recommended && <span className="text-[10px] font-normal text-muted">{t("estimates.recommended")}</span>}
+                  <span className={cn("font-medium", s.id === bundle.project.activeScenarioId ? "text-accent" : "text-ink")}>{lookName(s, i, locale)}</span>
                 </button>
               </th>
             ))}
@@ -49,13 +48,13 @@ export function ScenarioComparison({
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.key} className={cn("border-b border-line last:border-0", row.key === "total" && "bg-paper font-serif")}>
+            <tr key={row.key} className={cn("border-b border-line last:border-0", row.key === "total" && "bg-canvas font-serif")}>
               <td className="px-4 py-2.5 text-ink-soft">{t(row.labelKey)}</td>
               {bundle.scenarios.map((s) => {
                 const v = totals[s.id];
                 return (
                   <td key={s.id} className={cn("px-4 py-2.5 text-right tabular-nums", row.key === "total" ? "text-ink" : "text-ink-soft")}>
-                    {v ? formatUsd(v[row.key], locale) : "—"}
+                    {v ? formatUsd0(v[row.key], locale) : "—"}
                   </td>
                 );
               })}

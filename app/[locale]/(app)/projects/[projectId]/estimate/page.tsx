@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { Download, FileCheck2, FileText, Loader2 } from "lucide-react";
+import { Download, FileText, Loader2 } from "lucide-react";
 import { useEditor, activeItems } from "@/hooks/use-editor";
 import { useLiveEstimate, useScenarioTotals } from "@/hooks/use-estimate";
 import { ProjectShell } from "@/components/projects/project-shell";
@@ -79,15 +79,15 @@ function Estimate({ bundle }: { bundle: ProjectBundle }) {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-serif text-2xl text-ink">{t("estimates.title")}</h2>
+        <h2 className="display text-[26px] text-ink">{t("editor.range.title")}</h2>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => generate("proposal")} disabled={!!busy || !items.length}>
             {busy === "proposal" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
             {t("estimates.proposal.generate")}
           </Button>
           <Button onClick={() => generate("estimate")} disabled={!!busy || !items.length}>
-            {busy === "estimate" ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileCheck2 className="h-4 w-4" />}
-            {t("estimates.generate")}
+            {busy === "estimate" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            {t("common.actions.download_pdf")}
           </Button>
         </div>
       </div>

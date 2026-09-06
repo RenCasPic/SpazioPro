@@ -47,8 +47,8 @@ export default function LandingPage() {
       <section className="mx-auto max-w-6xl px-4 pb-10 pt-10 sm:px-6 sm:pt-20">
         <div className="animate-in max-w-3xl">
           <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-ink-soft">
-            <span className="h-1.5 w-1.5 rounded-full bg-clay" />
-            Built for US remodeling & construction · Demo mode on
+            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+            {li ? "Diseño de interiores con IA · sin conocimientos técnicos" : "AI interior design · no know-how required"}
           </span>
           <h1 className="mt-6 font-serif text-5xl leading-[1.03] tracking-tight text-ink sm:text-7xl">
             {t("common.app.tagline")}
@@ -57,16 +57,16 @@ export default function LandingPage() {
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <LocaleLink
               href="/projects/new"
-              className="inline-flex h-12 items-center gap-2 rounded-full bg-clay px-6 text-[15px] font-medium text-white hover:bg-clay-dark"
+              className="inline-flex h-12 items-center gap-2 rounded-full bg-accent px-6 text-[15px] font-medium text-white hover:bg-accent-dark"
             >
-              {t("common.actions.create_project")}
+              {li ? "Sube una foto" : "Upload a photo"}
               <ArrowRight className="h-4 w-4" />
             </LocaleLink>
             <LocaleLink
               href="/dashboard"
               className="inline-flex h-12 items-center gap-2 rounded-full border border-line-strong bg-surface px-6 text-[15px] font-medium text-ink hover:border-ink/30"
             >
-              See how it works
+              {li ? "Ver cómo funciona" : "See how it works"}
             </LocaleLink>
           </div>
         </div>
@@ -86,9 +86,20 @@ export default function LandingPage() {
         </div>
 
         <div className="mt-14 grid gap-6 rounded-2xl border border-line bg-surface p-6 sm:grid-cols-3 sm:p-10">
-          <Feature title="US market, out of the box" text="USD pricing, imperial units, US labor rates, and sales tax resolved from the project's state, city and ZIP." />
-          <Feature title="Reproducible estimates" text="Every estimate freezes a market snapshot — it won't change because a price or tax rate moves tomorrow." />
-          <Feature title="Fully bilingual" text="Use the app in English or Español, and generate the estimate PDF in either language independently." />
+          {(li
+            ? [
+                ["Prueba materiales reales", "Explora pisos, azulejos, encimeras y muebles de marcas reales y ve cómo se ven en tu espacio."],
+                ["El costo, calculado por ti", "La app calcula cantidades, desperdicio, mano de obra y demolición. Tú solo eliges lo que te gusta."],
+                ["Un rango honesto", "Nada de falsa precisión: un rango claro con su nivel de confianza y por qué."],
+              ]
+            : [
+                ["Try real materials", "Explore flooring, tile, countertops and furniture from real brands and see them in your space."],
+                ["The cost, worked out for you", "The app handles quantities, waste, labor and demolition. You just pick what you like."],
+                ["An honest range", "No false precision — a clear range with its confidence level and the reason why."],
+              ]
+          ).map(([title, text]) => (
+            <Feature key={title} title={title} text={text} />
+          ))}
         </div>
       </section>
 

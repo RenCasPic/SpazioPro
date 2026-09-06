@@ -61,7 +61,7 @@ export function ScenarioSwitcher({
 }
 
 /** Consumer-friendly label — hides the internal Economy/Standard/Premium tiers. */
-function lookName(s: DesignScenario, i: number, locale: string): string {
+export function lookName(s: DesignScenario, i: number, locale: string): string {
   const seeded = ["Economy", "Standard", "Premium", "Custom"].includes(s.name);
   if (!seeded) return s.name;
   return (locale === "es-US" ? "Estilo " : "Look ") + (i + 1);
