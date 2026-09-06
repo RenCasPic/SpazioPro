@@ -39,7 +39,7 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <h1 className="font-serif text-3xl tracking-tight text-ink">{t("settings.title")}</h1>
+      <h1 className="display text-[28px] text-ink">{t("settings.title")}</h1>
 
       <section className="space-y-4 rounded-2xl border border-line bg-surface p-5">
         <h2 className="font-serif text-lg text-ink">{t("settings.profile.title")}</h2>

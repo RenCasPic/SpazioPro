@@ -12,16 +12,20 @@ export function Logo({
   href?: string | null;
   size?: "sm" | "md" | "lg";
 }) {
-  const text = size === "lg" ? "text-2xl" : size === "sm" ? "text-base" : "text-lg";
-  const mark = size === "lg" ? "h-7 w-7" : size === "sm" ? "h-5 w-5" : "h-6 w-6";
+  const text = size === "lg" ? "text-[22px]" : size === "sm" ? "text-[15px]" : "text-[17px]";
+  const mark = size === "lg" ? "h-8 w-8" : size === "sm" ? "h-6 w-6" : "h-7 w-7";
+  const glyph = size === "lg" ? 18 : size === "sm" ? 14 : 16;
 
   const inner = (
-    <span className={cn("inline-flex items-center gap-2 font-serif tracking-tight", text, className)}>
-      <span className={cn("grid place-items-center rounded-[7px] bg-ink text-white", mark)} aria-hidden>
-        <span className="block h-1/2 w-1/2 rounded-[3px] border-2 border-clay" />
+    <span className={cn("inline-flex items-center gap-2.5 display tracking-tight", text, className)}>
+      <span className={cn("grid shrink-0 place-items-center rounded-[9px] bg-accent text-white", mark)} aria-hidden>
+        <svg width={glyph} height={glyph} viewBox="0 0 24 24" fill="none">
+          <path d="M6 4h9l3 4v12H6z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+          <path d="M6 12h12M12 4v16" stroke="currentColor" strokeWidth="1.4" opacity="0.7" />
+        </svg>
       </span>
       <span className="text-ink">
-        Spazio<span className="text-clay">Pro</span>
+        Spazio<span className="text-accent">Pro</span>
       </span>
     </span>
   );

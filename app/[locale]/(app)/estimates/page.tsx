@@ -27,7 +27,7 @@ export default function EstimatesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-serif text-3xl tracking-tight text-ink">{t("estimates.list_title")}</h1>
+      <h1 className="display text-[28px] text-ink">{t("estimates.list_title")}</h1>
 
       {loading ? (
         <Skeleton className="h-64" />

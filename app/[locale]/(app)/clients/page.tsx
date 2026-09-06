@@ -42,7 +42,7 @@ export default function ClientsPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="font-serif text-3xl tracking-tight text-ink">{t("common.nav.clients")}</h1>
+        <h1 className="display text-[28px] text-ink">{t("common.nav.clients")}</h1>
         <Button onClick={() => setEditing("new")}>
           <Plus className="h-4 w-4" /> {t("common.actions.add")}
         </Button>

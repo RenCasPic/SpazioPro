@@ -91,7 +91,7 @@ export default function NewProjectPage() {
       {step === 1 && (
         <form onSubmit={handleSubmit(createProject)} className="mt-8 animate-in space-y-5">
           <div>
-            <h1 className="font-serif text-3xl tracking-tight text-ink">{t("projects.new.title")}</h1>
+            <h1 className="display text-[28px] text-ink">{t("projects.new.title")}</h1>
             <p className="mt-1 text-sm text-ink-soft">{t("projects.new.subtitle")}</p>
           </div>
 

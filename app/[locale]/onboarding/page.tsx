@@ -61,7 +61,7 @@ export default function OnboardingPage() {
       <div className="mt-8 flex items-center gap-2 text-xs font-medium text-clay-dark">
         <Sparkles className="h-4 w-4" /> {t("onboarding.welcome")}
       </div>
-      <h1 className="mt-2 font-serif text-3xl tracking-tight text-ink">{t("onboarding.title")}</h1>
+      <h1 className="mt-2 display text-[28px] text-ink">{t("onboarding.title")}</h1>
       <p className="mt-1 text-sm text-ink-soft">{t("onboarding.subtitle")}</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4">

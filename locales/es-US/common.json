@@ -38,7 +38,8 @@
     "export_pdf": "Exportar PDF",
     "download_pdf": "Descargar PDF",
     "retry": "Intentar de nuevo",
-    "search": "Buscar"
+    "search": "Buscar",
+    "browse_catalog": "Ver catálogo"
   },
   "project_type": {
     "living_room": "Sala",

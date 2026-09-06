@@ -19,6 +19,7 @@ import { stateService } from "@/lib/market/country-service";
 import { taxService } from "@/lib/market/tax-service";
 import { laborRateService } from "@/lib/market/labor-rate-service";
 import { pricingService } from "@/lib/market/pricing-service";
+import { calculateEstimate } from "@/lib/calculations/estimate";
 import { productById } from "@/data/catalog";
 
 export interface ProjectBundle {
@@ -37,6 +38,8 @@ export interface ProjectListEntry {
   clientName: string | null;
   thumbnailUrl: string | null;
   itemCount: number;
+  /** headline grand total for the active scenario (USD) */
+  headlineTotal: number;
 }
 
 async function assertOwner(projectId: string): Promise<Project> {
@@ -53,16 +56,34 @@ export const projectService = {
     return db.projects
       .filter((p) => p.userId === userId)
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-      .map((project) => ({
-        project,
-        location: db.locations.find((l) => l.projectId === project.id) ?? null,
-        clientName: db.clients.find((c) => c.id === project.clientId)?.name ?? null,
-        thumbnailUrl:
-          db.images.find((i) => i.projectId === project.id && i.type === "original")?.originalUrl ?? null,
-        itemCount: db.items.filter(
+      .map((project) => {
+        const items = db.items.filter(
           (i) => i.projectId === project.id && i.scenarioId === project.activeScenarioId,
-        ).length,
-      }));
+        );
+        const room = db.rooms.find((r) => r.projectId === project.id);
+        const config = db.configs.find((c) => c.projectId === project.id);
+        let headlineTotal = 0;
+        if (room && config) {
+          headlineTotal = calculateEstimate({
+            items,
+            dimensions: { widthIn: room.widthIn, lengthIn: room.lengthIn, heightIn: room.heightIn },
+            measurementSource: room.measurementSource,
+            laborLines: config.laborLines,
+            settings: config.settings,
+            currency: "USD",
+            hasTaxJurisdiction: true,
+          }).totals.total;
+        }
+        return {
+          project,
+          location: db.locations.find((l) => l.projectId === project.id) ?? null,
+          clientName: db.clients.find((c) => c.id === project.clientId)?.name ?? null,
+          thumbnailUrl:
+            db.images.find((i) => i.projectId === project.id && i.type === "original")?.originalUrl ?? null,
+          itemCount: items.length,
+          headlineTotal,
+        };
+      });
   },
 
   async get(projectId: string): Promise<ProjectBundle | null> {

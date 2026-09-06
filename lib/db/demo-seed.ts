@@ -1,4 +1,12 @@
-import type { Client, ProjectItem, ProjectStatus, ProjectType } from "@/types";
+import type {
+  Client,
+  DesignScenario,
+  Estimate,
+  EstimateStatus,
+  ProjectItem,
+  ProjectStatus,
+  ProjectType,
+} from "@/types";
 import { emptyDatabase, type Database } from "./schema";
 import { createProfile, createProject } from "./factories";
 import { uid } from "@/lib/utils";
@@ -8,27 +16,19 @@ import { categoryMeta } from "@/data/categories";
 import { productById } from "@/data/catalog";
 import { baseSurfaceQuantity } from "@/lib/calculations/dimensions";
 import { calculateWaste } from "@/lib/calculations/materials";
+import { calculateEstimate } from "@/lib/calculations/estimate";
+import { marketService } from "@/lib/market/market-service";
+import { taxService } from "@/lib/market/tax-service";
+import { projectImage } from "@/lib/media/project-image";
+import { nextEstimateNumber } from "@/lib/format";
 
 export const DEMO_USER_ID = "demo-user";
 export const DEMO_EMAIL = "demo@spaziopro.app";
 
-function roomSvg(wall: string, floor: string, accent: string): string {
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'>
-<rect width='800' height='600' fill='${wall}'/>
-<polygon points='0,0 800,0 560,190 240,190' fill='${shade(wall, 8)}'/>
-<polygon points='240,360 560,360 800,600 0,600' fill='${floor}'/>
-<rect x='500' y='150' width='190' height='170' fill='#cfe0ea' stroke='${shade(wall, -14)}' stroke-width='6'/>
-<rect x='90' y='330' width='230' height='90' rx='10' fill='${accent}'/>
-<rect x='360' y='300' width='90' height='120' rx='6' fill='${shade(accent, -12)}'/>
-</svg>`;
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-}
-function shade(hex: string, amt: number): string {
-  const h = hex.replace("#", "");
-  const n = parseInt(h.length === 3 ? h.split("").map((c) => c + c).join("") : h, 16);
-  const clamp = (v: number) => Math.max(0, Math.min(255, v));
-  const r = clamp((n >> 16) + amt), g = clamp(((n >> 8) & 255) + amt), b = clamp((n & 255) + amt);
-  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+function daysAgo(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString();
 }
 
 function seededItem(
@@ -95,6 +95,86 @@ function client(name: string, email: string, city: string, company = ""): Client
   };
 }
 
+interface Spec {
+  name: string;
+  type: ProjectType;
+  clientIdx: number;
+  address: string;
+  city: string;
+  stateCode: string;
+  zip: string;
+  products: string[];
+  status: ProjectStatus;
+  updatedDaysAgo: number;
+  estimate?: { status: EstimateStatus; daysAgo: number };
+}
+
+const SPECS: Spec[] = [
+  {
+    name: "Modern Kitchen Remodel",
+    type: "kitchen",
+    clientIdx: 0,
+    address: "2408 Rio Grande St",
+    city: "Austin",
+    stateCode: "TX",
+    zip: "78701",
+    products: ["flr-porcelain-stone", "wal-subway-tile", "kit-shaker-cabinets", "kit-quartz-counter", "kit-ss-undermount", "lgt-chandelier-linear"],
+    status: "approved",
+    updatedDaysAgo: 2,
+    estimate: { status: "approved", daysAgo: 4 },
+  },
+  {
+    name: "Primary Bath Renovation",
+    type: "bathroom",
+    clientIdx: 1,
+    address: "1155 Vista Del Mar",
+    city: "San Diego",
+    stateCode: "CA",
+    zip: "92101",
+    products: ["bth-shower-tile", "wal-paint-eggshell", "bth-vanity-48", "bth-toilet-comfort", "bth-freestand-tub"],
+    status: "quoted",
+    updatedDaysAgo: 5,
+    estimate: { status: "draft", daysAgo: 8 },
+  },
+  {
+    name: "Living Room Redesign",
+    type: "living_room",
+    clientIdx: 2,
+    address: "88 Prospect Park W",
+    city: "Miami",
+    stateCode: "FL",
+    zip: "33131",
+    products: ["flr-white-oak-solid", "wal-paint-accent", "fur-sofa-88", "lgt-floor-arc", "fur-dining-table"],
+    status: "designing",
+    updatedDaysAgo: 4,
+    estimate: { status: "final", daysAgo: 11 },
+  },
+  {
+    name: "Outdoor Living Space",
+    type: "terrace",
+    clientIdx: 0,
+    address: "410 Camelback Rd",
+    city: "Phoenix",
+    stateCode: "AZ",
+    zip: "85012",
+    products: ["flr-porcelain-stone", "fur-dining-table", "fur-dining-chair", "lgt-sconce-glass"],
+    status: "designing",
+    updatedDaysAgo: 7,
+  },
+  {
+    name: "Home Office Buildout",
+    type: "office",
+    clientIdx: 1,
+    address: "77 Harbor Dr",
+    city: "San Diego",
+    stateCode: "CA",
+    zip: "92101",
+    products: ["flr-lvp-coastal", "wal-paint-eggshell", "fur-nightstand", "lgt-recessed-6"],
+    status: "estimating",
+    updatedDaysAgo: 12,
+  },
+];
+
 export function buildDemoDatabase(): Database {
   const db = emptyDatabase();
   db.profile = {
@@ -111,62 +191,12 @@ export function buildDemoDatabase(): Database {
   };
 
   db.clients = [
-    client("The Hendersons", "hendersons@example.com", "Austin", ""),
-    client("Marcus Bell", "marcus.bell@example.com", "Los Angeles", ""),
-    client("Priya & Sam Kapoor", "kapoor.home@example.com", "Brooklyn", ""),
+    client("The Hendersons", "hendersons@example.com", "Austin"),
+    client("Marcus Bell", "marcus.bell@example.com", "San Diego"),
+    client("Priya & Sam Kapoor", "kapoor.home@example.com", "Miami"),
   ];
 
-  const specs: Array<{
-    name: string;
-    type: ProjectType;
-    clientIdx: number;
-    address: string;
-    city: string;
-    stateCode: string;
-    zip: string;
-    palette: [string, string, string];
-    products: string[];
-    status: ProjectStatus;
-  }> = [
-    {
-      name: "Modern Kitchen Remodel",
-      type: "kitchen",
-      clientIdx: 0,
-      address: "2408 Rio Grande St",
-      city: "Austin",
-      stateCode: "TX",
-      zip: "78701",
-      palette: ["#f2efe9", "#c99b63", "#33363a"],
-      products: ["flr-porcelain-stone", "wal-subway-tile", "kit-shaker-cabinets", "kit-quartz-counter", "kit-ss-undermount", "lgt-chandelier-linear"],
-      status: "estimating",
-    },
-    {
-      name: "Primary Bath Renovation",
-      type: "bathroom",
-      clientIdx: 1,
-      address: "1155 Vista Del Mar",
-      city: "Los Angeles",
-      stateCode: "CA",
-      zip: "90001",
-      palette: ["#eef0f1", "#b8b2a8", "#8ba07e"],
-      products: ["bth-shower-tile", "wal-paint-eggshell", "bth-vanity-48", "bth-toilet-comfort", "bth-freestand-tub"],
-      status: "quoted",
-    },
-    {
-      name: "Living Room Refresh",
-      type: "living_room",
-      clientIdx: 2,
-      address: "88 Prospect Park W",
-      city: "Brooklyn",
-      stateCode: "NY",
-      zip: "10001",
-      palette: ["#efe9df", "#b98f5c", "#3d517a"],
-      products: ["flr-white-oak-solid", "wal-paint-accent", "fur-sofa-88", "lgt-floor-arc", "fur-dining-table"],
-      status: "designing",
-    },
-  ];
-
-  for (const spec of specs) {
+  for (const spec of SPECS) {
     const created = createProject(DEMO_USER_ID, {
       name: spec.name,
       clientId: db.clients[spec.clientIdx].id,
@@ -179,6 +209,8 @@ export function buildDemoDatabase(): Database {
       estimateLanguage: "en-US",
     });
     created.project.status = spec.status;
+    created.project.createdAt = daysAgo(spec.updatedDaysAgo + 6);
+    created.project.updatedAt = daysAgo(spec.updatedDaysAgo);
     const dims = {
       widthIn: created.room.widthIn,
       lengthIn: created.room.lengthIn,
@@ -196,19 +228,103 @@ export function buildDemoDatabase(): Database {
       projectId: created.project.id,
       roomId: created.room.id,
       type: "original",
-      originalUrl: roomSvg(...spec.palette),
+      originalUrl: projectImage(spec.type, created.project.id),
       processedUrl: null,
       thumbnailUrl: null,
-      designFilter: "saturate(1.06) contrast(1.03) brightness(1.02)",
-      metadata: { demo: true },
-      createdAt: new Date().toISOString(),
+      designFilter: "saturate(1.05) contrast(1.03)",
+      metadata: { demo: true, stock: true },
+      createdAt: created.project.createdAt,
     });
 
     const standard = created.scenarios[0];
     spec.products.forEach((pid, i) => {
       db.items.push(seededItem(created.project.id, created.room.id, standard.id, pid, spec.stateCode, dims, i));
     });
+
+    if (spec.estimate) {
+      db.estimates.push(
+        buildDemoEstimate(created.project, created.scenarios, created.config, db.items, dims, spec),
+      );
+    }
   }
 
   return db;
+}
+
+function buildDemoEstimate(
+  project: Database["projects"][number],
+  scenarios: DesignScenario[],
+  config: Database["configs"][number],
+  allItems: ProjectItem[],
+  dims: { widthIn: number; lengthIn: number; heightIn: number },
+  spec: Spec,
+): Estimate {
+  const sid = scenarios[0].id;
+  const items = allItems.filter((i) => i.projectId === project.id && i.scenarioId === sid);
+  const loc = { stateCode: spec.stateCode, city: spec.city, zipCode: spec.zip, county: null };
+  const tax = taxService.getTaxRate({ stateCode: spec.stateCode, city: spec.city, zipCode: spec.zip });
+  const settings = { ...config.settings, salesTaxRate: tax.rate };
+  const { totals, breakdown } = calculateEstimate({
+    items,
+    dimensions: dims,
+    measurementSource: "ai_estimate",
+    laborLines: config.laborLines,
+    settings,
+    currency: "USD",
+    hasTaxJurisdiction: tax.matchedOn !== "none",
+  });
+  const at = daysAgo(spec.estimate!.daysAgo);
+  const snapshot = marketService.snapshot(loc, [...new Set(items.map((i) => i.productId))]);
+
+  const id = uid("est");
+  return {
+    id,
+    projectId: project.id,
+    scenarioId: sid,
+    kind: "estimate",
+    estimateNumber: nextEstimateNumber([]),
+    language: "en-US",
+    countryCode: "US",
+    stateCode: spec.stateCode,
+    city: spec.city,
+    zipCode: spec.zip,
+    currencyCode: "USD",
+    salesTaxRate: tax.rate,
+    scopeOfWork:
+      "Remove existing finishes. Prep substrate. Install new materials per selections. Trim and punch-list. Final clean.",
+    subtotalMaterials: totals.materials,
+    subtotalLabor: totals.labor,
+    subtotalEquipment: totals.equipment,
+    subtotalDelivery: totals.delivery,
+    subtotalDisposal: totals.disposal,
+    subtotalPermits: totals.permits,
+    subtotalOther: totals.other,
+    discount: totals.discount,
+    taxAmount: totals.tax,
+    total: totals.total,
+    notes: "",
+    status: spec.estimate!.status,
+    marketSnapshot: snapshot,
+    items: breakdown.map((b) => ({
+      id: uid("eli"),
+      estimateId: id,
+      projectItemId: b.item.id,
+      description: b.item.name,
+      category: b.item.category,
+      quantity: b.quantity,
+      unit: b.item.unit,
+      unitPrice: b.item.unitPrice,
+      laborPrice: b.item.laborCost,
+      total: b.total,
+      priceSnapshot: {
+        price: b.item.unitPrice,
+        currency: "USD" as const,
+        supplier: b.item.supplier,
+        source: b.item.priceSource,
+        capturedAt: at,
+      },
+    })),
+    createdAt: at,
+    updatedAt: at,
+  };
 }

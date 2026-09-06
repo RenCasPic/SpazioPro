@@ -10,7 +10,8 @@
     "active_projects": "Proyectos activos",
     "estimates": "Estimados",
     "completed": "Completados",
-    "estimated_value": "Valor estimado"
+    "estimated_value": "Valor estimado",
+    "this_month": "{n} este mes"
   },
   "recent_projects": "Proyectos recientes",
   "recent_estimates": "Estimados recientes",
@@ -19,5 +20,7 @@
     "title": "Todavía no tienes proyectos",
     "description": "Crea tu primer proyecto: sube una foto del espacio, diséñalo y genera el estimado.",
     "cta": "Crear mi primer proyecto"
-  }
+  },
+  "hero_lead": "Convierte tus ideas en espacios bonitos y estimados profesionales.",
+  "activity": "Estimados recientes"
 }

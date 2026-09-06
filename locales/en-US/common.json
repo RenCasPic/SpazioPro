@@ -38,7 +38,8 @@
     "export_pdf": "Export PDF",
     "download_pdf": "Download PDF",
     "retry": "Try again",
-    "search": "Search"
+    "search": "Search",
+    "browse_catalog": "Browse Catalog"
   },
   "project_type": {
     "living_room": "Living Room",

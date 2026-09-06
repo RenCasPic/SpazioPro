@@ -36,7 +36,7 @@ export interface Database {
 
 export function emptyDatabase(): Database {
   return {
-    version: 3,
+    version: 4,
     profile: null,
     clients: [],
     projects: [],

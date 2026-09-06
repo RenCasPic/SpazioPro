@@ -45,7 +45,7 @@ export function ProjectShell({
     return (
       <div className="rounded-2xl border border-line bg-surface p-10 text-center text-sm text-ink-soft">
         {t("common.states.not_found")}{" "}
-        <LocaleLink href="/projects" className="text-clay underline">
+        <LocaleLink href="/projects" className="text-accent underline">
           {t("projects.title")}
         </LocaleLink>
       </div>
@@ -55,14 +55,14 @@ export function ProjectShell({
   return (
     <div className="space-y-5">
       <div>
-        <LocaleLink href="/projects" className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink">
-          <ArrowLeft className="h-4 w-4" /> {t("projects.title")}
+        <LocaleLink href="/projects" className="inline-flex items-center gap-1.5 text-[13px] text-muted transition-colors hover:text-ink">
+          <ArrowLeft className="h-3.5 w-3.5" /> {t("projects.title")}
         </LocaleLink>
-        <div className="mt-2 flex flex-wrap items-center gap-3">
-          <h1 className="font-serif text-2xl tracking-tight text-ink">{bundle.project.name}</h1>
+        <div className="mt-2 flex flex-wrap items-center gap-2.5">
+          <h1 className="display text-[26px] text-ink">{bundle.project.name}</h1>
           <StatusBadge status={bundle.project.status} label={t(`common.project_status.${bundle.project.status}`)} />
         </div>
-        <p className="mt-0.5 text-sm text-muted">
+        <p className="mt-1 text-[13px] text-muted">
           {t(`common.project_type.${bundle.project.projectType}`)}
           {bundle.location ? ` · ${bundle.location.city}, ${bundle.location.stateCode} ${bundle.location.zipCode}` : ""}
           {" · USD"}

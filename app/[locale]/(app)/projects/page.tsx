@@ -20,7 +20,7 @@ export default function ProjectsPage() {
     () =>
       projects.filter((e) => {
         if (status !== "all" && e.project.status !== status) return false;
-        if (query && !`${e.project.name} ${e.clientName ?? ""}`.toLowerCase().includes(query.toLowerCase())) return false;
+        if (query && !`${e.project.name} ${e.clientName ?? ""} ${e.location?.city ?? ""}`.toLowerCase().includes(query.toLowerCase())) return false;
         return true;
       }),
     [projects, query, status],
@@ -28,11 +28,14 @@ export default function ProjectsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="font-serif text-3xl tracking-tight text-ink">{t("projects.title")}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="display text-[28px] text-ink">{t("projects.title")}</h1>
+          <p className="mt-0.5 text-[13px] text-muted">{projects.length} total</p>
+        </div>
         <LocaleLink
           href="/projects/new"
-          className="inline-flex h-10 items-center gap-2 rounded-full bg-clay px-4 text-sm font-medium text-white hover:bg-clay-dark"
+          className="inline-flex h-10 items-center gap-2 rounded-full bg-ink px-4 text-sm font-medium text-white transition-colors hover:bg-ink/90"
         >
           <Plus className="h-4 w-4" />
           {t("common.actions.new_project")}
@@ -40,16 +43,16 @@ export default function ProjectsPage() {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <div className="flex h-10 items-center gap-2 rounded-xl border border-line-strong bg-surface px-3">
+        <div className="flex h-10 items-center gap-2 rounded-xl border border-line bg-surface px-3 focus-within:border-line-strong">
           <Search className="h-4 w-4 text-muted" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("projects.filters.search_placeholder")}
-            className="w-56 bg-transparent text-sm outline-none placeholder:text-muted"
+            className="w-60 bg-transparent text-sm outline-none placeholder:text-muted"
           />
         </div>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="no-scrollbar flex flex-nowrap gap-1.5 overflow-x-auto">
           <Chip active={status === "all"} onClick={() => setStatus("all")}>
             {t("projects.filters.all")}
           </Chip>
@@ -62,21 +65,21 @@ export default function ProjectsPage() {
       </div>
 
       {loading ? (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-64" />
+            <Skeleton key={i} className="h-60" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={<Plus className="h-5 w-5" />}
           title={projects.length ? t("common.states.empty") : t("dashboard.empty.title")}
-          description={projects.length ? "" : t("dashboard.empty.description")}
+          description={projects.length ? undefined : t("dashboard.empty.description")}
           action={
             !projects.length && (
               <LocaleLink
                 href="/projects/new"
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-clay px-5 text-sm font-medium text-white hover:bg-clay-dark"
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-sm font-medium text-white hover:bg-ink/90"
               >
                 {t("common.actions.create_project")}
               </LocaleLink>
@@ -84,7 +87,7 @@ export default function ProjectsPage() {
           }
         />
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((entry) => (
             <ProjectCard key={entry.project.id} entry={entry} />
           ))}
@@ -99,8 +102,8 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
     <button
       onClick={onClick}
       className={cn(
-        "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-        active ? "border-clay bg-clay-tint text-clay-dark" : "border-line-strong text-ink-soft hover:border-ink/30",
+        "shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+        active ? "border-accent bg-accent-tint text-accent" : "border-line-strong text-ink-soft hover:border-ink/25 hover:text-ink",
       )}
     >
       {children}

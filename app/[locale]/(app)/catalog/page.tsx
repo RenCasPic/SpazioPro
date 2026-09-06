@@ -45,7 +45,7 @@ export default function CatalogPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl tracking-tight text-ink">{t("catalog.title")}</h1>
+          <h1 className="display text-[28px] text-ink">{t("catalog.title")}</h1>
           <p className="mt-1 text-sm text-ink-soft">{t("catalog.subtitle")}</p>
         </div>
         <div className="w-56">
