@@ -41,6 +41,9 @@ export interface ProjectItem {
   category: ProductCategory;
   kind: "surface" | "object";
   surface?: "floor" | "wall" | "ceiling";
+  /** links a surface item to a Semantic 3D Room Model entity — quantity then
+   *  comes from that entity's net area instead of the room AABB */
+  roomEntityId?: string | null;
   quantity: number;
   quantityAuto: boolean;
   unit: Unit;
@@ -163,6 +166,10 @@ export interface Estimate {
   notes: string;
   status: EstimateStatus;
   marketSnapshot: MarketSnapshot;
+  /** the Semantic 3D Room Model version this estimate was computed against —
+   *  a later recalibration makes a new version and never changes this estimate */
+  roomModelId: string | null;
+  roomModelVersion: number | null;
   items: EstimateItem[];
   createdAt: string;
   updatedAt: string;

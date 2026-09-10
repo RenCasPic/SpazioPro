@@ -53,7 +53,11 @@
     "demo_price": "El catálogo utiliza precios de demostración.",
     "no_labor_rate": "Hay partidas de mano de obra sin tarifa asignada.",
     "no_items": "El estimado todavía no tiene elementos.",
-    "no_tax": "No se ha resuelto una jurisdicción de impuesto para la ubicación del proyecto."
+    "no_tax": "No se ha resuelto una jurisdicción de impuesto para la ubicación del proyecto.",
+    "uncalibrated_model": "El espacio 3D no está calibrado — confirma una medida para fijar la escala.",
+    "partial_calibration": "El espacio 3D está solo parcialmente calibrado; un eje podría estar desviado.",
+    "demo_model": "El espacio 3D es un modelo de demostración, no la reconstrucción de un espacio real.",
+    "unreviewed_geometry": "Algunas superficies del espacio 3D necesitan una revisión visual rápida."
   },
   "detail": {
     "snapshot_frozen": "Snapshot de mercado congelado",

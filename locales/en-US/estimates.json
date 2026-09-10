@@ -53,7 +53,11 @@
     "demo_price": "The catalog uses demo pricing.",
     "no_labor_rate": "Some labor line items have no rate assigned.",
     "no_items": "The estimate has no items yet.",
-    "no_tax": "No sales-tax jurisdiction has been resolved for the project location."
+    "no_tax": "No sales-tax jurisdiction has been resolved for the project location.",
+    "uncalibrated_model": "The 3D room hasn't been calibrated — confirm a measurement to lock in the scale.",
+    "partial_calibration": "The 3D room is only partially calibrated; one axis may still be off.",
+    "demo_model": "The 3D room is a demo model, not a reconstruction of a real space.",
+    "unreviewed_geometry": "Some surfaces in the 3D room still need a quick visual check."
   },
   "detail": {
     "snapshot_frozen": "Market snapshot frozen",

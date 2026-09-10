@@ -47,6 +47,7 @@ function inputFor(bundle: ProjectBundle, scenarioId: string): EstimateInput {
     settings: bundle.config.settings,
     currency: "USD",
     hasTaxJurisdiction: tax.matchedOn !== "none",
+    roomModel: bundle.roomModel,
   };
 }
 
@@ -155,6 +156,8 @@ export const estimateService = {
       notes: s.notes,
       status: "final",
       marketSnapshot: snapshot,
+      roomModelId: bundle.roomModel?.id ?? null,
+      roomModelVersion: bundle.roomModel?.version ?? null,
       items,
       createdAt: now,
       updatedAt: now,

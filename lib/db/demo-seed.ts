@@ -358,6 +358,8 @@ function buildDemoEstimate(
     notes: "",
     status: spec.estimate!.status,
     marketSnapshot: snapshot,
+    roomModelId: null,
+    roomModelVersion: null,
     items: breakdown.map((b) => ({
       id: uid("eli"),
       estimateId: id,

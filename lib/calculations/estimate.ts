@@ -7,8 +7,11 @@ import type {
   MeasurementSource,
   ProjectItem,
   RoomDimensions,
+  RoomEntity,
+  RoomModel,
 } from "@/types";
 import { baseSurfaceQuantity } from "./dimensions";
+import { entitySurfaceQuantity } from "./surfaces";
 import { calculateWaste, calculateMaterialCost } from "./materials";
 import { calculateItemLabor, calculateLabor } from "./labor";
 import { applyDiscount, calculateTaxes } from "./taxes";
@@ -23,6 +26,8 @@ export interface EstimateInput {
   currency: CurrencyCode;
   /** whether a sales-tax jurisdiction was resolved for the project location */
   hasTaxJurisdiction: boolean;
+  /** when present, surface items linked to an entity take their quantity from it */
+  roomModel?: RoomModel | null;
 }
 
 export interface ItemBreakdown {
@@ -33,14 +38,26 @@ export interface ItemBreakdown {
   total: number;
 }
 
-export function resolveItemQuantity(item: ProjectItem, dimensions: RoomDimensions): number {
+export function resolveItemQuantity(
+  item: ProjectItem,
+  dimensions: RoomDimensions,
+  entity?: RoomEntity | null,
+): number {
   if (item.kind === "object" || !item.quantityAuto) return item.quantity;
-  const base = baseSurfaceQuantity(item.surface, dimensions, item.unit);
+  const base = entity
+    ? entitySurfaceQuantity(entity, item.unit)
+    : baseSurfaceQuantity(item.surface, dimensions, item.unit);
   return calculateWaste(base, item.wastePercent);
 }
 
-export function itemBreakdown(item: ProjectItem, dimensions: RoomDimensions): ItemBreakdown {
-  const quantity = resolveItemQuantity(item, dimensions);
+export function itemBreakdown(
+  item: ProjectItem,
+  dimensions: RoomDimensions,
+  entities?: RoomEntity[],
+): ItemBreakdown {
+  const entity =
+    item.roomEntityId && entities ? entities.find((e) => e.id === item.roomEntityId) : undefined;
+  const quantity = resolveItemQuantity(item, dimensions, entity);
   const materialCost = calculateMaterialCost(quantity, item.unitPrice);
   const laborCost = calculateItemLabor(quantity, item.laborCost);
   return { item, quantity, materialCost, laborCost, total: round(materialCost + laborCost) };
@@ -50,7 +67,9 @@ export function calculateEstimate(input: EstimateInput): {
   totals: EstimateTotals;
   breakdown: ItemBreakdown[];
 } {
-  const breakdown = input.items.map((it) => itemBreakdown(it, input.dimensions));
+  const breakdown = input.items.map((it) =>
+    itemBreakdown(it, input.dimensions, input.roomModel?.entities),
+  );
 
   const materials = round(sum(breakdown.map((b) => b.materialCost)));
   const itemLabor = sum(breakdown.map((b) => b.laborCost));
@@ -98,8 +117,24 @@ export function confidenceReport(input: EstimateInput): ConfidenceReport {
   if (!input.items.length) reasons.push("no_items");
   if (!input.hasTaxJurisdiction) reasons.push("no_tax");
 
+  const model = input.roomModel;
+  if (model) {
+    if (model.calibration.status === "uncalibrated") reasons.push("uncalibrated_model");
+    else if (model.calibration.status === "partially_calibrated") reasons.push("partial_calibration");
+    if (model.source === "demo") reasons.push("demo_model");
+    if (
+      model.entities.some(
+        (e) => e.quantifiable && e.validationStatus !== "verified" && e.confidence < 0.9,
+      )
+    ) {
+      reasons.push("unreviewed_geometry");
+    }
+  }
+
   const level: ConfidenceReport["level"] =
-    input.items.some((i) => i.priceSource === "missing") || reasons.length >= 4
+    input.items.some((i) => i.priceSource === "missing") ||
+    model?.calibration.status === "uncalibrated" ||
+    reasons.length >= 4
       ? "low"
       : reasons.length >= 1
         ? "medium"

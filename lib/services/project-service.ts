@@ -8,6 +8,7 @@ import type {
   ProjectLocation,
   ProjectStatus,
   Room,
+  RoomModel,
   ScenarioType,
 } from "@/types";
 import type { ProjectConfig } from "@/lib/db/schema";
@@ -30,6 +31,15 @@ export interface ProjectBundle {
   scenarios: DesignScenario[];
   items: ProjectItem[];
   config: ProjectConfig;
+  /** latest Semantic 3D Room Model for the primary room, if one exists */
+  roomModel: RoomModel | null;
+}
+
+/** Latest room-model version for a room. */
+function latestRoomModel(roomId: string | undefined): RoomModel | null {
+  if (!roomId) return null;
+  const models = readDb().roomModels.filter((m) => m.roomId === roomId);
+  return models.length ? models.reduce((a, b) => (b.version > a.version ? b : a)) : null;
 }
 
 export interface ProjectListEntry {
@@ -72,6 +82,7 @@ export const projectService = {
             settings: config.settings,
             currency: "USD",
             hasTaxJurisdiction: true,
+            roomModel: latestRoomModel(room.id),
           }).totals.total;
         }
         return {
@@ -106,6 +117,7 @@ export const projectService = {
           laborLines: defaultLaborLines(project.stateCode),
           settings: defaultSettings(0),
         },
+      roomModel: latestRoomModel(db.rooms.find((r) => r.projectId === projectId)?.id),
     };
   },
 

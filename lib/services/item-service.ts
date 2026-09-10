@@ -6,10 +6,20 @@ import { categoryMeta } from "@/data/categories";
 import { pricingService } from "@/lib/market/pricing-service";
 import { laborRateService } from "@/lib/market/labor-rate-service";
 import { baseSurfaceQuantity, surfaceAreas } from "@/lib/calculations/dimensions";
+import { entitySurfaceQuantity } from "@/lib/calculations/surfaces";
 import { calculateWaste } from "@/lib/calculations/materials";
-import type { RoomDimensions } from "@/types";
+import type { RoomEntity } from "@/types";
 import type { Database } from "@/lib/db/schema";
 import { uid } from "@/lib/utils";
+
+/** Latest room-model entity for the given id, if any. */
+function findEntity(db: Database, roomId: string | undefined, entityId: string | undefined): RoomEntity | undefined {
+  if (!roomId || !entityId) return undefined;
+  const models = db.roomModels.filter((m) => m.roomId === roomId);
+  if (!models.length) return undefined;
+  const latest = models.reduce((a, b) => (b.version > a.version ? b : a));
+  return latest.entities.find((e) => e.id === entityId);
+}
 
 /**
  * When a surface material is chosen we silently make sure the project also
@@ -17,11 +27,9 @@ import { uid } from "@/lib/utils";
  * never has to think of these. Quantities track the surface area; we only
  * ever raise auto values, never stomp a number the user set by hand.
  */
-function planTeardown(store: Database, projectId: string, surface: SurfaceKind, dims: RoomDimensions) {
+function planTeardown(store: Database, projectId: string, area: number) {
   const config = store.configs.find((c) => c.projectId === projectId);
   if (!config) return;
-  const a = surfaceAreas(dims);
-  const area = surface === "wall" ? a.wallAreaSqFt : surface === "ceiling" ? a.ceilingAreaSqFt : a.floorAreaSqFt;
 
   const demo = config.laborLines.find((l) => l.category === "demolition");
   if (demo && demo.fromMarket) {
@@ -46,7 +54,12 @@ async function project(projectId: string) {
 }
 
 export const itemService = {
-  async add(params: { projectId: string; product: Product; surface?: SurfaceKind }): Promise<ProjectItem> {
+  async add(params: {
+    projectId: string;
+    product: Product;
+    surface?: SurfaceKind;
+    roomEntityId?: string | null;
+  }): Promise<ProjectItem> {
     const p = await project(params.projectId);
     const db = readDb();
     const room = db.rooms.find((r) => r.projectId === p.id);
@@ -56,9 +69,14 @@ export const itemService = {
 
     const meta = categoryMeta(params.product.category);
     const surface = params.surface ?? meta.surface;
+    const entity = findEntity(db, room?.id, params.roomEntityId ?? undefined);
     const price = pricingService.resolve(params.product.id, p.stateCode);
     const laborRate = laborRateService.rate(p.stateCode, params.product.laborCategory);
     const now = new Date().toISOString();
+
+    const baseQty = entity
+      ? entitySurfaceQuantity(entity, params.product.unit)
+      : baseSurfaceQuantity(surface, dims, params.product.unit);
 
     const item: ProjectItem = {
       id: uid("itm"),
@@ -70,9 +88,10 @@ export const itemService = {
       category: params.product.category,
       kind: meta.kind,
       surface: meta.kind === "surface" ? surface : undefined,
+      roomEntityId: meta.kind === "surface" ? (params.roomEntityId ?? null) : null,
       quantity:
         meta.kind === "surface"
-          ? calculateWaste(baseSurfaceQuantity(surface, dims, params.product.unit), params.product.wastePercent)
+          ? calculateWaste(baseQty, params.product.wastePercent)
           : 1,
       quantityAuto: meta.kind === "surface",
       unit: params.product.unit,
@@ -91,19 +110,27 @@ export const itemService = {
 
     mutateDb((store) => {
       if (meta.kind === "surface" && surface) {
+        // one material per surface: replace by the specific 3D entity when we
+        // have one (each wall is independent), otherwise by the surface kind.
         store.items = store.items.filter(
           (it) =>
             !(
               it.projectId === p.id &&
               it.scenarioId === p.activeScenarioId &&
               it.kind === "surface" &&
-              it.surface === surface
+              (params.roomEntityId
+                ? it.roomEntityId === params.roomEntityId
+                : it.surface === surface && !it.roomEntityId)
             ),
         );
       }
       store.items.push(item);
       if (meta.kind === "surface" && surface) {
-        planTeardown(store, p.id, surface, dims);
+        const a = surfaceAreas(dims);
+        const teardownArea =
+          entity?.dimensions.grossAreaSqFt ??
+          (surface === "wall" ? a.wallAreaSqFt : surface === "ceiling" ? a.ceilingAreaSqFt : a.floorAreaSqFt);
+        planTeardown(store, p.id, teardownArea);
       }
       const proj = store.projects.find((x) => x.id === p.id)!;
       if (proj.status === "draft") proj.status = "designing";
