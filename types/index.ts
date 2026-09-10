@@ -6,3 +6,4 @@ export * from "./project";
 export * from "./ai";
 export * from "./estimate";
 export * from "./profile";
+export * from "./room-model";
