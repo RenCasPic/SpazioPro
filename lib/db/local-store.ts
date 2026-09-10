@@ -1,7 +1,7 @@
-import type { Database } from "./schema";
+import { DB_VERSION, type Database } from "./schema";
 import { buildDemoDatabase } from "./demo-seed";
 
-const KEY = "spaziopro.db.v4";
+const KEY = `spaziopro.db.v${DB_VERSION}`;
 
 let memory: Database | null = null;
 
@@ -19,7 +19,7 @@ export function readDb(): Database {
     const raw = window.localStorage.getItem(KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Database;
-      if (parsed && parsed.version === 4) return parsed;
+      if (parsed && parsed.version === DB_VERSION) return parsed;
     }
   } catch {
     /* fall through to seed */

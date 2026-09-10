@@ -10,8 +10,13 @@ import type {
   ProjectImage,
   ProjectItem,
   ProjectLocation,
+  ReconstructionJob,
   Room,
+  RoomCapture,
+  RoomModel,
 } from "@/types";
+
+export const DB_VERSION = 5;
 
 export interface ProjectConfig {
   projectId: string;
@@ -32,11 +37,15 @@ export interface Database {
   estimates: Estimate[];
   configs: ProjectConfig[];
   aiJobs: AiJob[];
+  /** Semantic 3D room models — versioned; latest per room wins */
+  roomModels: RoomModel[];
+  roomCaptures: RoomCapture[];
+  reconstructionJobs: ReconstructionJob[];
 }
 
 export function emptyDatabase(): Database {
   return {
-    version: 4,
+    version: DB_VERSION,
     profile: null,
     clients: [],
     projects: [],
@@ -48,5 +57,8 @@ export function emptyDatabase(): Database {
     estimates: [],
     configs: [],
     aiJobs: [],
+    roomModels: [],
+    roomCaptures: [],
+    reconstructionJobs: [],
   };
 }

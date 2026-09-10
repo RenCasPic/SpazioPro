@@ -21,6 +21,8 @@ import { marketService } from "@/lib/market/market-service";
 import { taxService } from "@/lib/market/tax-service";
 import { projectImage } from "@/lib/media/project-image";
 import { nextEstimateNumber } from "@/lib/format";
+import { buildRectangularRoom } from "@/lib/spatial/room-builder";
+import type { RoomModel } from "@/types";
 
 export const DEMO_USER_ID = "demo-user";
 export const DEMO_EMAIL = "demo@spaziopro.app";
@@ -107,6 +109,8 @@ interface Spec {
   status: ProjectStatus;
   updatedDaysAgo: number;
   estimate?: { status: EstimateStatus; daysAgo: number };
+  /** seed a Semantic 3D Room Model for this project */
+  roomModel?: "calibrated" | "awaiting_validation";
 }
 
 const SPECS: Spec[] = [
@@ -122,6 +126,7 @@ const SPECS: Spec[] = [
     status: "approved",
     updatedDaysAgo: 2,
     estimate: { status: "approved", daysAgo: 4 },
+    roomModel: "calibrated",
   },
   {
     name: "Primary Bath Renovation",
@@ -135,6 +140,7 @@ const SPECS: Spec[] = [
     status: "quoted",
     updatedDaysAgo: 5,
     estimate: { status: "draft", daysAgo: 8 },
+    roomModel: "awaiting_validation",
   },
   {
     name: "Living Room Redesign",
@@ -246,9 +252,56 @@ export function buildDemoDatabase(): Database {
         buildDemoEstimate(created.project, created.scenarios, created.config, db.items, dims, spec),
       );
     }
+
+    if (spec.roomModel) {
+      db.roomModels.push(buildDemoRoomModel(created.project.id, created.room.id, spec, dims));
+    }
   }
 
   return db;
+}
+
+function buildDemoRoomModel(
+  projectId: string,
+  roomId: string,
+  spec: Spec,
+  dims: { widthIn: number; lengthIn: number; heightIn: number },
+): RoomModel {
+  const calibrated = spec.roomModel === "calibrated";
+  const model = buildRectangularRoom({
+    projectId,
+    roomId,
+    widthIn: dims.widthIn,
+    lengthIn: dims.lengthIn,
+    heightIn: dims.heightIn,
+    roomType: spec.type,
+    source: "demo",
+    captureSource: "photo",
+    status: calibrated ? "ready" : "awaiting_validation",
+    calibrationStatus: calibrated ? "calibrated" : "uncalibrated",
+    confidence: calibrated ? 0.93 : 0.82,
+    openings: [
+      { wallIndex: 3, kind: "door", widthIn: 32, heightIn: 80, uIn: 14, vIn: 0, confidence: 0.9 },
+      {
+        wallIndex: 0,
+        kind: "window",
+        widthIn: 48,
+        heightIn: 48,
+        uIn: Math.max(12, dims.widthIn / 2 - 24),
+        vIn: 36,
+        confidence: calibrated ? 0.88 : 0.66,
+      },
+    ],
+  });
+  if (calibrated) {
+    model.calibration.scaleFactor = 1;
+    model.calibration.scaleConfidence = 0.95;
+    model.entities.forEach((e) => {
+      e.calibrationStatus = "calibrated";
+      if (e.quantifiable) e.validationStatus = "verified";
+    });
+  }
+  return model;
 }
 
 function buildDemoEstimate(
