@@ -62,7 +62,7 @@ export interface AiEstimationResult {
   disclaimer: string;
 }
 
-export type AiJobType = "analyze" | "segment" | "generate" | "estimate";
+export type AiJobType = "analyze" | "segment" | "generate" | "estimate" | "reconstruct";
 export type AiJobStatus = "queued" | "running" | "done" | "error";
 
 export interface AiJob {
