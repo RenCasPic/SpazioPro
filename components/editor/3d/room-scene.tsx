@@ -6,7 +6,14 @@ import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import type { ProjectItem, RoomEntity, RoomModel } from "@/types";
 import { productById } from "@/data/catalog";
-import { entityNeedsReview } from "@/lib/spatial/reconstruction";
+import { CONFIDENCE } from "@/lib/spatial/reconstruction";
+
+/** Paint a surface amber only when it clearly needs a look — not for the
+ *  whole "verify recommended" band, which would tint the entire room. */
+function surfaceFlagged(e: Pick<RoomEntity, "confidence" | "validationStatus">): boolean {
+  if (e.validationStatus === "verified") return false;
+  return e.validationStatus === "needs_verification" || e.confidence < CONFIDENCE.verifyRecommended;
+}
 
 const FT = 1 / 12; // inches → feet, for sane camera distances
 const APPLIED_FALLBACK = "#c9c4bb";
@@ -66,7 +73,7 @@ export function RoomScene({ model, items, selectedEntityId, onSelectEntity, walk
                 elevationIn={e.type === "floor" ? 0 : model.ceilingHeightIn}
                 color={materialFor(e.id) ?? BARE_FLOOR}
                 selected={selectedEntityId === e.id}
-                needsReview={entityNeedsReview(e)}
+                needsReview={model.calibration.status !== "uncalibrated" && surfaceFlagged(e)}
                 onSelect={() => onSelectEntity(e.id)}
                 dim={e.type === "ceiling"}
               />
@@ -87,7 +94,7 @@ export function RoomScene({ model, items, selectedEntityId, onSelectEntity, walk
                 normal={e.geometry.plane?.normal ?? { x: 0, y: 0, z: 1 }}
                 color={materialFor(e.id) ?? BARE_WALL}
                 selected={selectedEntityId === e.id}
-                needsReview={entityNeedsReview(e)}
+                needsReview={model.calibration.status !== "uncalibrated" && surfaceFlagged(e)}
                 onSelect={() => onSelectEntity(e.id)}
               />
             );
