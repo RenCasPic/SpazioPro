@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   LayoutGrid,
   PaintBucket,
@@ -44,11 +44,21 @@ export function EditorSidebar({ bundle }: { bundle: ProjectBundle }) {
   const state = bundle.project.stateCode;
 
   const [group, setGroup] = useState<ProductGroup>(
-    activeSurface === "floor" ? "flooring" : activeSurface === "wall" ? "walls" : "flooring",
+    activeSurface === "wall" ? "walls" : "flooring",
   );
   const [category, setCategory] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [quality, setQuality] = useState<Quality>("any");
+
+  // follow the surface the user picks in the canvas / 3D view
+  const lastSurface = useRef(activeSurface);
+  useEffect(() => {
+    if (activeSurface && activeSurface !== lastSurface.current) {
+      setGroup(activeSurface === "wall" ? "walls" : activeSurface === "ceiling" ? "walls" : "flooring");
+      setCategory(null);
+    }
+    lastSurface.current = activeSurface;
+  }, [activeSurface]);
 
   const groupLabel = (g: ProductGroup) => (locale === "es-US" ? GROUP_LABELS_ES : GROUP_LABELS_EN)[g];
   const groupCategories = CATEGORIES.filter((c) => c.group === group);

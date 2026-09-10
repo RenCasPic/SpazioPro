@@ -9,11 +9,12 @@ import { EditorToolbar } from "./editor-toolbar";
 import { EditorCanvas } from "./editor-canvas";
 import { EditorSidebar } from "./editor-sidebar";
 import { PropertiesPanel } from "./properties-panel";
+import { RoomViewport } from "./3d/room-viewport";
 import { cn } from "@/lib/utils";
 
 export function Editor({ projectId }: { projectId: string }) {
   const t = useT();
-  const { bundle, status, load } = useEditor();
+  const { bundle, status, load, viewMode } = useEditor();
   const [sheet, setSheet] = useState<"catalog" | "props" | null>(null);
 
   useEffect(() => {
@@ -53,7 +54,7 @@ export function Editor({ projectId }: { projectId: string }) {
           <EditorSidebar bundle={bundle} />
         </aside>
         <section className="relative min-h-0">
-          <EditorCanvas bundle={bundle} />
+          {viewMode === "3d" ? <RoomViewport /> : <EditorCanvas bundle={bundle} />}
         </section>
         <aside className="hidden min-h-0 overflow-y-auto border-l border-line bg-surface lg:block">
           <PropertiesPanel bundle={bundle} />

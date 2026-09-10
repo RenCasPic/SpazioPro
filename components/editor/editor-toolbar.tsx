@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowLeft, Undo2, Redo2, FileText, Columns2, Check, Loader2, MapPin } from "lucide-react";
+import { ArrowLeft, Undo2, Redo2, FileText, Columns2, Check, Loader2, MapPin, Image as ImageIcon, Box } from "lucide-react";
 import type { ProjectBundle } from "@/lib/services/project-service";
 import { useEditor } from "@/hooks/use-editor";
+import { cn } from "@/lib/utils";
 import { useScenarioTotals } from "@/hooks/use-estimate";
 import { useT } from "@/components/localization/i18n-provider";
 import { LocaleLink } from "@/components/localization/locale-link";
@@ -14,7 +15,8 @@ import { Logo } from "@/components/brand/logo";
 
 export function EditorToolbar({ bundle }: { bundle: ProjectBundle }) {
   const t = useT();
-  const { past, future, undo, redo, setScenario, addScenario, reload } = useEditor();
+  const { past, future, undo, redo, setScenario, addScenario, reload, viewMode, setViewMode, roomModel } =
+    useEditor();
   const [name, setName] = useState(bundle.project.name);
   const [saved, setSaved] = useState(true);
   const [locationOpen, setLocationOpen] = useState(false);
@@ -70,6 +72,32 @@ export function EditorToolbar({ bundle }: { bundle: ProjectBundle }) {
         <button onClick={() => setLocationOpen(true)} className="hidden h-9 items-center gap-1.5 rounded-full border border-line-strong px-3 text-[13px] font-medium text-ink hover:border-ink/30 sm:inline-flex" title={t("editor.change_location")}>
           <MapPin className="h-4 w-4" /> {bundle.location?.stateCode ?? bundle.project.stateCode}
         </button>
+
+        <div className="hidden items-center rounded-full border border-line-strong p-0.5 sm:flex">
+          <button
+            onClick={() => setViewMode("photo")}
+            title={t("editor.d3.mode_photo")}
+            className={cn(
+              "grid h-8 w-8 place-items-center rounded-full",
+              viewMode === "photo" ? "bg-ink text-white" : "text-ink-soft hover:text-ink",
+            )}
+          >
+            <ImageIcon className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => setViewMode("3d")}
+            title={t("editor.d3.mode_3d")}
+            className={cn(
+              "relative grid h-8 w-8 place-items-center rounded-full",
+              viewMode === "3d" ? "bg-ink text-white" : "text-ink-soft hover:text-ink",
+            )}
+          >
+            <Box className="h-4 w-4" />
+            {roomModel && viewMode !== "3d" && (
+              <span className="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-accent" />
+            )}
+          </button>
+        </div>
 
         <div className="flex items-center gap-0.5">
           <button onClick={undo} disabled={!past.length} title={t("editor.undo")} className="grid h-9 w-9 place-items-center rounded-full text-ink-soft hover:bg-ink/5 disabled:opacity-40">

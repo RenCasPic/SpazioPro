@@ -9,17 +9,26 @@ import type {
   NewLocation,
   Product,
   ProjectItem,
+  ProjectType,
+  ReconstructionJob,
   RoomDimensions,
+  RoomModel,
   ScenarioType,
 } from "@/types";
 import type { SurfaceKind } from "@/lib/constants";
+import type { MeasurementInput } from "@/lib/spatial/calibrate";
+import type { RoomModelEdit } from "@/lib/validations/room-model";
 import { projectService, type ProjectBundle } from "@/lib/services/project-service";
 import { itemService } from "@/lib/services/item-service";
 import { roomService } from "@/lib/services/room-service";
+import { roomModelService } from "@/lib/services/room-model-service";
+import { applyModelEdit } from "@/lib/spatial/edit";
 import { configService } from "@/lib/services/config-service";
 import { imageService } from "@/lib/services/image-service";
 import { restoreProjectState, type EditorSnapshot } from "@/lib/services/editor-state";
 import { imageGeneration } from "@/lib/ai/image-generation";
+
+export type EditorViewMode = "photo" | "3d";
 
 type Status = "idle" | "loading" | "ready" | "missing";
 
@@ -32,10 +41,23 @@ interface EditorState {
   future: EditorSnapshot[];
   applying: string | null;
 
+  // --- 3D semantic room model ---
+  viewMode: EditorViewMode;
+  roomModel: RoomModel | null;
+  selectedEntityId: string | null;
+  reconstructing: boolean;
+  reconstructionJob: ReconstructionJob | null;
+
   load: (projectId: string) => Promise<void>;
   reload: () => Promise<void>;
   select: (id: string | null) => void;
   setActiveSurface: (s: SurfaceKind | null) => void;
+
+  setViewMode: (m: EditorViewMode) => void;
+  selectEntity: (id: string | null) => void;
+  runReconstruction: (captureUrls: string[], hint?: ProjectType) => Promise<void>;
+  calibrateRoomModel: (measurements: MeasurementInput[]) => Promise<void>;
+  editRoomModel: (edit: RoomModelEdit) => Promise<void>;
 
   addProduct: (product: Product, surface?: SurfaceKind) => Promise<void>;
   updateItem: (id: string, patch: Partial<ProjectItem>, opts?: { history?: boolean }) => Promise<void>;
@@ -77,30 +99,98 @@ export const useEditor = create<EditorState>((set, get) => ({
   future: [],
   applying: null,
 
+  viewMode: "photo",
+  roomModel: null,
+  selectedEntityId: null,
+  reconstructing: false,
+  reconstructionJob: null,
+
   async load(projectId) {
     set({ status: "loading" });
     const bundle = await projectService.get(projectId);
     set({
       bundle,
+      roomModel: bundle?.roomModel ?? null,
       status: bundle ? "ready" : "missing",
       past: [],
       future: [],
       selectedItemId: null,
+      selectedEntityId: null,
       activeSurface: null,
+      viewMode: bundle?.roomModel ? "3d" : "photo",
     });
   },
 
   async reload() {
     const id = get().bundle?.project.id;
     if (!id) return;
-    set({ bundle: await projectService.get(id) });
+    const bundle = await projectService.get(id);
+    set({ bundle, roomModel: bundle?.roomModel ?? get().roomModel });
   },
 
   select(id) {
-    set({ selectedItemId: id });
+    set({ selectedItemId: id, selectedEntityId: null });
   },
   setActiveSurface(s) {
     set({ activeSurface: s, selectedItemId: null });
+  },
+
+  setViewMode(m) {
+    set({ viewMode: m });
+  },
+
+  selectEntity(id) {
+    const model = get().roomModel;
+    const entity = id ? model?.entities.find((e) => e.id === id) ?? null : null;
+    set({
+      selectedEntityId: id,
+      selectedItemId: null,
+      activeSurface: entity?.surfaceKind ?? null,
+    });
+  },
+
+  async runReconstruction(captureUrls, hint) {
+    const bundle = get().bundle;
+    if (!bundle) return;
+    set({ reconstructing: true });
+    try {
+      await roomModelService.addCaptures(
+        bundle.project.id,
+        captureUrls.map((url) => ({ url, width: 1024, height: 768 })),
+      );
+      const { model, job } = await roomModelService.reconstruct(bundle.project.id, {
+        roomTypeHint: hint ?? bundle.project.projectType,
+      });
+      await get().reload();
+      set({ roomModel: model, reconstructionJob: job, viewMode: "3d", reconstructing: false });
+    } catch (e) {
+      set({
+        reconstructing: false,
+        reconstructionJob: {
+          ...(get().reconstructionJob ?? ({} as ReconstructionJob)),
+          status: "failed",
+          error: e instanceof Error ? e.message : "Reconstruction failed",
+        } as ReconstructionJob,
+      });
+    }
+  },
+
+  async calibrateRoomModel(measurements) {
+    const model = get().roomModel;
+    if (!model) return;
+    const next = await roomModelService.calibrate(model.id, measurements);
+    await get().reload();
+    set({ roomModel: next });
+  },
+
+  async editRoomModel(edit) {
+    const model = get().roomModel;
+    if (!model) return;
+    const optimistic = applyModelEdit(model, edit);
+    set({ roomModel: optimistic }); // instant feedback
+    const saved = await roomModelService.saveVersion(model.id, optimistic);
+    await get().reload();
+    set({ roomModel: saved });
   },
 
   async addProduct(product, surface) {
@@ -110,7 +200,13 @@ export const useEditor = create<EditorState>((set, get) => ({
     set({ applying: product.id });
     try {
       const image = bundle.images.find((i) => i.type === "original");
-      const item = await itemService.add({ projectId: bundle.project.id, product, surface });
+      const entityId = get().selectedEntityId;
+      const item = await itemService.add({
+        projectId: bundle.project.id,
+        product,
+        surface,
+        roomEntityId: get().viewMode === "3d" ? entityId : null,
+      });
       if (item.kind === "surface" && image) {
         const res = await imageGeneration.applyMaterial({
           imageUrl: image.originalUrl,
