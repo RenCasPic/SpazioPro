@@ -31,7 +31,14 @@
     "continue": "Empezar a diseñar",
     "where": "¿Dónde está el proyecto?",
     "where_hint": "Define los precios locales, la mano de obra y el impuesto sobre ventas. Puedes cambiarlo después.",
-    "analyzed_done": "Listo — preparando tu espacio…"
+    "analyzed_done": "Listo — preparando tu espacio…",
+    "source_photos": "Fotos",
+    "source_bim": "BIM / IFC",
+    "source_cad": "CAD / Planos",
+    "source_documents": "Documentos",
+    "source_capture": "Captura de sitio",
+    "source_soon_badge": "Pronto",
+    "source_soon": "Próximamente — por ahora, empieza desde fotos o medidas."
   },
   "card": {
     "estimate": "Estimado",

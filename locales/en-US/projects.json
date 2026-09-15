@@ -31,7 +31,14 @@
     "continue": "Start designing",
     "where": "Where is the project?",
     "where_hint": "Sets local pricing, labor rates and sales tax. You can change it later.",
-    "analyzed_done": "Got it — setting up your space…"
+    "analyzed_done": "Got it — setting up your space…",
+    "source_photos": "Photos",
+    "source_bim": "BIM / IFC",
+    "source_cad": "CAD / Plans",
+    "source_documents": "Documents",
+    "source_capture": "Site Capture",
+    "source_soon_badge": "Soon",
+    "source_soon": "Coming soon — for now, start from photos or dimensions."
   },
   "card": {
     "estimate": "Estimate",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Ruler, MapPin, Sparkles, ScanSearch } from "lucide-react";
+import { Ruler, MapPin, Sparkles, ScanSearch, Camera, Box, PenTool, FileText, Video, Lock } from "lucide-react";
 import type { ProjectType, RoomAnalysis } from "@/types";
 import { PhotoUploader } from "@/components/projects/photo-uploader";
 import { StateSelect } from "@/components/countries/state-select";
@@ -15,7 +15,18 @@ import { roomService } from "@/lib/services/room-service";
 import { imageService } from "@/lib/services/image-service";
 import { vision } from "@/lib/ai/vision";
 import { toInches } from "@/lib/calculations/units";
+import { useToasts } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+
+type ImportSource = "photos" | "bim" | "cad" | "documents" | "capture";
+
+const SOURCES: Array<{ id: ImportSource; icon: typeof Camera; ready: boolean }> = [
+  { id: "photos", icon: Camera, ready: true },
+  { id: "bim", icon: Box, ready: false },
+  { id: "cad", icon: PenTool, ready: false },
+  { id: "documents", icon: FileText, ready: false },
+  { id: "capture", icon: Video, ready: false },
+];
 
 /** A friendly default name so the user never has to name the project up front. */
 function defaultName(type: ProjectType, locale: string): string {
@@ -40,7 +51,9 @@ export default function NewProjectPage() {
   const locale = useLocale();
   const router = useLocaleRouter();
   const { profile } = useSession();
+  const push = useToasts((s) => s.push);
 
+  const [source, setSource] = useState<ImportSource>("photos");
   const [stateCode, setStateCode] = useState("TX");
   const [city, setCity] = useState("");
   const [mode, setMode] = useState<"photo" | "dims">("photo");
@@ -158,6 +171,34 @@ export default function NewProjectPage() {
         {t("projects.start.title")}
       </h1>
       <p className="mt-2 text-[15px] text-ink-soft">{t("projects.start.subtitle")}</p>
+
+      <div className="no-scrollbar mt-6 flex gap-2 overflow-x-auto pb-1">
+        {SOURCES.map((s) => {
+          const Icon = s.icon;
+          const active = source === s.id;
+          return (
+            <button
+              key={s.id}
+              onClick={() => (s.ready ? setSource(s.id) : push(t("projects.start.source_soon"), "info"))}
+              className={cn(
+                "relative flex w-[104px] shrink-0 flex-col items-center gap-1.5 rounded-xl border px-3 py-3 text-center transition-colors",
+                active
+                  ? "border-accent bg-accent-tint"
+                  : s.ready
+                    ? "border-line-strong hover:border-ink/30"
+                    : "border-line-strong opacity-60",
+              )}
+            >
+              {!s.ready && <Lock className="absolute right-1.5 top-1.5 h-3 w-3 text-muted" />}
+              <Icon className={cn("h-5 w-5", active ? "text-accent" : "text-ink-soft")} />
+              <span className={cn("text-[11px] font-medium leading-tight", active ? "text-accent" : "text-ink")}>
+                {t(`projects.start.source_${s.id}`)}
+              </span>
+              {!s.ready && <span className="text-[9px] uppercase tracking-wide text-muted">{t("projects.start.source_soon_badge")}</span>}
+            </button>
+          );
+        })}
+      </div>
 
       <div className="mt-6 inline-flex rounded-full border border-line-strong bg-surface p-0.5 text-[13px] font-medium">
         <button
