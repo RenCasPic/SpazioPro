@@ -26,12 +26,18 @@
     "permits": "Permisos",
     "other": "Otros",
     "subtotal": "Subtotal",
+    "overhead": "Overhead",
+    "markup": "Markup",
     "discount": "Descuento",
     "sales_tax": "Impuesto sobre ventas",
     "grand_total": "Total"
   },
   "settings": {
     "title": "Ajustes del estimado",
+    "overhead": "Overhead (%)",
+    "overhead_hint": "Se aplica sobre el costo directo (materiales + mano de obra + extras).",
+    "markup": "Markup (%)",
+    "markup_hint": "Se aplica después del overhead — el resultado es tu precio de venta.",
     "sales_tax": "Impuesto sobre ventas (%)",
     "tax_note": "Resuelto desde {jurisdiction}",
     "discount": "Descuento (%)",
@@ -46,6 +52,7 @@
   "compare_scenarios": "Comparar escenarios",
   "recommended": "recomendado",
   "summary": "Resumen",
+  "selling_price": "Precio de venta",
   "confidence_reasons": {
     "ai_dimensions": "Las dimensiones se estimaron a partir de la imagen, no de una medición certificada.",
     "converted_price": "Algunos precios provienen de una conversión de referencia, no de un precio local.",

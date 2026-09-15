@@ -22,5 +22,12 @@
     "cta": "Crear mi primer proyecto"
   },
   "hero_lead": "Convierte tus ideas en espacios bonitos y estimados profesionales.",
-  "activity": "Estimados recientes"
+  "activity": "Estimados recientes",
+  "pipeline": {
+    "title": "Pipeline",
+    "won": "Ganados",
+    "open": "Pendientes",
+    "lost": "Perdidos",
+    "avg_value": "Valor promedio"
+  }
 }

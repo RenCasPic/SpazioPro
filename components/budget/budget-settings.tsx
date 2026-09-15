@@ -21,6 +21,15 @@ export function BudgetSettings({ bundle }: { bundle: ProjectBundle }) {
       <h3 className="font-serif text-xl text-ink">{t("estimates.settings.title")}</h3>
 
       <div className="grid gap-3 sm:grid-cols-2">
+        <Field label={t("estimates.settings.overhead")} hint={t("estimates.settings.overhead_hint")}>
+          <Input type="number" min="0" step="1" value={s.overheadPercent ?? 0} onChange={(e) => updateSettings({ overheadPercent: Number(e.target.value) })} />
+        </Field>
+        <Field label={t("estimates.settings.markup")} hint={t("estimates.settings.markup_hint")}>
+          <Input type="number" min="0" step="1" value={s.markupPercent ?? 0} onChange={(e) => updateSettings({ markupPercent: Number(e.target.value) })} />
+        </Field>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
         <Field label={t("estimates.settings.sales_tax")} hint={tax ? t("estimates.settings.tax_note", { jurisdiction: tax.jurisdiction.name }) : undefined}>
           <Input type="number" min="0" step="0.001" value={s.salesTaxRate} onChange={(e) => updateSettings({ salesTaxRate: Number(e.target.value) })} />
         </Field>

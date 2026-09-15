@@ -161,6 +161,17 @@ function Estimate({ bundle }: { bundle: ProjectBundle }) {
               <span className="text-xs text-muted group-open:hidden">{t("settings.advanced_hint")}</span>
             </summary>
             <div className="space-y-5 px-5 pb-5">
+              {live && (live.totals.overhead > 0 || live.totals.markup > 0) && (
+                <dl className="space-y-1 rounded-xl border border-line p-3 text-[13px]">
+                  <PriceRow label={t("estimates.cost_lines.subtotal")} value={money(live.totals.directCost)} />
+                  {live.totals.overhead > 0 && <PriceRow label={t("estimates.cost_lines.overhead")} value={money(live.totals.overhead)} />}
+                  {live.totals.markup > 0 && <PriceRow label={t("estimates.cost_lines.markup")} value={money(live.totals.markup)} />}
+                  <div className="flex justify-between border-t border-line pt-1.5 font-semibold text-ink">
+                    <dt>{t("estimates.selling_price")}</dt>
+                    <dd className="tabular-nums">{money(live.totals.sellingPrice)}</dd>
+                  </div>
+                </dl>
+              )}
               <LaborEditor bundle={bundle} />
               <BudgetSettings bundle={bundle} />
             </div>
@@ -193,6 +204,15 @@ function Estimate({ bundle }: { bundle: ProjectBundle }) {
           <PriceDisclaimer className="mt-4" />
         </aside>
       </div>
+    </div>
+  );
+}
+
+function PriceRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between text-ink-soft">
+      <dt>{label}</dt>
+      <dd className="tabular-nums">{value}</dd>
     </div>
   );
 }

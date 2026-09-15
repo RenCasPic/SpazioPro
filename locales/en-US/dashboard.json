@@ -22,5 +22,12 @@
     "cta": "Create my first project"
   },
   "hero_lead": "Turn your ideas into beautiful spaces and professional estimates.",
-  "activity": "Recent Estimates"
+  "activity": "Recent Estimates",
+  "pipeline": {
+    "title": "Pipeline",
+    "won": "Won",
+    "open": "Pending",
+    "lost": "Lost",
+    "avg_value": "Avg. project value"
+  }
 }

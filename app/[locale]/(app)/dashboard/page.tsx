@@ -10,6 +10,10 @@ import {
   DollarSign,
   ArrowRight,
   ArrowUpRight,
+  Trophy,
+  Clock,
+  XCircle,
+  TrendingUp,
 } from "lucide-react";
 import { useProjects } from "@/hooks/use-project";
 import { useSession } from "@/hooks/use-session";
@@ -20,9 +24,9 @@ import { LocaleLink } from "@/components/localization/locale-link";
 import { useT, useLocale } from "@/components/localization/i18n-provider";
 import { estimateService } from "@/lib/services/estimate-service";
 import { clientService } from "@/lib/services/client-service";
-import { formatUsd, formatDate } from "@/lib/format";
+import { formatUsd, formatUsd0, formatDate } from "@/lib/format";
 import { projectImage, HERO_IMAGE } from "@/lib/media/project-image";
-import type { Estimate, Client } from "@/types";
+import { WON_STATUSES, OPEN_STATUSES, LOST_STATUSES, type Estimate, type Client } from "@/types";
 
 export default function DashboardPage() {
   const t = useT();
@@ -52,6 +56,18 @@ export default function DashboardPage() {
       totalValue,
     };
   }, [projects, estimates, clients]);
+
+  const pipeline = useMemo(() => {
+    const won = projects.filter((p) => WON_STATUSES.includes(p.project.status));
+    const open = projects.filter((p) => OPEN_STATUSES.includes(p.project.status));
+    const lost = projects.filter((p) => LOST_STATUSES.includes(p.project.status));
+    const avgValue = projects.length
+      ? projects.reduce((s, p) => s + p.headlineTotal, 0) / projects.length
+      : 0;
+    return { won: won.length, open: open.length, lost: lost.length, avgValue };
+  }, [projects]);
+
+  const isProfessional = profile?.workspaceMode === "professional";
 
   const hour = new Date().getHours();
   const greetKey = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
@@ -114,6 +130,19 @@ export default function DashboardPage() {
         <Stat icon={<Users className="h-4 w-4" />} label={t("common.nav.clients")} value={String(stats.clients)} />
         <Stat icon={<DollarSign className="h-4 w-4" />} label={t("dashboard.stats.estimated_value")} value={formatUsd(stats.totalValue, locale)} />
       </div>
+
+      {/* pipeline — professional workspace only */}
+      {isProfessional && stats.projects > 0 && (
+        <div>
+          <h2 className="mb-3 font-serif text-[17px] text-ink">{t("dashboard.pipeline.title")}</h2>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <Stat icon={<Trophy className="h-4 w-4" />} label={t("dashboard.pipeline.won")} value={String(pipeline.won)} />
+            <Stat icon={<Clock className="h-4 w-4" />} label={t("dashboard.pipeline.open")} value={String(pipeline.open)} />
+            <Stat icon={<XCircle className="h-4 w-4" />} label={t("dashboard.pipeline.lost")} value={String(pipeline.lost)} />
+            <Stat icon={<TrendingUp className="h-4 w-4" />} label={t("dashboard.pipeline.avg_value")} value={formatUsd0(pipeline.avgValue, locale)} />
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-7 xl:grid-cols-[minmax(0,1fr)_360px]">
         {/* recent projects */}

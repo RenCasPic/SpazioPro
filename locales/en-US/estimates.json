@@ -26,12 +26,18 @@
     "permits": "Permits",
     "other": "Other",
     "subtotal": "Subtotal",
+    "overhead": "Overhead",
+    "markup": "Markup",
     "discount": "Discount",
     "sales_tax": "Sales Tax",
     "grand_total": "Grand Total"
   },
   "settings": {
     "title": "Estimate settings",
+    "overhead": "Overhead (%)",
+    "overhead_hint": "Applied to direct cost (materials + labor + extras).",
+    "markup": "Markup (%)",
+    "markup_hint": "Applied after overhead — the result is your selling price.",
     "sales_tax": "Sales tax (%)",
     "tax_note": "Resolved from {jurisdiction}",
     "discount": "Discount (%)",
@@ -46,6 +52,7 @@
   "compare_scenarios": "Compare scenarios",
   "recommended": "recommended",
   "summary": "Summary",
+  "selling_price": "Selling price",
   "confidence_reasons": {
     "ai_dimensions": "Room dimensions were estimated from the uploaded image, not a certified measurement.",
     "converted_price": "Some prices come from a reference conversion, not a local price.",
