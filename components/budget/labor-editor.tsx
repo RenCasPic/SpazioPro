@@ -19,7 +19,7 @@ export function LaborEditor({ bundle }: { bundle: ProjectBundle }) {
     <div>
       <div className="flex items-center justify-between">
         <h3 className="font-serif text-xl text-ink">{t("estimates.labor.title")}</h3>
-        <button onClick={addLaborLine} className="inline-flex h-8 items-center gap-1.5 rounded-full border border-line-strong px-3 text-xs font-medium text-ink hover:border-ink/30">
+        <button onClick={addLaborLine} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-line-strong px-3 text-xs font-medium text-ink hover:border-ink/30">
           <Plus className="h-3.5 w-3.5" /> {t("estimates.labor.add_line")}
         </button>
       </div>

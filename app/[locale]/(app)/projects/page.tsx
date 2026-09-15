@@ -35,7 +35,7 @@ export default function ProjectsPage() {
         </div>
         <LocaleLink
           href="/projects/new"
-          className="inline-flex h-10 items-center gap-2 rounded-full bg-ink px-4 text-sm font-medium text-white transition-colors hover:bg-ink/90"
+          className="inline-flex h-10 items-center gap-2 rounded-lg bg-ink px-4 text-sm font-medium text-white transition-colors hover:bg-ink/90"
         >
           <Plus className="h-4 w-4" />
           {t("common.actions.new_project")}
@@ -79,7 +79,7 @@ export default function ProjectsPage() {
             !projects.length && (
               <LocaleLink
                 href="/projects/new"
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-sm font-medium text-white hover:bg-ink/90"
+                className="inline-flex h-11 items-center gap-2 rounded-lg bg-ink px-5 text-sm font-medium text-white hover:bg-ink/90"
               >
                 {t("common.actions.create_project")}
               </LocaleLink>

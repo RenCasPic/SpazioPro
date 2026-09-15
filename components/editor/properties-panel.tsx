@@ -95,7 +95,7 @@ export function PropertiesPanel({ bundle }: { bundle: ProjectBundle }) {
         </div>
         <LocaleLink
           href={`/projects/${bundle.project.id}/estimate`}
-          className="mt-3 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-full bg-ink text-[13px] font-medium text-white hover:bg-ink/90"
+          className="mt-3 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg bg-ink text-[13px] font-medium text-white hover:bg-ink/90"
         >
           <FileText className="h-4 w-4" /> {t("editor.studio.calc")}
         </LocaleLink>

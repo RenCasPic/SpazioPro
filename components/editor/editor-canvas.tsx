@@ -36,7 +36,7 @@ export function EditorCanvas({ bundle }: { bundle: ProjectBundle }) {
   return (
     <div className="relative flex h-full flex-col bg-[repeating-conic-gradient(#f0ece4_0%_25%,#f6f3ee_0%_50%)] bg-[length:22px_22px]">
       <div className="pointer-events-none absolute right-3 top-3 z-20">
-        <div className="pointer-events-auto flex items-center gap-0.5 rounded-full border border-line bg-surface/95 p-1 shadow-sm backdrop-blur">
+        <div className="pointer-events-auto flex items-center gap-0.5 rounded-lg border border-line bg-surface/95 p-1 shadow-sm backdrop-blur">
           <IconBtn label={t("editor.zoom_out")} onClick={() => setZoom((z) => Math.max(0.5, +(z - 0.1).toFixed(2)))}>
             <ZoomOut className="h-4 w-4" />
           </IconBtn>

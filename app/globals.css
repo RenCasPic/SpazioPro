@@ -14,16 +14,16 @@
   --color-line: #ecedf0;
   --color-line-strong: #dee0e5;
 
-  /* --- Accent: sophisticated deep evergreen --- */
-  --color-accent: #1f4d40;
-  --color-accent-dark: #163a30;
-  --color-accent-tint: #e9f1ee;
-  --color-accent-ink: #2b6a58;
+  /* --- Accent: blueprint steel blue (construction/precision, used sparingly) --- */
+  --color-accent: #1d4e73;
+  --color-accent-dark: #153a56;
+  --color-accent-tint: #e7edf2;
+  --color-accent-ink: #2f6fa0;
 
   /* legacy aliases so existing markup keeps working */
-  --color-clay: #1f4d40;
-  --color-clay-dark: #163a30;
-  --color-clay-tint: #e9f1ee;
+  --color-clay: #1d4e73;
+  --color-clay-dark: #153a56;
+  --color-clay-tint: #e7edf2;
 
   /* --- Status (soft pastels) --- */
   --color-ok: #1c7a54;
@@ -44,13 +44,15 @@
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-serif: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 
-  --radius-lg: 0.75rem;
-  --radius-xl: 0.9rem;
-  --radius-2xl: 1.1rem;
+  /* Tighter, more technical radius scale — precise, not soft/consumer */
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.625rem;
+  --radius-2xl: 0.75rem;
 
-  --shadow-card: 0 1px 2px rgba(18, 21, 26, 0.04), 0 1px 3px rgba(18, 21, 26, 0.03);
-  --shadow-raised: 0 2px 8px -2px rgba(18, 21, 26, 0.08), 0 1px 3px rgba(18, 21, 26, 0.04);
-  --shadow-pop: 0 12px 32px -8px rgba(18, 21, 26, 0.16), 0 4px 10px -4px rgba(18, 21, 26, 0.08);
+  /* Flatter shadows — a professional data tool leans on borders, not glow */
+  --shadow-card: 0 1px 2px rgba(18, 21, 26, 0.05);
+  --shadow-raised: 0 1px 3px rgba(18, 21, 26, 0.06), 0 1px 2px rgba(18, 21, 26, 0.04);
+  --shadow-pop: 0 8px 20px -6px rgba(18, 21, 26, 0.14), 0 2px 6px -2px rgba(18, 21, 26, 0.06);
 }
 
 :root {

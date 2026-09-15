@@ -25,7 +25,7 @@ import { useT, useLocale } from "@/components/localization/i18n-provider";
 import { estimateService } from "@/lib/services/estimate-service";
 import { clientService } from "@/lib/services/client-service";
 import { formatUsd, formatUsd0, formatDate } from "@/lib/format";
-import { projectImage, HERO_IMAGE } from "@/lib/media/project-image";
+import { projectImage } from "@/lib/media/project-image";
 import { WON_STATUSES, OPEN_STATUSES, LOST_STATUSES, type Estimate, type Client } from "@/types";
 
 export default function DashboardPage() {
@@ -35,7 +35,6 @@ export default function DashboardPage() {
   const { profile } = useSession();
   const [estimates, setEstimates] = useState<Estimate[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
-  const [heroBroken, setHeroBroken] = useState(false);
   const [now] = useState(() => Date.now());
 
   useEffect(() => {
@@ -79,47 +78,30 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-7">
-      {/* hero */}
-      <section className="relative overflow-hidden rounded-2xl border border-line bg-surface">
-        <div className="grid lg:grid-cols-[minmax(0,1fr)_46%]">
-          <div className="p-6 sm:p-8 lg:p-10">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-              {t(`dashboard.greeting.${greetKey}`)},
-            </p>
-            <h1 className="mt-1.5 display text-4xl text-ink sm:text-[44px]">{firstName || "Estimate It"}</h1>
-            <p className="mt-2 max-w-md text-[15px] text-ink-soft">{t("dashboard.hero_lead")}</p>
-            <div className="mt-6 flex flex-wrap gap-2.5">
-              <LocaleLink
-                href="/projects/new"
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-sm font-medium text-white transition-colors hover:bg-ink/90"
-              >
-                <Plus className="h-4 w-4" />
-                {t("common.actions.new_project")}
-              </LocaleLink>
-              <LocaleLink
-                href="/catalog"
-                className="inline-flex h-11 items-center gap-2 rounded-full border border-line-strong bg-surface px-5 text-sm font-medium text-ink transition-colors hover:border-ink/25 hover:bg-surface-2"
-              >
-                <LibraryBig className="h-4 w-4" />
-                {t("common.actions.browse_catalog")}
-              </LocaleLink>
-            </div>
-          </div>
-          <div className="relative h-40 bg-canvas sm:h-52 lg:h-auto lg:min-h-full">
-            {!heroBroken ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={HERO_IMAGE}
-                alt=""
-                referrerPolicy="no-referrer"
-                onError={() => setHeroBroken(true)}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            ) : (
-              <div className="absolute inset-0 bg-[linear-gradient(135deg,var(--color-accent-tint),#eef1f0)]" />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/10 to-transparent lg:w-24" />
-          </div>
+      {/* hero — compact data banner, not a lifestyle photo */}
+      <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-6 py-5 sm:px-8 sm:py-6">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+            {t(`dashboard.greeting.${greetKey}`)},
+          </p>
+          <h1 className="mt-1 display text-[28px] text-ink sm:text-[32px]">{firstName || "Estimate It"}</h1>
+          <p className="mt-1.5 max-w-md text-[14px] text-ink-soft">{t("dashboard.hero_lead")}</p>
+        </div>
+        <div className="flex flex-wrap gap-2.5">
+          <LocaleLink
+            href="/projects/new"
+            className="inline-flex h-10 items-center gap-2 rounded-lg bg-ink px-4 text-sm font-medium text-white transition-colors hover:bg-ink/90"
+          >
+            <Plus className="h-4 w-4" />
+            {t("common.actions.new_project")}
+          </LocaleLink>
+          <LocaleLink
+            href="/catalog"
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-line-strong bg-surface px-4 text-sm font-medium text-ink transition-colors hover:border-ink/25 hover:bg-surface-2"
+          >
+            <LibraryBig className="h-4 w-4" />
+            {t("common.actions.browse_catalog")}
+          </LocaleLink>
         </div>
       </section>
 
@@ -165,7 +147,7 @@ export default function DashboardPage() {
               title={t("dashboard.empty.title")}
               description={t("dashboard.empty.description")}
               action={
-                <LocaleLink href="/projects/new" className="inline-flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-sm font-medium text-white hover:bg-ink/90">
+                <LocaleLink href="/projects/new" className="inline-flex h-11 items-center gap-2 rounded-lg bg-ink px-5 text-sm font-medium text-white hover:bg-ink/90">
                   {t("dashboard.empty.cta")}
                 </LocaleLink>
               }

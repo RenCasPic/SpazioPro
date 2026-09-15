@@ -69,16 +69,16 @@ export function EditorToolbar({ bundle }: { bundle: ProjectBundle }) {
           )}
         </span>
 
-        <button onClick={() => setLocationOpen(true)} className="hidden h-9 items-center gap-1.5 rounded-full border border-line-strong px-3 text-[13px] font-medium text-ink hover:border-ink/30 sm:inline-flex" title={t("editor.change_location")}>
+        <button onClick={() => setLocationOpen(true)} className="hidden h-9 items-center gap-1.5 rounded-lg border border-line-strong px-3 text-[13px] font-medium text-ink hover:border-ink/30 sm:inline-flex" title={t("editor.change_location")}>
           <MapPin className="h-4 w-4" /> {bundle.location?.stateCode ?? bundle.project.stateCode}
         </button>
 
-        <div className="hidden items-center rounded-full border border-line-strong p-0.5 sm:flex">
+        <div className="hidden items-center rounded-lg border border-line-strong p-0.5 sm:flex">
           <button
             onClick={() => setViewMode("photo")}
             title={t("editor.d3.mode_photo")}
             className={cn(
-              "grid h-8 w-8 place-items-center rounded-full",
+              "grid h-8 w-8 place-items-center rounded-md",
               viewMode === "photo" ? "bg-ink text-white" : "text-ink-soft hover:text-ink",
             )}
           >
@@ -88,7 +88,7 @@ export function EditorToolbar({ bundle }: { bundle: ProjectBundle }) {
             onClick={() => setViewMode("3d")}
             title={t("editor.d3.mode_3d")}
             className={cn(
-              "relative grid h-8 w-8 place-items-center rounded-full",
+              "relative grid h-8 w-8 place-items-center rounded-md",
               viewMode === "3d" ? "bg-ink text-white" : "text-ink-soft hover:text-ink",
             )}
           >
@@ -108,10 +108,10 @@ export function EditorToolbar({ bundle }: { bundle: ProjectBundle }) {
           </button>
         </div>
 
-        <LocaleLink href={`/projects/${bundle.project.id}/images`} className="hidden h-9 items-center gap-1.5 rounded-full border border-line-strong px-3 text-[13px] font-medium text-ink hover:border-ink/30 sm:inline-flex">
+        <LocaleLink href={`/projects/${bundle.project.id}/images`} className="hidden h-9 items-center gap-1.5 rounded-lg border border-line-strong px-3 text-[13px] font-medium text-ink hover:border-ink/30 sm:inline-flex">
           <Columns2 className="h-4 w-4" /> {t("editor.before_after")}
         </LocaleLink>
-        <LocaleLink href={`/projects/${bundle.project.id}/estimate`} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-accent px-3.5 text-[13px] font-medium text-white hover:bg-accent-dark">
+        <LocaleLink href={`/projects/${bundle.project.id}/estimate`} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-accent px-3.5 text-[13px] font-medium text-white hover:bg-accent-dark">
           <FileText className="h-4 w-4" /> {t("editor.studio.calc")}
         </LocaleLink>
       </div>

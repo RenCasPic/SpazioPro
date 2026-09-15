@@ -74,7 +74,7 @@ export function PhotoUploader({ onReady }: { onReady: (dataUrl: string) => void 
             type="button"
             disabled={busy}
             onClick={() => fileInput.current?.click()}
-            className="inline-flex h-10 items-center gap-2 rounded-full bg-ink px-4 text-sm font-medium text-white hover:bg-ink/90 disabled:opacity-50"
+            className="inline-flex h-10 items-center gap-2 rounded-lg bg-ink px-4 text-sm font-medium text-white hover:bg-ink/90 disabled:opacity-50"
           >
             <Upload className="h-4 w-4" /> {t("projects.upload.choose")}
           </button>
@@ -82,7 +82,7 @@ export function PhotoUploader({ onReady }: { onReady: (dataUrl: string) => void 
             type="button"
             disabled={busy}
             onClick={() => cameraInput.current?.click()}
-            className="inline-flex h-10 items-center gap-2 rounded-full border border-line-strong bg-surface px-4 text-sm font-medium text-ink hover:border-ink/30 disabled:opacity-50"
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-line-strong bg-surface px-4 text-sm font-medium text-ink hover:border-ink/30 disabled:opacity-50"
           >
             <Camera className="h-4 w-4" /> {t("projects.upload.camera")}
           </button>

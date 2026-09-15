@@ -200,7 +200,7 @@ export default function NewProjectPage() {
         })}
       </div>
 
-      <div className="mt-6 inline-flex rounded-full border border-line-strong bg-surface p-0.5 text-[13px] font-medium">
+      <div className="mt-6 inline-flex rounded-lg border border-line-strong bg-surface p-0.5 text-[13px] font-medium">
         <button
           onClick={() => setMode("photo")}
           className={cn(

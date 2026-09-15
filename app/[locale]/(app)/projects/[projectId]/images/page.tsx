@@ -43,7 +43,7 @@ function Images({ bundle, reload }: { bundle: ProjectBundle; reload: () => Promi
             <Button variant="outline" size="sm" onClick={() => setReplacing((v) => !v)}>
               <Upload className="h-4 w-4" /> {t("common.actions.upload_space")}
             </Button>
-            <div className="flex rounded-full border border-line-strong p-0.5">
+            <div className="flex rounded-lg border border-line-strong p-0.5">
               <Toggle active={mode === "slider"} onClick={() => setMode("slider")} icon={<SplitSquareHorizontal className="h-4 w-4" />} label="Slider" />
               <Toggle active={mode === "split"} onClick={() => setMode("split")} icon={<Rows2 className="h-4 w-4" />} label="Side by side" />
             </div>

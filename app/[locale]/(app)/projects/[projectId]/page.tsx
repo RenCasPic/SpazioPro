@@ -49,16 +49,16 @@ function Overview({ bundle, onDeleted }: { bundle: ProjectBundle; onDeleted: () 
             <div className="grid aspect-[16/10] place-items-center bg-paper text-sm text-muted">—</div>
           )}
           <div className="flex flex-wrap gap-2 p-4">
-            <LocaleLink href={`/projects/${project.id}/editor`} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-clay px-3.5 text-[13px] font-medium text-white hover:bg-clay-dark">
+            <LocaleLink href={`/projects/${project.id}/editor`} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-clay px-3.5 text-[13px] font-medium text-white hover:bg-clay-dark">
               <Pencil className="h-4 w-4" /> {t("projects.overview.open_editor")}
             </LocaleLink>
-            <LocaleLink href={`/projects/${project.id}/images`} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-line-strong px-3.5 text-[13px] font-medium text-ink hover:border-ink/30">
+            <LocaleLink href={`/projects/${project.id}/images`} className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line-strong px-3.5 text-[13px] font-medium text-ink hover:border-ink/30">
               <ImageIcon className="h-4 w-4" /> {t("projects.overview.images")}
             </LocaleLink>
-            <LocaleLink href={`/projects/${project.id}/estimate`} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-line-strong px-3.5 text-[13px] font-medium text-ink hover:border-ink/30">
+            <LocaleLink href={`/projects/${project.id}/estimate`} className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line-strong px-3.5 text-[13px] font-medium text-ink hover:border-ink/30">
               <ReceiptText className="h-4 w-4" /> {t("projects.tabs.estimate")}
             </LocaleLink>
-            <LocaleLink href={`/projects/${project.id}/scenarios`} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-line-strong px-3.5 text-[13px] font-medium text-ink hover:border-ink/30">
+            <LocaleLink href={`/projects/${project.id}/scenarios`} className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line-strong px-3.5 text-[13px] font-medium text-ink hover:border-ink/30">
               <Layers className="h-4 w-4" /> {t("projects.tabs.scenarios")}
             </LocaleLink>
           </div>
@@ -98,7 +98,7 @@ function Overview({ bundle, onDeleted }: { bundle: ProjectBundle; onDeleted: () 
             <p className="text-sm text-muted">{t("common.states.loading")}</p>
           </div>
         )}
-        <LocaleLink href={`/projects/${project.id}/estimate`} className="inline-flex h-10 w-full items-center justify-center rounded-full bg-ink text-[13px] font-medium text-white hover:bg-ink/90">
+        <LocaleLink href={`/projects/${project.id}/estimate`} className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-ink text-[13px] font-medium text-white hover:bg-ink/90">
           {t("projects.overview.view_full_estimate")}
         </LocaleLink>
 

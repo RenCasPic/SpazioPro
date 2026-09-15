@@ -35,10 +35,10 @@ export default function LandingPage() {
         <Logo href="/" />
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
-          <LocaleLink href="/login" className="rounded-full px-3 py-1.5 text-sm text-ink-soft hover:text-ink">
+          <LocaleLink href="/login" className="rounded-lg px-3 py-1.5 text-sm text-ink-soft hover:text-ink">
             {t("onboarding.auth.sign_in")}
           </LocaleLink>
-          <LocaleLink href="/register" className="rounded-full bg-clay px-3.5 py-1.5 text-sm font-medium text-white hover:bg-clay-dark">
+          <LocaleLink href="/register" className="rounded-lg bg-clay px-3.5 py-1.5 text-sm font-medium text-white hover:bg-clay-dark">
             {t("onboarding.auth.create_account")}
           </LocaleLink>
         </div>
@@ -57,14 +57,14 @@ export default function LandingPage() {
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <LocaleLink
               href="/projects/new"
-              className="inline-flex h-12 items-center gap-2 rounded-full bg-accent px-6 text-[15px] font-medium text-white hover:bg-accent-dark"
+              className="inline-flex h-12 items-center gap-2 rounded-lg bg-accent px-6 text-[15px] font-medium text-white hover:bg-accent-dark"
             >
               {li ? "Crear proyecto" : "Create project"}
               <ArrowRight className="h-4 w-4" />
             </LocaleLink>
             <LocaleLink
               href="/dashboard"
-              className="inline-flex h-12 items-center gap-2 rounded-full border border-line-strong bg-surface px-6 text-[15px] font-medium text-ink hover:border-ink/30"
+              className="inline-flex h-12 items-center gap-2 rounded-lg border border-line-strong bg-surface px-6 text-[15px] font-medium text-ink hover:border-ink/30"
             >
               {li ? "Ver cómo funciona" : "See how it works"}
             </LocaleLink>

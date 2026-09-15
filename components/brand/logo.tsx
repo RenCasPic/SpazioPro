@@ -18,7 +18,7 @@ export function Logo({
 
   const inner = (
     <span className={cn("inline-flex items-center gap-2.5 display tracking-tight", text, className)}>
-      <span className={cn("grid shrink-0 place-items-center rounded-[9px] bg-accent text-white", mark)} aria-hidden>
+      <span className={cn("grid shrink-0 place-items-center rounded-[7px] bg-accent text-white", mark)} aria-hidden>
         <svg width={glyph} height={glyph} viewBox="0 0 24 24" fill="none">
           <path d="M6 4h9l3 4v12H6z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
           <path d="M6 12h12M12 4v16" stroke="currentColor" strokeWidth="1.4" opacity="0.7" />
