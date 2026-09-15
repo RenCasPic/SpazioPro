@@ -39,6 +39,7 @@ export default function CatalogPage() {
     supplier: t("catalog.price_source.supplier"),
     converted: t("catalog.price_source.converted"),
     missing: t("catalog.price_source.missing"),
+    company: t("catalog.price_source.company"),
   };
 
   return (

@@ -230,17 +230,19 @@ export const projectService = {
       location.zipCode = loc.zipCode;
       location.updatedAt = new Date().toISOString();
 
+      const companyPrices = db.companyProductPrices.filter((o) => o.companyId === project.userId);
+      const companyLabor = db.companyLaborRates.filter((o) => o.companyId === project.userId);
       db.items
         .filter((i) => i.projectId === projectId)
         .forEach((item) => {
-          const resolved = pricingService.resolve(item.productId, stateCode);
+          const resolved = pricingService.resolve(item.productId, stateCode, companyPrices);
           item.unitPrice = resolved.money.amount;
           item.currencyCode = "USD";
           item.priceSource = resolved.source;
           item.supplier = resolved.supplier;
           const product = productById(item.productId);
           if (product) {
-            const rate = laborRateService.rate(stateCode, product.laborCategory);
+            const rate = laborRateService.rate(stateCode, product.laborCategory, companyLabor);
             item.laborCost = rate && rate.unit === item.unit ? rate.cost : 0;
           }
           item.updatedAt = new Date().toISOString();

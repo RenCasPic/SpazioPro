@@ -9,7 +9,8 @@
     "market": "Market price",
     "supplier": "Local supplier",
     "converted": "Reference conversion",
-    "missing": "No price"
+    "missing": "No price",
+    "company": "Your company price"
   },
   "no_stock": "out of stock",
   "supplier": "Supplier: {name}",

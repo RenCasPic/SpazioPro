@@ -66,7 +66,7 @@ export type Unit =
   | "day"
   | "project";
 
-export type PriceSource = "market" | "supplier" | "converted" | "missing";
+export type PriceSource = "market" | "supplier" | "converted" | "missing" | "company";
 
 export interface ProductMarketPrice {
   productId: string;

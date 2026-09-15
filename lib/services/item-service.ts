@@ -70,8 +70,10 @@ export const itemService = {
     const meta = categoryMeta(params.product.category);
     const surface = params.surface ?? meta.surface;
     const entity = findEntity(db, room?.id, params.roomEntityId ?? undefined);
-    const price = pricingService.resolve(params.product.id, p.stateCode);
-    const laborRate = laborRateService.rate(p.stateCode, params.product.laborCategory);
+    const companyPrices = db.companyProductPrices.filter((o) => o.companyId === p.userId);
+    const companyLabor = db.companyLaborRates.filter((o) => o.companyId === p.userId);
+    const price = pricingService.resolve(params.product.id, p.stateCode, companyPrices);
+    const laborRate = laborRateService.rate(p.stateCode, params.product.laborCategory, companyLabor);
     const now = new Date().toISOString();
 
     const baseQty = entity
