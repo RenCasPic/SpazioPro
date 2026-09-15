@@ -14,6 +14,7 @@ const BASE: Array<{ category: LaborCategory; unit: LaborUnit; cost: number }> = 
   { category: "hvac", unit: "hour", cost: 110 },
   { category: "demolition", unit: "sq_ft", cost: 2.75 },
   { category: "framing", unit: "sq_ft", cost: 6.0 },
+  { category: "roofing", unit: "sq_ft", cost: 5.5 },
   { category: "cabinet_installation", unit: "linear_ft", cost: 90 },
   { category: "countertop_installation", unit: "linear_ft", cost: 45 },
   { category: "finish_carpentry", unit: "linear_ft", cost: 8.5 },

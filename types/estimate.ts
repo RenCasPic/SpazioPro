@@ -44,6 +44,10 @@ export interface ProjectItem {
   /** links a surface item to a Semantic 3D Room Model entity — quantity then
    *  comes from that entity's net area instead of the room AABB */
   roomEntityId?: string | null;
+  /** links this item to a TAKEOFF measurement — quantity then comes from
+   *  that measurement instead of the room AABB or the 3D entity. Takeoff and
+   *  Estimate stay two layers: this is the only bridge between them. */
+  takeoffMeasurementId?: string | null;
   quantity: number;
   quantityAuto: boolean;
   unit: Unit;

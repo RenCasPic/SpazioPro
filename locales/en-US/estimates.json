@@ -57,7 +57,8 @@
     "uncalibrated_model": "The 3D room hasn't been calibrated — confirm a measurement to lock in the scale.",
     "partial_calibration": "The 3D room is only partially calibrated; one axis may still be off.",
     "demo_model": "The 3D room is a demo model, not a reconstruction of a real space.",
-    "unreviewed_geometry": "Some surfaces in the 3D room still need a quick visual check."
+    "unreviewed_geometry": "Some surfaces in the 3D room still need a quick visual check.",
+    "unverified_takeoff": "Some quantities come from a takeoff measurement that hasn't been verified yet."
   },
   "detail": {
     "snapshot_frozen": "Market snapshot frozen",

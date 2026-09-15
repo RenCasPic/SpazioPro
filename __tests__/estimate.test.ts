@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   calculateEstimate,
   confidenceReport,
+  itemBreakdown,
   nextEstimateVersion,
+  resolveItemQuantity,
   type EstimateInput,
 } from "@/lib/calculations/estimate";
+import type { RoomEntity, TakeoffMeasurement } from "@/types";
 import { calculateTaxes, applyDiscount } from "@/lib/calculations/taxes";
 import { toInches } from "@/lib/calculations/units";
 import type { ProjectItem } from "@/types";
@@ -160,6 +163,65 @@ describe("professional cost model: direct cost → overhead → markup → selli
     expect(totals.sellingPrice).toBe(11000); // 10,000 + 10%
     expect(totals.discount).toBe(550); // 5% of 11,000, not of 10,000
     expect(totals.total).toBe(10450);
+  });
+});
+
+describe("takeoff → estimate: two layers, one bridge", () => {
+  function takeoff(over: Partial<TakeoffMeasurement> = {}): TakeoffMeasurement {
+    return {
+      id: "tk_1",
+      projectId: "p",
+      roomId: null,
+      category: "flooring_installation",
+      label: "Flooring",
+      unit: "sq_ft",
+      quantity: 100,
+      source: "manual",
+      sourceRef: null,
+      confidence: 0.95,
+      verificationStatus: "verified",
+      notes: "",
+      createdAt: "",
+      updatedAt: "",
+      ...over,
+    };
+  }
+
+  it("a linked takeoff measurement supplies the quantity, waste still applies", () => {
+    const item = surfaceItem({ takeoffMeasurementId: "tk_1", wastePercent: 10 });
+    const dims = base.dimensions;
+    expect(resolveItemQuantity(item, dims, null, takeoff())).toBe(110);
+  });
+
+  it("without a link, the room dimensions are used as before", () => {
+    const item = surfaceItem({ wastePercent: 10 });
+    expect(resolveItemQuantity(item, base.dimensions)).toBe(198); // 180 + 10%, same as the existing test
+  });
+
+  it("takeoff outranks a 3D room-model entity when both are linked", () => {
+    const entity = {
+      dimensions: { netAreaSqFt: 999, grossAreaSqFt: 999 },
+    } as RoomEntity;
+    const item = surfaceItem({ roomEntityId: "wall_01", takeoffMeasurementId: "tk_1", wastePercent: 0 });
+    expect(resolveItemQuantity(item, base.dimensions, entity, takeoff())).toBe(100);
+  });
+
+  it("itemBreakdown resolves the linked measurement when passed the takeoff list", () => {
+    const item = surfaceItem({ takeoffMeasurementId: "tk_1", wastePercent: 0, unitPrice: 5, laborCost: 2 });
+    const b = itemBreakdown(item, base.dimensions, undefined, [takeoff()]);
+    expect(b.quantity).toBe(100);
+    expect(b.materialCost).toBe(500);
+    expect(b.laborCost).toBe(200);
+  });
+
+  it("an unverified linked measurement is flagged on the estimate's confidence", () => {
+    const item = surfaceItem({ takeoffMeasurementId: "tk_1", demoPrice: false });
+    const r = confidenceReport({
+      ...base,
+      items: [item],
+      takeoffMeasurements: [takeoff({ verificationStatus: "needs_verification" })],
+    });
+    expect(r.reasons).toContain("unverified_takeoff");
   });
 });
 

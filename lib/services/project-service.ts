@@ -10,6 +10,8 @@ import type {
   Room,
   RoomModel,
   ScenarioType,
+  ScopeSection,
+  TakeoffMeasurement,
 } from "@/types";
 import type { ProjectConfig } from "@/lib/db/schema";
 import { mutateDb, readDb } from "@/lib/db/local-store";
@@ -33,6 +35,9 @@ export interface ProjectBundle {
   config: ProjectConfig;
   /** latest Semantic 3D Room Model for the primary room, if one exists */
   roomModel: RoomModel | null;
+  /** professional foundation */
+  takeoffMeasurements: TakeoffMeasurement[];
+  scopeSections: ScopeSection[];
 }
 
 /** Latest room-model version for a room. */
@@ -118,6 +123,10 @@ export const projectService = {
           settings: defaultSettings(0),
         },
       roomModel: latestRoomModel(db.rooms.find((r) => r.projectId === projectId)?.id),
+      takeoffMeasurements: db.takeoffMeasurements.filter((m) => m.projectId === projectId),
+      scopeSections: db.scopeSections
+        .filter((s) => s.projectId === projectId)
+        .sort((a, b) => a.order - b.order),
     };
   },
 
@@ -158,6 +167,9 @@ export const projectService = {
       db.items = db.items.filter((i) => i.projectId !== projectId);
       db.estimates = db.estimates.filter((e) => e.projectId !== projectId);
       db.configs = db.configs.filter((c) => c.projectId !== projectId);
+      db.takeoffMeasurements = db.takeoffMeasurements.filter((m) => m.projectId !== projectId);
+      db.scopeSections = db.scopeSections.filter((s) => s.projectId !== projectId);
+      db.projectFiles = db.projectFiles.filter((f) => f.projectId !== projectId);
     });
   },
 

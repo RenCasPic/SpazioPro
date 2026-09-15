@@ -1,12 +1,15 @@
 import type {
   AiJob,
   Client,
+  CompanyLaborRate,
+  CompanyProductPrice,
   DesignScenario,
   Estimate,
   EstimateSettings,
   LaborLine,
   Profile,
   Project,
+  ProjectFile,
   ProjectImage,
   ProjectItem,
   ProjectLocation,
@@ -14,9 +17,11 @@ import type {
   Room,
   RoomCapture,
   RoomModel,
+  ScopeSection,
+  TakeoffMeasurement,
 } from "@/types";
 
-export const DB_VERSION = 5;
+export const DB_VERSION = 6;
 
 export interface ProjectConfig {
   projectId: string;
@@ -41,6 +46,12 @@ export interface Database {
   roomModels: RoomModel[];
   roomCaptures: RoomCapture[];
   reconstructionJobs: ReconstructionJob[];
+  /** Professional foundation */
+  takeoffMeasurements: TakeoffMeasurement[];
+  scopeSections: ScopeSection[];
+  companyProductPrices: CompanyProductPrice[];
+  companyLaborRates: CompanyLaborRate[];
+  projectFiles: ProjectFile[];
 }
 
 export function emptyDatabase(): Database {
@@ -60,5 +71,10 @@ export function emptyDatabase(): Database {
     roomModels: [],
     roomCaptures: [],
     reconstructionJobs: [],
+    takeoffMeasurements: [],
+    scopeSections: [],
+    companyProductPrices: [],
+    companyLaborRates: [],
+    projectFiles: [],
   };
 }

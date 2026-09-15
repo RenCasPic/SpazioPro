@@ -49,6 +49,7 @@ function inputFor(bundle: ProjectBundle, scenarioId: string): EstimateInput {
     currency: "USD",
     hasTaxJurisdiction: tax.matchedOn !== "none",
     roomModel: bundle.roomModel,
+    takeoffMeasurements: bundle.takeoffMeasurements,
   };
 }
 

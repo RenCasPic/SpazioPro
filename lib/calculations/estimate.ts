@@ -9,6 +9,7 @@ import type {
   RoomDimensions,
   RoomEntity,
   RoomModel,
+  TakeoffMeasurement,
 } from "@/types";
 import { baseSurfaceQuantity } from "./dimensions";
 import { entitySurfaceQuantity } from "./surfaces";
@@ -28,6 +29,9 @@ export interface EstimateInput {
   hasTaxJurisdiction: boolean;
   /** when present, surface items linked to an entity take their quantity from it */
   roomModel?: RoomModel | null;
+  /** when present, items linked to a measurement take their quantity from it —
+   *  the TAKEOFF layer feeding the ESTIMATE layer (never the other way) */
+  takeoffMeasurements?: TakeoffMeasurement[];
 }
 
 export interface ItemBreakdown {
@@ -42,11 +46,16 @@ export function resolveItemQuantity(
   item: ProjectItem,
   dimensions: RoomDimensions,
   entity?: RoomEntity | null,
+  takeoff?: TakeoffMeasurement | null,
 ): number {
   if (item.kind === "object" || !item.quantityAuto) return item.quantity;
-  const base = entity
-    ? entitySurfaceQuantity(entity, item.unit)
-    : baseSurfaceQuantity(item.surface, dimensions, item.unit);
+  // Priority: a professional TAKEOFF measurement > a 3D room-model entity >
+  // the room's own AABB. Each is a strictly better source than the next.
+  const base = takeoff
+    ? takeoff.quantity
+    : entity
+      ? entitySurfaceQuantity(entity, item.unit)
+      : baseSurfaceQuantity(item.surface, dimensions, item.unit);
   return calculateWaste(base, item.wastePercent);
 }
 
@@ -54,10 +63,15 @@ export function itemBreakdown(
   item: ProjectItem,
   dimensions: RoomDimensions,
   entities?: RoomEntity[],
+  takeoffMeasurements?: TakeoffMeasurement[],
 ): ItemBreakdown {
   const entity =
     item.roomEntityId && entities ? entities.find((e) => e.id === item.roomEntityId) : undefined;
-  const quantity = resolveItemQuantity(item, dimensions, entity);
+  const takeoff =
+    item.takeoffMeasurementId && takeoffMeasurements
+      ? takeoffMeasurements.find((t) => t.id === item.takeoffMeasurementId)
+      : undefined;
+  const quantity = resolveItemQuantity(item, dimensions, entity, takeoff);
   const materialCost = calculateMaterialCost(quantity, item.unitPrice);
   const laborCost = calculateItemLabor(quantity, item.laborCost);
   return { item, quantity, materialCost, laborCost, total: round(materialCost + laborCost) };
@@ -68,7 +82,7 @@ export function calculateEstimate(input: EstimateInput): {
   breakdown: ItemBreakdown[];
 } {
   const breakdown = input.items.map((it) =>
-    itemBreakdown(it, input.dimensions, input.roomModel?.entities),
+    itemBreakdown(it, input.dimensions, input.roomModel?.entities, input.takeoffMeasurements),
   );
 
   const materials = round(sum(breakdown.map((b) => b.materialCost)));
@@ -145,6 +159,14 @@ export function confidenceReport(input: EstimateInput): ConfidenceReport {
   if (input.laborLines.some((l) => l.enabled && !l.fromMarket && l.unitCost === 0)) reasons.push("no_labor_rate");
   if (!input.items.length) reasons.push("no_items");
   if (!input.hasTaxJurisdiction) reasons.push("no_tax");
+
+  if (input.takeoffMeasurements?.length) {
+    const linkedIds = new Set(input.items.map((i) => i.takeoffMeasurementId).filter(Boolean));
+    const unverified = input.takeoffMeasurements.some(
+      (m) => linkedIds.has(m.id) && m.verificationStatus !== "verified",
+    );
+    if (unverified) reasons.push("unverified_takeoff");
+  }
 
   const model = input.roomModel;
   if (model) {

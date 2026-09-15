@@ -43,6 +43,7 @@ export type LaborCategory =
   | "hvac"
   | "demolition"
   | "framing"
+  | "roofing"
   | "cabinet_installation"
   | "countertop_installation"
   | "finish_carpentry"

@@ -57,7 +57,8 @@
     "uncalibrated_model": "El espacio 3D no está calibrado — confirma una medida para fijar la escala.",
     "partial_calibration": "El espacio 3D está solo parcialmente calibrado; un eje podría estar desviado.",
     "demo_model": "El espacio 3D es un modelo de demostración, no la reconstrucción de un espacio real.",
-    "unreviewed_geometry": "Algunas superficies del espacio 3D necesitan una revisión visual rápida."
+    "unreviewed_geometry": "Algunas superficies del espacio 3D necesitan una revisión visual rápida.",
+    "unverified_takeoff": "Algunas cantidades provienen de una medición de takeoff que aún no ha sido verificada."
   },
   "detail": {
     "snapshot_frozen": "Snapshot de mercado congelado",
