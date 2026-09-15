@@ -3,6 +3,7 @@ import type {
   NewLocation,
   NewProject,
   Project,
+  ProjectFile,
   ProjectImage,
   ProjectItem,
   ProjectLocation,
@@ -38,6 +39,7 @@ export interface ProjectBundle {
   /** professional foundation */
   takeoffMeasurements: TakeoffMeasurement[];
   scopeSections: ScopeSection[];
+  files: ProjectFile[];
 }
 
 /** Latest room-model version for a room. */
@@ -127,6 +129,9 @@ export const projectService = {
       scopeSections: db.scopeSections
         .filter((s) => s.projectId === projectId)
         .sort((a, b) => a.order - b.order),
+      files: db.projectFiles
+        .filter((f) => f.projectId === projectId)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     };
   },
 

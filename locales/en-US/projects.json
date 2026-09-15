@@ -103,6 +103,7 @@
     "scenarios": "Scenarios",
     "takeoff": "Takeoff",
     "scope": "Scope",
+    "files": "Files",
     "settings": "Settings"
   },
   "scope_category": {
@@ -166,6 +167,16 @@
     "contingency_amount": "Contingency",
     "markup_amount": "Markup",
     "selling_price": "Selling price"
+  },
+  "files": {
+    "title": "Files",
+    "subtitle": "Specs, scope of work, schedules and bid documents for this project.",
+    "upload": "Upload files",
+    "uploading": "Uploading…",
+    "upload_failed": "Couldn't upload that file.",
+    "removed": "File removed.",
+    "empty_title": "No files yet",
+    "empty_description": "PDF, Word, Excel, CSV or image files — up to 8 MB each in demo mode."
   },
   "settings": {
     "title": "Project settings",

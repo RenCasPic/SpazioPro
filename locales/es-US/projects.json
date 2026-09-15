@@ -103,6 +103,7 @@
     "scenarios": "Escenarios",
     "takeoff": "Takeoff",
     "scope": "Alcance",
+    "files": "Archivos",
     "settings": "Configuración"
   },
   "scope_category": {
@@ -166,6 +167,16 @@
     "contingency_amount": "Contingencia",
     "markup_amount": "Markup",
     "selling_price": "Precio de venta"
+  },
+  "files": {
+    "title": "Archivos",
+    "subtitle": "Especificaciones, alcance de trabajo, cronogramas y documentos de licitación de este proyecto.",
+    "upload": "Subir archivos",
+    "uploading": "Subiendo…",
+    "upload_failed": "No se pudo subir ese archivo.",
+    "removed": "Archivo eliminado.",
+    "empty_title": "Todavía no hay archivos",
+    "empty_description": "PDF, Word, Excel, CSV o imágenes — hasta 8 MB cada uno en modo demo."
   },
   "settings": {
     "title": "Configuración del proyecto",

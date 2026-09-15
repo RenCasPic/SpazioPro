@@ -12,6 +12,7 @@ const TABS = [
   { seg: "images", key: "images" },
   { seg: "takeoff", key: "takeoff", professional: true },
   { seg: "scope", key: "scope", professional: true },
+  { seg: "files", key: "files", professional: true },
   { seg: "estimate", key: "estimate" },
   { seg: "scenarios", key: "scenarios" },
   { seg: "settings", key: "settings" },
