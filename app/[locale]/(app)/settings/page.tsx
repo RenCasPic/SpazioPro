@@ -85,6 +85,28 @@ export default function SettingsPage() {
       </section>
 
       <section className="space-y-4 rounded-2xl border border-line bg-surface p-5">
+        <h2 className="font-serif text-lg text-ink">{t("settings.workspace.title")}</h2>
+        <p className="text-xs text-muted">{t("settings.workspace.note")}</p>
+        <div className="flex gap-2">
+          {(["professional", "consumer"] as const).map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => set({ workspaceMode: mode })}
+              className={`flex-1 rounded-xl border px-4 py-3 text-left transition-colors ${
+                form.workspaceMode === mode ? "border-accent bg-accent-tint" : "border-line-strong hover:border-ink/30"
+              }`}
+            >
+              <span className={`block text-sm font-medium ${form.workspaceMode === mode ? "text-accent" : "text-ink"}`}>
+                {t(`settings.workspace.${mode}_title`)}
+              </span>
+              <span className="mt-0.5 block text-xs text-muted">{t(`settings.workspace.${mode}_hint`)}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-4 rounded-2xl border border-line bg-surface p-5">
         <h2 className="font-serif text-lg text-ink">{t("settings.preferences.title")}</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label={t("settings.preferences.app_language")}>

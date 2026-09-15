@@ -27,7 +27,8 @@ describe("company price overrides — resolved before state/national market pric
   it("with no overrides, behaves exactly as before", () => {
     const withOverride = pricingService.resolve("flr-lvp-coastal", "TX", []);
     const without = pricingService.resolve("flr-lvp-coastal", "TX");
-    expect(withOverride).toEqual(without);
+    // capturedAt is `new Date().toISOString()` at call time — compare everything else exactly
+    expect({ ...withOverride, capturedAt: null }).toEqual({ ...without, capturedAt: null });
   });
 
   it("a company-wide override (stateCode null) applies in every state", () => {

@@ -118,6 +118,48 @@
     "general_labor": "General Labor",
     "delivery": "Delivery"
   },
+  "takeoff": {
+    "title": "Takeoff",
+    "subtitle": "Measured quantities — how much work or material exists. The estimate reads from these; they never come from the estimate.",
+    "add": "Add measurement",
+    "removed": "Measurement removed.",
+    "empty_title": "No measurements yet",
+    "empty_description": "Add a quantity — from a plan, a manual measurement, or the 3D room — and link it to an item when you price it.",
+    "verified": "Verified",
+    "verify": "Verify",
+    "label": "What is this?",
+    "label_placeholder": "e.g. Kitchen flooring",
+    "category": "Trade",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "source": {
+      "manual": "Manual entry",
+      "room_model": "3D room model",
+      "ai_photo": "AI photo analysis",
+      "ifc": "IFC model",
+      "cad": "CAD drawing",
+      "pdf_plan": "PDF plan",
+      "document": "Document"
+    }
+  },
+  "scope": {
+    "title": "Scope of Work",
+    "subtitle": "Group your items by trade. Each section can carry its own contingency and markup on top of its direct cost.",
+    "add": "Add scope section",
+    "removed": "Scope section removed.",
+    "empty_title": "No scope sections yet",
+    "empty_description": "Add a trade section — Flooring, Painting, Electrical — to see its own direct cost, contingency and markup.",
+    "name": "Section name",
+    "name_placeholder": "e.g. Kitchen flooring",
+    "category": "Trade",
+    "contingency": "Contingency (%)",
+    "markup": "Markup (%)",
+    "items_count": "{n} items",
+    "direct_cost": "Direct cost",
+    "contingency_amount": "Contingency",
+    "markup_amount": "Markup",
+    "selling_price": "Selling price"
+  },
   "settings": {
     "title": "Project settings",
     "status": "Status",

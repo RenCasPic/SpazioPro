@@ -118,6 +118,48 @@
     "general_labor": "Mano de obra general",
     "delivery": "Entrega"
   },
+  "takeoff": {
+    "title": "Takeoff",
+    "subtitle": "Cantidades medidas — cuánto trabajo o material existe. El estimado se alimenta de esto; nunca al revés.",
+    "add": "Agregar medición",
+    "removed": "Medición eliminada.",
+    "empty_title": "Todavía no hay mediciones",
+    "empty_description": "Agrega una cantidad — de un plano, una medición manual o el espacio 3D — y vincúlala a un item cuando lo cotices.",
+    "verified": "Verificada",
+    "verify": "Verificar",
+    "label": "¿Qué es esto?",
+    "label_placeholder": "p. ej. Piso de la cocina",
+    "category": "Trade",
+    "quantity": "Cantidad",
+    "unit": "Unidad",
+    "source": {
+      "manual": "Entrada manual",
+      "room_model": "Modelo 3D",
+      "ai_photo": "Análisis IA de foto",
+      "ifc": "Modelo IFC",
+      "cad": "Plano CAD",
+      "pdf_plan": "Plano PDF",
+      "document": "Documento"
+    }
+  },
+  "scope": {
+    "title": "Alcance de trabajo",
+    "subtitle": "Agrupa tus items por trade. Cada sección puede tener su propia contingencia y markup sobre su costo directo.",
+    "add": "Agregar sección",
+    "removed": "Sección eliminada.",
+    "empty_title": "Todavía no hay secciones",
+    "empty_description": "Agrega una sección por trade — Piso, Pintura, Electricidad — para ver su propio costo directo, contingencia y markup.",
+    "name": "Nombre de la sección",
+    "name_placeholder": "p. ej. Piso de la cocina",
+    "category": "Trade",
+    "contingency": "Contingencia (%)",
+    "markup": "Markup (%)",
+    "items_count": "{n} items",
+    "direct_cost": "Costo directo",
+    "contingency_amount": "Contingencia",
+    "markup_amount": "Markup",
+    "selling_price": "Precio de venta"
+  },
   "settings": {
     "title": "Configuración del proyecto",
     "status": "Estado",

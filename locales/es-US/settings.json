@@ -2,6 +2,14 @@
   "title": "Configuración",
   "advanced_mode": "Avanzado (herramientas de contratista)",
   "advanced_hint": "Mano de obra, impuestos y extras",
+  "workspace": {
+    "title": "Espacio de trabajo",
+    "note": "Cambia cuando quieras — tus proyectos y datos siguen siendo los mismos.",
+    "professional_title": "Profesional",
+    "professional_hint": "Takeoff, alcance de trabajo, assemblies, precios de empresa y versionado de estimados.",
+    "consumer_title": "Simple",
+    "consumer_hint": "El flujo foto → materiales → estimado, sin nada más en pantalla."
+  },
   "profile": {
     "title": "Perfil de la empresa",
     "note": "Estos datos se usan automáticamente en tus estimados y PDFs.",
