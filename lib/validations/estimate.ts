@@ -3,6 +3,8 @@ import { z } from "zod";
 export const estimateSettingsSchema = z.object({
   salesTaxRate: z.number().min(0).max(20),
   discountPercent: z.number().min(0).max(100),
+  overheadPercent: z.number().min(0).max(100).optional(),
+  markupPercent: z.number().min(0).max(200).optional(),
   extras: z.object({
     equipment: z.number().min(0),
     delivery: z.number().min(0),

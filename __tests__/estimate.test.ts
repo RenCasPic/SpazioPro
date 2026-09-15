@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { calculateEstimate, confidenceReport, type EstimateInput } from "@/lib/calculations/estimate";
+import {
+  calculateEstimate,
+  confidenceReport,
+  nextEstimateVersion,
+  type EstimateInput,
+} from "@/lib/calculations/estimate";
 import { calculateTaxes, applyDiscount } from "@/lib/calculations/taxes";
 import { toInches } from "@/lib/calculations/units";
 import type { ProjectItem } from "@/types";
@@ -112,5 +117,63 @@ describe("confidence report", () => {
   it("flags AI-estimated dimensions", () => {
     const r = confidenceReport({ ...base, measurementSource: "ai_estimate", items: [surfaceItem({ demoPrice: false })] });
     expect(r.reasons).toContain("ai_dimensions");
+  });
+});
+
+describe("professional cost model: direct cost → overhead → markup → selling price", () => {
+  it("consumer estimates (0% / 0%) are numerically unchanged: sellingPrice === directCost === subtotal", () => {
+    const { totals } = calculateEstimate(base);
+    expect(totals.directCost).toBe(totals.subtotal);
+    expect(totals.sellingPrice).toBe(totals.subtotal);
+    expect(totals.overhead).toBe(0);
+    expect(totals.markup).toBe(0);
+  });
+
+  it("the brief's example: $42,000 direct + 10% overhead + 15% markup = $53,130 selling price", () => {
+    const obj = surfaceItem({
+      kind: "object",
+      surface: undefined,
+      quantityAuto: false,
+      quantity: 1,
+      unitPrice: 42000,
+      laborCost: 0,
+    });
+    const input: EstimateInput = {
+      ...base,
+      items: [obj],
+      settings: { ...base.settings, overheadPercent: 10, markupPercent: 15 },
+    };
+    const { totals } = calculateEstimate(input);
+    expect(totals.directCost).toBe(42000);
+    expect(totals.overhead).toBe(4200);
+    expect(totals.sellingPrice).toBe(53130);
+  });
+
+  it("discount and tax apply to the selling price, not the direct cost", () => {
+    const obj = surfaceItem({ kind: "object", surface: undefined, quantityAuto: false, quantity: 1, unitPrice: 10000, laborCost: 0 });
+    const input: EstimateInput = {
+      ...base,
+      items: [obj],
+      settings: { ...base.settings, overheadPercent: 10, markupPercent: 0, discountPercent: 5, salesTaxRate: 0 },
+    };
+    const { totals } = calculateEstimate(input);
+    expect(totals.sellingPrice).toBe(11000); // 10,000 + 10%
+    expect(totals.discount).toBe(550); // 5% of 11,000, not of 10,000
+    expect(totals.total).toBe(10450);
+  });
+});
+
+describe("estimate versioning — a chain, never a silent edit", () => {
+  it("v1 has no predecessor", () => {
+    expect(nextEstimateVersion([])).toEqual({ versionNumber: 1, supersedesId: null });
+  });
+
+  it("chains to the highest existing version regardless of array order", () => {
+    const existing = [
+      { id: "est_1", versionNumber: 1 },
+      { id: "est_3", versionNumber: 3 },
+      { id: "est_2", versionNumber: 2 },
+    ];
+    expect(nextEstimateVersion(existing)).toEqual({ versionNumber: 4, supersedesId: "est_3" });
   });
 });

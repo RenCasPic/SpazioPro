@@ -15,6 +15,7 @@ import { taxService } from "@/lib/market/tax-service";
 import {
   calculateEstimate,
   confidenceReport,
+  nextEstimateVersion,
   resolveItemQuantity,
   type EstimateInput,
 } from "@/lib/calculations/estimate";
@@ -125,6 +126,13 @@ export const estimateService = {
     const productIds = [...new Set(input.items.map((i) => i.productId))];
     const snapshot = marketService.snapshot(location, productIds);
 
+    // Chain versions per (project, scenario, kind) — a recalculated estimate
+    // never overwrites the one before it; it supersedes it as a new version.
+    const priorInChain = readDb().estimates.filter(
+      (e) => e.projectId === projectId && e.scenarioId === sid && e.kind === kind,
+    );
+    const { versionNumber, supersedesId } = nextEstimateVersion(priorInChain);
+
     const estimateId = uid("est");
     const items: EstimateItem[] = breakdown.map((b) => lineFrom(b.item, b, estimateId, now));
     const s = bundle.config.settings;
@@ -155,6 +163,8 @@ export const estimateService = {
       total: totals.total,
       notes: s.notes,
       status: "final",
+      versionNumber,
+      supersedesId,
       marketSnapshot: snapshot,
       roomModelId: bundle.roomModel?.id ?? null,
       roomModelVersion: bundle.roomModel?.version ?? null,

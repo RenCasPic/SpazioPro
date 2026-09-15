@@ -357,6 +357,8 @@ function buildDemoEstimate(
     total: totals.total,
     notes: "",
     status: spec.estimate!.status,
+    versionNumber: 1,
+    supersedesId: null,
     marketSnapshot: snapshot,
     roomModelId: null,
     roomModelVersion: null,

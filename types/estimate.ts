@@ -85,6 +85,14 @@ export interface EstimateSettings {
   /** sales-tax percentage resolved from the project location */
   salesTaxRate: number;
   discountPercent: number;
+  /**
+   * Professional cost model — direct cost (materials + labor + extras) → +
+   * overhead → + markup → selling price. Optional and defaulted to 0, so a
+   * consumer estimate (both unset) is numerically identical to before this
+   * existed: sellingPrice === directCost.
+   */
+  overheadPercent?: number;
+  markupPercent?: number;
   extras: EstimateExtras;
   scopeOfWork: string;
   notes: string;
@@ -165,6 +173,10 @@ export interface Estimate {
   total: number;
   notes: string;
   status: EstimateStatus;
+  /** 1, 2, 3 … within its (projectId, scenarioId, kind) chain. Never re-numbered. */
+  versionNumber: number;
+  /** the estimate this one replaces, or null for v1. That estimate is never edited. */
+  supersedesId: string | null;
   marketSnapshot: MarketSnapshot;
   /** the Semantic 3D Room Model version this estimate was computed against —
    *  a later recalibration makes a new version and never changes this estimate */
@@ -191,7 +203,13 @@ export interface EstimateTotals {
   disposal: number;
   permits: number;
   other: number;
+  /** materials + labor + extras — same value as `directCost`, kept for backward compatibility */
   subtotal: number;
+  /** professional cost model, §9: Direct Cost → + Overhead → + Markup → Selling Price */
+  directCost: number;
+  overhead: number;
+  markup: number;
+  sellingPrice: number;
   discount: number;
   taxable: number;
   tax: number;

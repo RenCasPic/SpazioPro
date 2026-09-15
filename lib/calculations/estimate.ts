@@ -80,8 +80,20 @@ export function calculateEstimate(input: EstimateInput): {
   const extrasTotal = round(equipment + delivery + disposal + permits + other);
 
   const subtotal = round(materials + labor + extrasTotal);
-  const discount = applyDiscount(subtotal, input.settings.discountPercent);
-  const taxable = round(subtotal - discount);
+  const directCost = subtotal;
+
+  // Professional cost model (§9): direct cost → + overhead → + markup → selling
+  // price. Both default to 0, so with nothing set sellingPrice === directCost
+  // and every number downstream is unchanged from before this existed.
+  const overheadPercent = input.settings.overheadPercent ?? 0;
+  const markupPercent = input.settings.markupPercent ?? 0;
+  const overhead = round(directCost * (overheadPercent / 100));
+  const costWithOverhead = round(directCost + overhead);
+  const markup = round(costWithOverhead * (markupPercent / 100));
+  const sellingPrice = round(costWithOverhead + markup);
+
+  const discount = applyDiscount(sellingPrice, input.settings.discountPercent);
+  const taxable = round(sellingPrice - discount);
   const tax = calculateTaxes(taxable, input.settings.salesTaxRate);
   const total = round(taxable + tax);
 
@@ -96,6 +108,10 @@ export function calculateEstimate(input: EstimateInput): {
       permits: round(permits),
       other: round(other),
       subtotal,
+      directCost,
+      overhead,
+      markup,
+      sellingPrice,
       discount,
       taxable,
       tax,
@@ -103,6 +119,19 @@ export function calculateEstimate(input: EstimateInput): {
       currency: input.currency,
     },
   };
+}
+
+/**
+ * The next version in an estimate's (projectId, scenarioId, kind) chain.
+ * `existing` is prior estimates in that same chain, oldest or newest order —
+ * this picks the highest version regardless. Never re-numbers or mutates them.
+ */
+export function nextEstimateVersion(
+  existing: Array<{ id: string; versionNumber: number }>,
+): { versionNumber: number; supersedesId: string | null } {
+  if (!existing.length) return { versionNumber: 1, supersedesId: null };
+  const latest = existing.reduce((a, b) => (b.versionNumber > a.versionNumber ? b : a));
+  return { versionNumber: latest.versionNumber + 1, supersedesId: latest.id };
 }
 
 /** Returns i18n keys under `estimates.confidence_reasons`. */
