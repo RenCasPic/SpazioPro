@@ -167,6 +167,7 @@ export function createProfile(id: string, email: string): Profile {
     terms:
       "Estimate valid for 30 days. Payment: 40% on acceptance, 40% at midpoint, 20% on completion. Permits and municipal fees not included unless stated.",
     professionalType: "general_contractor",
+    workspaceMode: "professional",
     onboardingComplete: false,
     createdAt: now,
     updatedAt: now,

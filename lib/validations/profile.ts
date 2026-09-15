@@ -28,6 +28,7 @@ export const profileSchema = onboardingSchema.partial().extend({
   terms: z.string().max(4000).optional(),
   measurementSystem: z.enum(["imperial", "metric"]).optional(),
   estimateLanguage: localeSchema.optional(),
+  workspaceMode: z.enum(["consumer", "professional"]).optional(),
 });
 
 export const credentialsSchema = z.object({

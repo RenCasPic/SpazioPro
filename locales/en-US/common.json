@@ -59,7 +59,8 @@
     "estimating": "Estimating",
     "quoted": "Quoted",
     "approved": "Approved",
-    "completed": "Completed"
+    "completed": "Completed",
+    "lost": "Lost"
   },
   "professional_type": {
     "general_contractor": "General Contractor",

@@ -43,6 +43,7 @@ const STATUS_TONE: Record<ProjectStatus, Tone> = {
   quoted: "violet",
   approved: "ok",
   completed: "ink",
+  lost: "warn",
 };
 
 export function StatusBadge({

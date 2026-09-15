@@ -18,6 +18,14 @@ export const PROFESSIONAL_TYPES: ProfessionalType[] = [
   "other",
 ];
 
+/**
+ * "professional" is the default, work-oriented surface: takeoff, scope,
+ * company pricing, estimate versioning front and center. "consumer" is the
+ * original photo → materials → estimate flow for a homeowner — it never goes
+ * away, it's just no longer what the product leads with.
+ */
+export type WorkspaceMode = "consumer" | "professional";
+
 export interface Profile {
   id: string;
   fullName: string;
@@ -42,6 +50,7 @@ export interface Profile {
   website: string;
   terms: string;
   professionalType: ProfessionalType;
+  workspaceMode: WorkspaceMode;
   onboardingComplete: boolean;
   createdAt: string;
   updatedAt: string;

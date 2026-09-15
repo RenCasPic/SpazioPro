@@ -32,7 +32,9 @@ export type ProjectStatus =
   | "estimating"
   | "quoted"
   | "approved"
-  | "completed";
+  | "completed"
+  /** the client didn't proceed — kept distinct from "completed" for pipeline reporting */
+  | "lost";
 
 export const PROJECT_STATUS_ORDER: ProjectStatus[] = [
   "draft",
@@ -41,7 +43,13 @@ export const PROJECT_STATUS_ORDER: ProjectStatus[] = [
   "quoted",
   "approved",
   "completed",
+  "lost",
 ];
+
+/** Pipeline reporting buckets for the professional dashboard. */
+export const WON_STATUSES: ProjectStatus[] = ["approved", "completed"];
+export const OPEN_STATUSES: ProjectStatus[] = ["draft", "designing", "estimating", "quoted"];
+export const LOST_STATUSES: ProjectStatus[] = ["lost"];
 
 export type MeasurementSource = "manual" | "ai_estimate" | "mixed";
 
