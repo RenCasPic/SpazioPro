@@ -1,4 +1,4 @@
--- SpazioPro — Semantic 3D Room Models.
+-- Estimate It — Semantic 3D Room Models.
 -- The MVP runs fully on localStorage (see lib/services/room-model-service.ts +
 -- lib/spatial/*). This migration is the production backend: apply with
 -- `supabase db push`, then set DEMO_MODE=false.

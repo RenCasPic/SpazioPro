@@ -1,4 +1,4 @@
--- SpazioPro — Professional foundation: Takeoff, Scope of Work, Assemblies
+-- Estimate It — Professional foundation: Takeoff, Scope of Work, Assemblies
 -- (catalog only, not a table — see data/assemblies.ts), company pricing/labor
 -- overrides, project files, and estimate versioning.
 --

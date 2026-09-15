@@ -18,10 +18,10 @@
   "view_all": "Ver todos",
   "empty": {
     "title": "Todavía no tienes proyectos",
-    "description": "Crea tu primer proyecto: sube una foto del espacio, diséñalo y genera el estimado.",
+    "description": "Crea tu primer proyecto: importa planos o fotos, corre el takeoff y genera el estimado.",
     "cta": "Crear mi primer proyecto"
   },
-  "hero_lead": "Convierte tus ideas en espacios bonitos y estimados profesionales.",
+  "hero_lead": "Construye estimados precisos a partir de planos, modelos y datos de sitio.",
   "activity": "Estimados recientes",
   "pipeline": {
     "title": "Pipeline",

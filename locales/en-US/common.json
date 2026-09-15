@@ -1,8 +1,8 @@
 {
   "app": {
-    "name": "SpazioPro",
-    "tagline": "Visualize. Estimate. Build.",
-    "description": "Upload a photo of any room, try real materials with AI, and see what the remodel would cost — no measuring, no guesswork."
+    "name": "Estimate It",
+    "tagline": "From plans to price.",
+    "description": "Build accurate estimates from plans, models and site data — takeoff, pricing and proposals in one professional workflow."
   },
   "nav": {
     "dashboard": "Dashboard",

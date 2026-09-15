@@ -18,10 +18,10 @@
   "view_all": "View all",
   "empty": {
     "title": "You don't have any projects yet",
-    "description": "Create your first project: upload a photo of the space, design it, and generate the estimate.",
+    "description": "Create your first project: import plans or photos, run takeoff, and generate the estimate.",
     "cta": "Create my first project"
   },
-  "hero_lead": "Turn your ideas into beautiful spaces and professional estimates.",
+  "hero_lead": "Build accurate estimates from plans, models and site data.",
   "activity": "Recent Estimates",
   "pipeline": {
     "title": "Pipeline",

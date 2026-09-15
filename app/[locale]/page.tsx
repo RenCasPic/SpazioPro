@@ -1,27 +1,27 @@
 "use client";
 
-import { ArrowRight, Camera, ScanSearch, Layers, PackageSearch, Calculator, FileCheck2 } from "lucide-react";
+import { ArrowRight, FolderInput, Ruler, ClipboardList, PackageSearch, Calculator, FileCheck2 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { LocaleLink } from "@/components/localization/locale-link";
 import { LanguageSwitcher } from "@/components/localization/language-switcher";
 import { useT, useLocale } from "@/components/localization/i18n-provider";
 
 const FLOW = [
-  { icon: Camera, key: "photo", tone: "#efe9df" },
-  { icon: ScanSearch, key: "analysis", tone: "#e7dedd" },
-  { icon: Layers, key: "design", tone: "#e4ddcf" },
-  { icon: PackageSearch, key: "materials", tone: "#e9e2d6" },
-  { icon: Calculator, key: "estimate", tone: "#efe6da" },
-  { icon: FileCheck2, key: "build", tone: "#e6ece6" },
+  { icon: FolderInput, key: "import", tone: "#eef1f0" },
+  { icon: Ruler, key: "takeoff", tone: "#e9edeb" },
+  { icon: ClipboardList, key: "scope", tone: "#eef1ee" },
+  { icon: PackageSearch, key: "materials", tone: "#eaeeec" },
+  { icon: Calculator, key: "estimate", tone: "#eef1f0" },
+  { icon: FileCheck2, key: "proposal", tone: "#e7ece9" },
 ];
 
 const FLOW_LABELS: Record<string, [string, string]> = {
-  photo: ["Photo", "Fotografía"],
-  analysis: ["AI Analysis", "Análisis IA"],
-  design: ["Design", "Diseño"],
+  import: ["Import", "Importar"],
+  takeoff: ["Takeoff", "Takeoff"],
+  scope: ["Scope", "Alcance"],
   materials: ["Materials", "Materiales"],
   estimate: ["Estimate", "Estimado"],
-  build: ["Build", "Construir"],
+  proposal: ["Proposal", "Propuesta"],
 };
 
 export default function LandingPage() {
@@ -48,7 +48,7 @@ export default function LandingPage() {
         <div className="animate-in max-w-3xl">
           <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-ink-soft">
             <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-            {li ? "Diseño de interiores con IA · sin conocimientos técnicos" : "AI interior design · no know-how required"}
+            {li ? "Software profesional de estimación y takeoff" : "Professional estimating & takeoff software"}
           </span>
           <h1 className="mt-6 font-serif text-5xl leading-[1.03] tracking-tight text-ink sm:text-7xl">
             {t("common.app.tagline")}
@@ -59,7 +59,7 @@ export default function LandingPage() {
               href="/projects/new"
               className="inline-flex h-12 items-center gap-2 rounded-full bg-accent px-6 text-[15px] font-medium text-white hover:bg-accent-dark"
             >
-              {li ? "Sube una foto" : "Upload a photo"}
+              {li ? "Crear proyecto" : "Create project"}
               <ArrowRight className="h-4 w-4" />
             </LocaleLink>
             <LocaleLink
@@ -88,13 +88,13 @@ export default function LandingPage() {
         <div className="mt-14 grid gap-6 rounded-2xl border border-line bg-surface p-6 sm:grid-cols-3 sm:p-10">
           {(li
             ? [
-                ["Prueba materiales reales", "Explora pisos, azulejos, encimeras y muebles de marcas reales y ve cómo se ven en tu espacio."],
-                ["El costo, calculado por ti", "La app calcula cantidades, desperdicio, mano de obra y demolición. Tú solo eliges lo que te gusta."],
+                ["Takeoff trazable", "Cada cantidad sabe de dónde salió — foto, medición manual o modelo 3D — nunca una caja negra."],
+                ["El costo, calculado por ti", "La app resuelve cantidades, desperdicio, mano de obra, overhead y markup. Tú tomas las decisiones del proyecto."],
                 ["Un rango honesto", "Nada de falsa precisión: un rango claro con su nivel de confianza y por qué."],
               ]
             : [
-                ["Try real materials", "Explore flooring, tile, countertops and furniture from real brands and see them in your space."],
-                ["The cost, worked out for you", "The app handles quantities, waste, labor and demolition. You just pick what you like."],
+                ["Traceable takeoff", "Every quantity knows where it came from — a photo, a manual measurement, a 3D model — never a black box."],
+                ["The cost, worked out for you", "The app resolves quantities, waste, labor, overhead and markup. You make the project decisions."],
                 ["An honest range", "No false precision — a clear range with its confidence level and the reason why."],
               ]
           ).map(([title, text]) => (

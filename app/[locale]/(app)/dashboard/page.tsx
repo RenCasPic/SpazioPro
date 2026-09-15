@@ -86,7 +86,7 @@ export default function DashboardPage() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
               {t(`dashboard.greeting.${greetKey}`)},
             </p>
-            <h1 className="mt-1.5 display text-4xl text-ink sm:text-[44px]">{firstName || "SpazioPro"}</h1>
+            <h1 className="mt-1.5 display text-4xl text-ink sm:text-[44px]">{firstName || "Estimate It"}</h1>
             <p className="mt-2 max-w-md text-[15px] text-ink-soft">{t("dashboard.hero_lead")}</p>
             <div className="mt-6 flex flex-wrap gap-2.5">
               <LocaleLink

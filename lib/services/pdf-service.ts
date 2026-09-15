@@ -46,7 +46,7 @@ export function buildEstimatePdf(payload: PdfPayload, images: PdfImages = {}): B
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
-  doc.text("SPAZIOPRO", M, 11);
+  doc.text("ESTIMATE IT", M, 11);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(212, 200, 190);
@@ -200,7 +200,7 @@ export function buildEstimatePdf(payload: PdfPayload, images: PdfImages = {}): B
 
   doc.setFontSize(7);
   doc.setTextColor(...SOFT);
-  doc.text("SpazioPro · Visualize. Estimate. Build.", M, pageH - 8);
+  doc.text("Estimate It · From plans to price.", M, pageH - 8);
 
   return doc.output("blob");
 }

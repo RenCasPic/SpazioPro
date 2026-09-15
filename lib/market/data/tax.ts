@@ -59,7 +59,7 @@ function addJurisdiction(j: Omit<TaxJurisdiction, "id" | "countryCode" | "active
     rate,
     effectiveFrom: "2026-01-01T00:00:00.000Z",
     effectiveUntil: null,
-    source: "SpazioPro demo tax table",
+    source: "Estimate It demo tax table",
     active: true,
   });
 }

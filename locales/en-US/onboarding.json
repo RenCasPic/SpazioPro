@@ -14,7 +14,7 @@
     "forgot": "I forgot my password",
     "panel_text": "The platform where a photo of a space becomes a design proposal and a professional estimate."
   },
-  "welcome": "Welcome to SpazioPro",
+  "welcome": "Welcome to Estimate It",
   "title": "Tell us about your work",
   "subtitle": "We use this to set up your market — sales tax, pricing and labor rates — and to fill in your estimates.",
   "what_you_do": "What do you do?",
@@ -26,5 +26,5 @@
   "full_name": "Full name",
   "company": "Company",
   "phone": "Phone",
-  "finish": "Enter SpazioPro"
+  "finish": "Enter Estimate It"
 }

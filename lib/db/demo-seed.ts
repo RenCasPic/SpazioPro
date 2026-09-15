@@ -25,7 +25,7 @@ import { buildRectangularRoom } from "@/lib/spatial/room-builder";
 import type { RoomModel } from "@/types";
 
 export const DEMO_USER_ID = "demo-user";
-export const DEMO_EMAIL = "demo@spaziopro.app";
+export const DEMO_EMAIL = "demo@estimateit.app";
 
 function daysAgo(n: number): string {
   const d = new Date();

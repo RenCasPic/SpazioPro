@@ -1,8 +1,8 @@
 {
   "app": {
-    "name": "SpazioPro",
-    "tagline": "Visualiza. Presupuesta. Construye.",
-    "description": "Sube la foto de cualquier habitación, prueba materiales reales con IA y ve cuánto costaría la remodelación — sin medir y sin adivinar."
+    "name": "Estimate It",
+    "tagline": "De los planos al precio.",
+    "description": "Construye estimados precisos a partir de planos, modelos y datos de sitio — takeoff, precios y propuestas en un solo flujo profesional."
   },
   "nav": {
     "dashboard": "Panel",

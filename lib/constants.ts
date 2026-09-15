@@ -1,6 +1,6 @@
 import type { Unit } from "@/types";
 
-export const APP_NAME = "SpazioPro";
+export const APP_NAME = "Estimate It";
 
 /** i18n keys — see the common namespace (unit.*). */
 export const UNIT_KEYS: Record<Unit, string> = {

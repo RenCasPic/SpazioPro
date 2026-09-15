@@ -1,4 +1,4 @@
--- SpazioPro — initial schema (US market).
+-- Estimate It — initial schema (US market).
 -- The MVP runs fully on localStorage (see lib/db). This migration is the
 -- target backend: apply with `supabase db push` or the SQL editor, then set
 -- NEXT_PUBLIC_SUPABASE_URL / ANON_KEY and DEMO_MODE=false.

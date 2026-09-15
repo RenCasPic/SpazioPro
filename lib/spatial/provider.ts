@@ -2,7 +2,7 @@
  * Spatial reconstruction provider seam. Mirrors lib/ai/provider.ts exactly:
  * `SPATIAL_PROVIDER=demo` (the default) needs no network, key or GPU. A real
  * provider (COLMAP, a commercial reconstruction API, mobile depth, ARKit …)
- * registers a case here and nothing else in SpazioPro changes.
+ * registers a case here and nothing else in Estimate It changes.
  *
  * The UI never knows which provider is active — it only ever consumes a
  * RoomModel. See docs/3d-room-reconstruction.md §11, §47.

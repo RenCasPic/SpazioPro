@@ -25,7 +25,7 @@ export function Logo({
         </svg>
       </span>
       <span className="text-ink">
-        Spazio<span className="text-accent">Pro</span>
+        Estimate<span className="text-accent"> It</span>
       </span>
     </span>
   );

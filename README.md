@@ -1,14 +1,18 @@
-# SpazioPro — Visualize. Estimate. Build.
+# Estimate It — From plans to price.
 
-An AI-powered remodeling app for the **US** market: upload a photo of a room, try
-real materials on it, and get a trustworthy USD **estimate** — no construction
-knowledge required. Under the hood it's built on quantities, materials, labor,
-equipment, delivery, disposal, permits and **local sales tax**, with an optional
-**Semantic 3D Room Model** so a surface's area comes from real geometry instead of
-a guess.
+Professional **construction estimating and takeoff software** for the **US**
+market. Import a project from photos (BIM/CAD/documents are on the roadmap —
+see below), run takeoff, assign materials and labor, and produce an accurate
+USD **estimate** and **proposal** — for remodelers, general contractors,
+estimators, architects, designers and specialty contractors.
 
-Fully **bilingual** (English `en-US` default, Español `es-US`) — the estimate PDF
-language is independent of the app UI language.
+Two workspaces, one product: **Professional** (Takeoff, Scope of Work,
+Assemblies, company pricing, estimate versioning — the default) and **Simple**
+(the original photo → materials → estimate flow, still fully intact for a
+quick homeowner-facing project). Switch anytime in Settings.
+
+Fully **bilingual** (English `en-US` default, Español `es-US`) — the estimate
+PDF language is independent of the app UI language.
 
 > This estimate is for planning purposes only. Actual costs may vary based on
 > verified measurements, site conditions, material availability, supplier
@@ -22,46 +26,51 @@ language is independent of the app UI language.
 npm install
 cp .env.example .env.local     # optional — demo mode works with nothing set
 npm run dev -- -p 3100         # http://localhost:3100 → redirects to /en-US
-npm test                       # 89 tests: imperial math, geometry, calibration, tax, i18n…
+npm test                       # 117 tests: geometry, calibration, cost model, tax, i18n…
 npm run lint
 npm run build
 ```
 
 `-p 3100` avoids the default port 3000 if you run other Next.js projects locally.
 
-Demo account (pre-filled on the login screen): `demo@spaziopro.app` / `demo`.
-Data is stored in the browser (`localStorage`, key `spaziopro.db.v5`); AI and 3D
-reconstruction are simulated locally — nothing leaves the browser.
+Demo account (pre-filled on the login screen): `demo@estimateit.app` / `demo`.
+Data is stored in the browser (`localStorage`); AI and 3D reconstruction are
+simulated locally — nothing leaves the browser.
 
 ---
 
-## Product flow (consumer-first)
+## Product flow
 
 ```
-What space do you want to remodel?
-  → 📷 Upload a photo  (or  📐 Enter dimensions)
+Create project
+  → Import: 📷 Photos (working)  ·  BIM/IFC, CAD/Plans, Documents, Site Capture (roadmap)
 → AI reads the room: type, surfaces, rough size — no measuring
+→ Takeoff: measured quantities, each with its source, confidence and
+  verification status — SF, LF, EA, CY, CF, SY, gal, hr…
+→ Scope of Work: group items by trade, each with its own contingency and markup
 → Studio: tap a surface (floor / wall / ceiling) → pick a real material
-  → applied to that surface, quantity computed automatically
-→ (optional) switch to 3D: orbit the room, select a surface there instead,
-  confirm one measurement to calibrate real-world scale
-→ Save different "Looks", compare their cost
-→ Calculate remodel → a rounded cost RANGE with a plain-language confidence note
-  (never false precision like "$7,348.23")
+  → applied to that surface, quantity resolved from the takeoff automatically
+→ (optional) 3D: orbit the room, select a surface there instead, confirm one
+  measurement to calibrate real-world scale
+→ Estimate: Direct Cost → Overhead → Markup → Selling Price → Sales Tax → Total
+  — a rounded cost RANGE with a plain-language confidence note, never false
+  precision like "$7,348.23"
+→ Save different "Looks" / alternates, compare their cost
+→ Generate the estimate or proposal PDF, with a version history
 ```
 
-The user never has to know square footage, waste percentages, labor units, tax
-rates, or (in the 3D view) what a mesh, plane or point cloud is — that's all
-resolved automatically. Contractor-grade tools (editable labor lines, tax/discount
-settings, per-item price overrides, client/proposal management) still exist but
-sit behind an **"Advanced"** disclosure on the estimate page, not the default path.
+The technical work — quantities, waste, labor units, tax jurisdiction, what a
+mesh/plane/point cloud is in the 3D view — is resolved automatically. Every
+number can answer "where did this come from": a source, a confidence level,
+and (once linked) a takeoff measurement or 3D entity.
 
 ## Routes (all locale-prefixed: `/en-US/...`, `/es-US/...`)
 
 `/` landing · `/login` `/register` · `/onboarding` · `/dashboard` · `/projects`
-`/projects/new` (photo-first) · `/projects/[id]` `…/editor` (Studio, 2D + 3D)
-`…/images` `…/estimate` `…/scenarios` `…/settings` · `/catalog` · `/clients` ·
-`/estimates` `/estimates/[id]` · `/settings`
+`/projects/new` (import chooser) · `/projects/[id]` `…/editor` (Studio, 2D + 3D)
+`…/images` `…/takeoff` `…/scope` `…/files` `…/estimate` `…/scenarios`
+`…/settings` · `/catalog` · `/clients` · `/estimates` `/estimates/[id]` ·
+`/settings`
 
 ---
 
@@ -86,10 +95,12 @@ sit behind an **"Advanced"** disclosure on the estimate page, not the default pa
 UI (app/[locale], components/)
   → hooks/               use-editor · use-project · use-estimate · use-products · use-market · use-ai · use-session
   → lib/services/         project · location · room · item · image · client · estimate · config · profile · pdf
-                           · room-model-service (Semantic 3D Room Model — persistence & versioning)
+                           · room-model-service · takeoff-service · scope-service · assembly-service
+                           · company-service (pricing/labor overrides) · file-service
   → lib/market/           country/state · currency · tax · pricing · labor-rate · delivery · catalog · market
   → lib/calculations/     units · conversions · dimensions · quantities · materials · labor · taxes · estimate
                            · money · range (rounded cost ranges) · surfaces (3D entity → quantity bridge)
+                           · scopes (Scope of Work rollups) · assemblies (material + accessories expansion)
   → lib/ai/               provider (VisionProvider/SegmentationProvider/ImageGenerationProvider/EstimationProvider)
                            + demo-provider
   → lib/spatial/          provider (SpatialProvider) + demo-provider · room-builder (parametric geometry)
@@ -99,22 +110,53 @@ UI (app/[locale], components/)
 ```
 
 No business logic in `page.tsx`. Calculations are pure functions with tests.
+**One** quantity engine and **one** estimate engine — every input (photo, 3D
+model, manual takeoff, and eventually BIM/CAD) feeds the same pipeline; none of
+them duplicate it.
+
+### Professional cost model
+
+`EstimateSettings.overheadPercent` / `markupPercent` sit on top of the direct
+cost (materials + labor + extras): **Direct Cost → + Overhead → + Markup →
+Selling Price → − Discount → + Sales Tax → Total**. With both at 0% the result
+is numerically identical to the simple flow. Scope of Work sections can carry
+their own contingency/markup on the same underlying item breakdown — see
+`lib/calculations/scopes.ts`.
+
+### Takeoff is not the Estimate
+
+`TakeoffMeasurement` (`lib/services/takeoff-service.ts`) records *how much*
+work or material exists — quantity, unit, source (manual, 3D room model, AI
+photo analysis, and eventually IFC/CAD/PDF), confidence, verification status —
+and never a price. A `ProjectItem` optionally links to one
+(`takeoffMeasurementId`); `resolveItemQuantity()` then resolves the quantity
+with a strict priority: **linked takeoff measurement > linked 3D entity > the
+room's own dimensions.** Nothing is computed twice.
 
 ### Reproducible estimates
 
 Generating an estimate freezes a `market_snapshot` — country, state, city, ZIP,
 sales-tax rate + jurisdiction, product prices, labor rates, delivery rates, FX —
-plus a `price_snapshot` per line. A historical estimate **never changes** because
-a price, tax, labor or delivery rate moves — and the same holds for the 3D model:
-an estimate references a specific `room_model_id` + `version`, so recalibrating a
-room later creates a new version without touching past estimates.
+plus a `price_snapshot` per line, and now a `versionNumber`/`supersedesId`
+chain (`nextEstimateVersion()`): a regenerated estimate never edits the one
+before it. The same holds for the 3D model: an estimate references a specific
+`room_model_id` + `version`, so recalibrating a room later creates a new
+version without touching past estimates.
+
+### Company pricing & labor overrides
+
+`pricingService.resolve()` / `laborRateService.rate()` accept an optional
+`overrides` array, resolved **before** the state/national market default:
+state-specific first, then company-wide. `lib/market` stays pure — the service
+layer injects the company's own `CompanyProductPrice` / `CompanyLaborRate`
+rows (`lib/services/company-service.ts`).
 
 ### Changing a project's location
 
 `projectService.changeLocation()` re-resolves the state, sales-tax rate,
-per-item prices and labor rates — after the user confirms in
-`ChangeLocationDialog`. Existing estimates keep their snapshot. Covered by
-`__tests__/location-change.test.ts`.
+per-item prices and labor rates (including company overrides) — after the user
+confirms in `ChangeLocationDialog`. Existing estimates keep their snapshot.
+Covered by `__tests__/location-change.test.ts`.
 
 ### AI providers
 
@@ -132,7 +174,8 @@ A room can go beyond flat photo + typed dimensions: the editor's **Photo / 3D**
 toggle builds a **Semantic 3D Room Model** — a typed tree of architectural
 entities (Room → Floor / Ceiling / Wall[] → Window / Door), not a photorealistic
 mesh. Each entity carries its own geometry, gross/net area, `confidence`, `source`
-and `calibrationStatus` (`types/room-model.ts`).
+and `calibrationStatus` (`types/room-model.ts`) — the same traceability
+vocabulary the Takeoff layer uses.
 
 - **`SpatialProvider`** (`lib/spatial/provider.ts`) mirrors the existing
   `AIProvider` pattern — a separate interface, not folded into it, switched by
@@ -142,8 +185,8 @@ and `calibrationStatus` (`types/room-model.ts`).
   apply material, calibrate — works with zero external services and zero GPU.
   `lib/spatial/fixtures.ts` supplies fixed rooms (simple, with a door, with a
   low-confidence window, uncalibrated, calibrated…) for tests. A real
-  photogrammetry/depth/segmentation provider is Phase 2 (see the design doc);
-  the interface is ready for it.
+  photogrammetry/depth/segmentation provider — and BIM/IFC and CAD/DWG/DXF
+  import — is Phase 2 (see the design doc); the interfaces are ready for it.
 - **Geometry is parametric**, not a scanned mesh: a floor polygon + wall planes +
   rectangular openings — a few hundred triangles, rendered client-side with
   **three.js** / **@react-three/fiber** (`components/editor/3d/`).
@@ -161,12 +204,7 @@ and `calibrationStatus` (`types/room-model.ts`).
   product unit; `resolveItemQuantity()` in `lib/calculations/estimate.ts` picks
   that up when a project item is linked to a 3D entity. Waste, pricing, labor,
   delivery, tax and the estimate total are the same pipeline every other item
-  uses — there is only **one** quantity engine.
-- **API**: `POST /api/projects/[id]/room-model/reconstruct` (build/rebuild),
-  `GET`/`PATCH /api/projects/[id]/room-model` (read / apply a small, closed set
-  of edit ops — move a wall, resize an opening, override a dimension — never
-  free-form CAD editing), `POST /api/projects/[id]/room-model/calibrate`. Bodies
-  validated with the shared schemas in `lib/validations/room-model.ts`.
+  uses.
 - **Database** (optional Supabase backend): `supabase/migrations/
   002_room_models.sql` adds `room_models` (the semantic model as JSONB — the
   source of truth, versioned), `room_captures` and `room_measurements`, with
@@ -208,16 +246,18 @@ project/estimate/room-model routes return `501` and persistence is client-side.
      keyed to `owns_project()`, auto-profile trigger.
    - `supabase/migrations/002_room_models.sql` — Semantic 3D Room Model tables
      (`room_models`, `room_captures`, `room_measurements`), same RLS pattern.
+   - `supabase/migrations/003_professional.sql` — Takeoff, Scope of Work,
+     company pricing/labor overrides, project files, estimate versioning
+     columns, same RLS pattern.
 3. Apply `supabase/seed.sql` — `npm run seed` regenerates it from the same data
-   modules the app uses (51 states, 68 tax jurisdictions, 36 products, 1,188
-   per-state prices).
+   modules the app uses (51 states, 68 tax jurisdictions, 41 products, per-state
+   prices).
 4. Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
    `SUPABASE_SERVICE_ROLE_KEY`, `DEMO_MODE=false`.
 5. Storage buckets: `project-images`, `project-renders`, `avatars`, `pdfs`,
-   `product-images` with per-owner policies. (Heavy 3D capture artefacts — raw
-   photos/depth/mesh for a real reconstruction provider — are a Phase 2 addition
-   described in `docs/3d-room-reconstruction.md`; the demo/parametric path never
-   needs them.)
+   `product-images` with per-owner policies. (Heavy 3D capture artefacts, and
+   BIM/CAD/PDF plan files, are a Phase 2 addition described in
+   `docs/3d-room-reconstruction.md`; the demo/parametric path never needs them.)
 
 ---
 
@@ -226,6 +266,6 @@ project/estimate/room-model routes return `501` and persistence is client-side.
 | | |
 | --- | --- |
 | `npm run dev -- -p 3100` / `build` / `start` | Next.js |
-| `npm test` | vitest — 89 tests |
+| `npm test` | vitest — 117 tests |
 | `npm run seed` | regenerate `supabase/seed.sql` |
 | `npm run lint` | ESLint |

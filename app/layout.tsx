@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SpazioPro — Visualize. Estimate. Build.",
+  title: "Estimate It — From plans to price.",
   description:
-    "Turn a photo of a room into a design proposal and a professional estimate — built for US remodeling and construction.",
+    "Professional construction estimating and takeoff software. Build accurate estimates from plans, models and site data — for remodelers, general contractors, estimators, architects and designers.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

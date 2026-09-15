@@ -12,6 +12,7 @@ import { credentialsSchema } from "@/lib/validations/profile";
 import { demoAuth } from "@/lib/auth/demo-auth";
 import { profileService } from "@/lib/services/profile-service";
 import { isDemoMode } from "@/lib/constants";
+import { DEMO_EMAIL } from "@/lib/db/demo-seed";
 
 type FormValues = z.infer<typeof credentialsSchema>;
 
@@ -21,7 +22,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const { register, handleSubmit, formState } = useForm<FormValues>({
     resolver: zodResolver(credentialsSchema),
-    defaultValues: { email: "demo@spaziopro.app", password: "demo" },
+    defaultValues: { email: DEMO_EMAIL, password: "demo" },
   });
 
   async function onSubmit(values: FormValues) {
@@ -64,7 +65,7 @@ export default function LoginPage() {
         </LocaleLink>
       </p>
       <button
-        onClick={() => demoAuth.sendPasswordReset("demo@spaziopro.app").then((r) => setError(r.message))}
+        onClick={() => demoAuth.sendPasswordReset(DEMO_EMAIL).then((r) => setError(r.message))}
         className="mt-2 text-xs text-muted underline"
       >
         {t("onboarding.auth.forgot")}
