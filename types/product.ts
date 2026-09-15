@@ -48,7 +48,10 @@ export type ProductCategory =
   | "wall_sconce"
   | "floor_lamp"
   | "table_lamp"
-  | "other";
+  | "other"
+  // Installation supplies — Assembly accessory components (underlayment,
+  // adhesive, grout, transitions). Never a "surface" a user browses to first.
+  | "installation_supply";
 
 export type ProductGroup = "flooring" | "walls" | "kitchen" | "bathroom" | "furniture" | "lighting";
 

@@ -7,3 +7,4 @@ export * from "./ai";
 export * from "./estimate";
 export * from "./profile";
 export * from "./room-model";
+export * from "./professional";

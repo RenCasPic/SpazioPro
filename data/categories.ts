@@ -59,6 +59,8 @@ export const CATEGORIES: CategoryMeta[] = [
   { key: "floor_lamp", group: "lighting", label: "Floor Lamp", kind: "object" },
   { key: "table_lamp", group: "lighting", label: "Table Lamp", kind: "object" },
   { key: "other", group: "furniture", label: "Other", kind: "object" },
+  // Installation supplies (Assembly accessory components — never surface-browsed)
+  { key: "installation_supply", group: "flooring", label: "Installation Supplies", kind: "object" },
 ];
 
 /** i18n keys — see the editor namespace; catalog uses group names directly */
