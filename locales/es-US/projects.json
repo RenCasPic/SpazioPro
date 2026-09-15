@@ -48,6 +48,25 @@
     "all": "Todos",
     "search_placeholder": "Buscar proyecto o cliente…"
   },
+  "table": {
+    "project": "Proyecto",
+    "client": "Cliente",
+    "address": "Dirección",
+    "type": "Tipo",
+    "status": "Estado",
+    "estimate": "Estimado",
+    "margin": "Margen",
+    "updated": "Actualizado",
+    "no_client": "—",
+    "no_address": "—",
+    "no_estimate": "—",
+    "no_margin": "—"
+  },
+  "view": {
+    "grid": "Cuadrícula",
+    "list": "Lista"
+  },
+  "count": "{n} proyectos",
   "upload": {
     "title": "Sube una foto del espacio que quieres transformar",
     "hint": "Arrastra una imagen, elígela o usa la cámara. JPG, PNG o WebP.",

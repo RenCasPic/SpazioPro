@@ -57,6 +57,8 @@ export interface ProjectListEntry {
   itemCount: number;
   /** headline grand total for the active scenario (USD) */
   headlineTotal: number;
+  /** (sellingPrice - directCost) / sellingPrice, as a whole percent — null when there's no priced work yet */
+  marginPercent: number | null;
 }
 
 async function assertOwner(projectId: string): Promise<Project> {
@@ -80,8 +82,9 @@ export const projectService = {
         const room = db.rooms.find((r) => r.projectId === project.id);
         const config = db.configs.find((c) => c.projectId === project.id);
         let headlineTotal = 0;
+        let marginPercent: number | null = null;
         if (room && config) {
-          headlineTotal = calculateEstimate({
+          const totals = calculateEstimate({
             items,
             dimensions: { widthIn: room.widthIn, lengthIn: room.lengthIn, heightIn: room.heightIn },
             measurementSource: room.measurementSource,
@@ -90,7 +93,11 @@ export const projectService = {
             currency: "USD",
             hasTaxJurisdiction: true,
             roomModel: latestRoomModel(room.id),
-          }).totals.total;
+          }).totals;
+          headlineTotal = totals.total;
+          if (totals.sellingPrice > 0) {
+            marginPercent = ((totals.sellingPrice - totals.directCost) / totals.sellingPrice) * 100;
+          }
         }
         return {
           project,
@@ -100,6 +107,7 @@ export const projectService = {
             db.images.find((i) => i.projectId === project.id && i.type === "original")?.originalUrl ?? null,
           itemCount: items.length,
           headlineTotal,
+          marginPercent,
         };
       });
   },

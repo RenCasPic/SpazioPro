@@ -9,37 +9,49 @@ import {
   Users,
   DollarSign,
   ArrowRight,
-  ArrowUpRight,
   Trophy,
   Clock,
   XCircle,
   TrendingUp,
+  FileWarning,
+  Ruler,
+  AlertTriangle,
+  CheckCircle2,
 } from "lucide-react";
 import { useProjects } from "@/hooks/use-project";
 import { useSession } from "@/hooks/use-session";
-import { ProjectCard } from "@/components/projects/project-card";
 import { EmptyState, Skeleton } from "@/components/ui/states";
-import { EstimateStatusBadge } from "@/components/ui/badge";
-import { LocaleLink } from "@/components/localization/locale-link";
+import { EstimateStatusBadge, StatusBadge } from "@/components/ui/badge";
+import { Table, THead, TBody, TH, TR, TD } from "@/components/ui/table";
+import { LocaleLink, useLocaleRouter } from "@/components/localization/locale-link";
 import { useT, useLocale } from "@/components/localization/i18n-provider";
 import { estimateService } from "@/lib/services/estimate-service";
 import { clientService } from "@/lib/services/client-service";
+import { dashboardService, type OperationalSummary } from "@/lib/services/dashboard-service";
 import { formatUsd, formatUsd0, formatDate } from "@/lib/format";
-import { projectImage } from "@/lib/media/project-image";
 import { WON_STATUSES, OPEN_STATUSES, LOST_STATUSES, type Estimate, type Client } from "@/types";
+
+const EMPTY_SUMMARY: OperationalSummary = {
+  estimatesNeedingReview: [],
+  unverifiedTakeoffs: [],
+  projectsMissingInfo: [],
+};
 
 export default function DashboardPage() {
   const t = useT();
   const locale = useLocale();
+  const router = useLocaleRouter();
   const { projects, loading } = useProjects();
   const { profile } = useSession();
   const [estimates, setEstimates] = useState<Estimate[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
+  const [summary, setSummary] = useState<OperationalSummary>(EMPTY_SUMMARY);
   const [now] = useState(() => Date.now());
 
   useEffect(() => {
     void estimateService.list().then(setEstimates);
     void clientService.list().then(setClients);
+    void dashboardService.operationalSummary().then(setSummary);
   }, [projects.length]);
 
   const stats = useMemo(() => {
@@ -54,7 +66,7 @@ export default function DashboardPage() {
       clients: clients.length,
       totalValue,
     };
-  }, [projects, estimates, clients]);
+  }, [projects, estimates, clients, now]);
 
   const pipeline = useMemo(() => {
     const won = projects.filter((p) => WON_STATUSES.includes(p.project.status));
@@ -67,18 +79,17 @@ export default function DashboardPage() {
   }, [projects]);
 
   const isProfessional = profile?.workspaceMode === "professional";
+  const attentionCount =
+    summary.estimatesNeedingReview.length + summary.unverifiedTakeoffs.length + summary.projectsMissingInfo.length;
 
   const hour = new Date().getHours();
   const greetKey = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
   const firstName = profile?.fullName?.split(" ")[0] ?? "";
-  const recentEstimates = estimates
-    .slice()
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .slice(0, 5);
+  const operationalRows = projects.slice(0, 8);
 
   return (
     <div className="space-y-7">
-      {/* hero — compact data banner, not a lifestyle photo */}
+      {/* header — compact banner, not a lifestyle photo */}
       <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-6 py-5 sm:px-8 sm:py-6">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
@@ -126,79 +137,190 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="grid gap-7 xl:grid-cols-[minmax(0,1fr)_360px]">
-        {/* recent projects */}
+      {/* operational — what needs a look right now */}
+      {isProfessional && (
         <section>
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-serif text-[17px] text-ink">{t("dashboard.recent_projects")}</h2>
-            <LocaleLink href="/projects" className="inline-flex items-center gap-1 text-[13px] font-medium text-accent hover:text-accent-dark">
-              {t("dashboard.view_all")} <ArrowRight className="h-3.5 w-3.5" />
-            </LocaleLink>
+          <div className="mb-3 flex items-center gap-2">
+            <h2 className="font-serif text-[17px] text-ink">{t("dashboard.attention.title")}</h2>
+            {attentionCount > 0 && (
+              <span className="grid h-5 min-w-5 place-items-center rounded-full bg-warn-bg px-1.5 text-[11px] font-semibold text-warn">
+                {attentionCount}
+              </span>
+            )}
           </div>
-          {loading ? (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-60" />
-              ))}
+          {attentionCount === 0 ? (
+            <div className="flex items-center gap-2.5 rounded-2xl border border-line bg-surface px-5 py-4 text-[13px] text-ink-soft">
+              <CheckCircle2 className="h-4 w-4 text-ok" />
+              {t("dashboard.attention.all_clear")}
             </div>
-          ) : projects.length === 0 ? (
-            <EmptyState
-              icon={<Plus className="h-5 w-5" />}
-              title={t("dashboard.empty.title")}
-              description={t("dashboard.empty.description")}
-              action={
-                <LocaleLink href="/projects/new" className="inline-flex h-11 items-center gap-2 rounded-lg bg-ink px-5 text-sm font-medium text-white hover:bg-ink/90">
-                  {t("dashboard.empty.cta")}
-                </LocaleLink>
-              }
-            />
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {projects.slice(0, 4).map((e) => (
-                <ProjectCard key={e.project.id} entry={e} />
-              ))}
+            <div className="grid gap-3 md:grid-cols-3">
+              <AttentionPanel
+                icon={<FileWarning className="h-3.5 w-3.5" />}
+                title={t("dashboard.attention.estimates_review")}
+                count={summary.estimatesNeedingReview.length}
+              >
+                {summary.estimatesNeedingReview.map(({ estimate, projectName }) => (
+                  <LocaleLink
+                    key={estimate.id}
+                    href={`/estimates/${estimate.id}`}
+                    className="flex items-center justify-between gap-2 border-t border-line px-4 py-2.5 text-[12.5px] first:border-t-0 hover:bg-canvas"
+                  >
+                    <span className="min-w-0 truncate text-ink">{projectName || estimate.estimateNumber}</span>
+                    <span className="shrink-0 text-muted">{formatUsd(estimate.total, locale)}</span>
+                  </LocaleLink>
+                ))}
+              </AttentionPanel>
+
+              <AttentionPanel
+                icon={<Ruler className="h-3.5 w-3.5" />}
+                title={t("dashboard.attention.takeoffs_review")}
+                count={summary.unverifiedTakeoffs.length}
+              >
+                {summary.unverifiedTakeoffs.map(({ measurement, projectId, projectName }) => (
+                  <LocaleLink
+                    key={measurement.id}
+                    href={`/projects/${projectId}/takeoff`}
+                    className="flex items-center justify-between gap-2 border-t border-line px-4 py-2.5 text-[12.5px] first:border-t-0 hover:bg-canvas"
+                  >
+                    <span className="min-w-0 truncate text-ink">{measurement.label}</span>
+                    <span className="shrink-0 truncate text-muted">{projectName}</span>
+                  </LocaleLink>
+                ))}
+              </AttentionPanel>
+
+              <AttentionPanel
+                icon={<AlertTriangle className="h-3.5 w-3.5" />}
+                title={t("dashboard.attention.missing_info")}
+                count={summary.projectsMissingInfo.length}
+              >
+                {summary.projectsMissingInfo.map(({ project, missing }) => (
+                  <LocaleLink
+                    key={project.id}
+                    href={`/projects/${project.id}`}
+                    className="flex items-center justify-between gap-2 border-t border-line px-4 py-2.5 text-[12.5px] first:border-t-0 hover:bg-canvas"
+                  >
+                    <span className="min-w-0 truncate text-ink">{project.name}</span>
+                    <span className="shrink-0 truncate text-muted">
+                      {missing.map((m) => t(`dashboard.attention.missing_${m}`)).join(" · ")}
+                    </span>
+                  </LocaleLink>
+                ))}
+              </AttentionPanel>
             </div>
           )}
         </section>
+      )}
 
-        {/* recent estimates */}
-        <section>
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-serif text-[17px] text-ink">{t("dashboard.recent_estimates")}</h2>
-            <LocaleLink href="/estimates" className="inline-flex items-center gap-1 text-[13px] font-medium text-accent hover:text-accent-dark">
-              {t("dashboard.view_all")} <ArrowRight className="h-3.5 w-3.5" />
-            </LocaleLink>
+      {/* operational project table */}
+      <section>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-serif text-[17px] text-ink">{t("dashboard.recent_projects")}</h2>
+          <LocaleLink href="/projects" className="inline-flex items-center gap-1 text-[13px] font-medium text-accent hover:text-accent-dark">
+            {t("dashboard.view_all")} <ArrowRight className="h-3.5 w-3.5" />
+          </LocaleLink>
+        </div>
+        {loading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-11" />
+            ))}
           </div>
-          <div className="overflow-hidden rounded-2xl border border-line bg-surface">
+        ) : projects.length === 0 ? (
+          <EmptyState
+            icon={<Plus className="h-5 w-5" />}
+            title={t("dashboard.empty.title")}
+            description={t("dashboard.empty.description")}
+            action={
+              <LocaleLink href="/projects/new" className="inline-flex h-11 items-center gap-2 rounded-lg bg-ink px-5 text-sm font-medium text-white hover:bg-ink/90">
+                {t("dashboard.empty.cta")}
+              </LocaleLink>
+            }
+          />
+        ) : (
+          <Table>
+            <THead>
+              <tr>
+                <TH>{t("dashboard.table.project")}</TH>
+                <TH>{t("dashboard.table.client")}</TH>
+                <TH>{t("dashboard.table.stage")}</TH>
+                <TH align="right">{t("dashboard.table.estimate")}</TH>
+                <TH align="right">{t("dashboard.table.updated")}</TH>
+              </tr>
+            </THead>
+            <TBody>
+              {operationalRows.map((entry) => (
+                <TR key={entry.project.id} onClick={() => router.push(`/projects/${entry.project.id}`)}>
+                  <TD className="font-medium">{entry.project.name}</TD>
+                  <TD className="text-ink-soft">{entry.clientName ?? t("dashboard.table.no_client")}</TD>
+                  <TD>
+                    <StatusBadge status={entry.project.status} label={t(`common.project_status.${entry.project.status}`)} />
+                  </TD>
+                  <TD align="right">{entry.headlineTotal > 0 ? formatUsd(entry.headlineTotal, locale) : "—"}</TD>
+                  <TD align="right" className="text-ink-soft">{formatDate(entry.project.updatedAt, locale)}</TD>
+                </TR>
+              ))}
+            </TBody>
+          </Table>
+        )}
+      </section>
+
+      {/* recent estimates */}
+      <section>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="font-serif text-[17px] text-ink">{t("dashboard.recent_estimates")}</h2>
+          <LocaleLink href="/estimates" className="inline-flex items-center gap-1 text-[13px] font-medium text-accent hover:text-accent-dark">
+            {t("dashboard.view_all")} <ArrowRight className="h-3.5 w-3.5" />
+          </LocaleLink>
+        </div>
+        <Table>
+          <THead>
+            <tr>
+              <TH>{t("dashboard.table.project")}</TH>
+              <TH>{t("dashboard.table.status")}</TH>
+              <TH align="right">{t("dashboard.table.estimate")}</TH>
+              <TH align="right">{t("dashboard.table.updated")}</TH>
+            </tr>
+          </THead>
+          <TBody>
             {loading ? (
-              <div className="space-y-2 p-3">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-14" />
-                ))}
-              </div>
-            ) : recentEstimates.length === 0 ? (
-              <p className="px-4 py-10 text-center text-sm text-muted">{t("common.states.empty")}</p>
+              <tr>
+                <td colSpan={4} className="p-3">
+                  <div className="space-y-2">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <Skeleton key={i} className="h-9" />
+                    ))}
+                  </div>
+                </td>
+              </tr>
+            ) : estimates.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-4 py-10 text-center text-sm text-muted">
+                  {t("common.states.empty")}
+                </td>
+              </tr>
             ) : (
-              recentEstimates.map((e) => {
-                const entry = projects.find((p) => p.project.id === e.projectId);
-                return (
-                  <EstimateRow
-                    key={e.id}
-                    estimate={e}
-                    projectName={entry?.project.name}
-                    imageSrc={
-                      entry?.thumbnailUrl && !entry.thumbnailUrl.startsWith("data:image/svg")
-                        ? entry.thumbnailUrl
-                        : projectImage(entry?.project.projectType ?? "other", e.projectId, 200)
-                    }
-                    locale={locale}
-                  />
-                );
-              })
+              estimates
+                .slice()
+                .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+                .slice(0, 6)
+                .map((e) => {
+                  const entry = projects.find((p) => p.project.id === e.projectId);
+                  return (
+                    <TR key={e.id} onClick={() => router.push(`/estimates/${e.id}`)}>
+                      <TD className="font-medium">{entry?.project.name ?? e.estimateNumber}</TD>
+                      <TD>
+                        <EstimateStatusBadge status={e.status} label={t(`estimates.detail.status.${e.status}`)} />
+                      </TD>
+                      <TD align="right">{formatUsd(e.total, locale)}</TD>
+                      <TD align="right" className="text-ink-soft">{formatDate(e.createdAt, locale)}</TD>
+                    </TR>
+                  );
+                })
             )}
-          </div>
-        </section>
-      </div>
+          </TBody>
+        </Table>
+      </section>
     </div>
   );
 }
@@ -226,52 +348,26 @@ function Stat({
   );
 }
 
-function EstimateRow({
-  estimate,
-  projectName,
-  imageSrc,
-  locale,
+function AttentionPanel({
+  icon,
+  title,
+  count,
+  children,
 }: {
-  estimate: Estimate;
-  projectName?: string;
-  imageSrc: string;
-  locale: "en-US" | "es-US";
+  icon: React.ReactNode;
+  title: string;
+  count: number;
+  children: React.ReactNode;
 }) {
-  const t = useT();
-  const [broken, setBroken] = useState(false);
-  const project = projectName ?? "Project";
+  if (count === 0) return null;
   return (
-    <LocaleLink
-      href={`/estimates/${estimate.id}`}
-      className="group flex items-center gap-3 border-b border-line px-3.5 py-3 last:border-0 hover:bg-canvas"
-    >
-      <span className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-canvas">
-        {!broken ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={imageSrc}
-            alt=""
-            referrerPolicy="no-referrer"
-            onError={() => setBroken(true)}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <span className="block h-full w-full bg-[linear-gradient(135deg,var(--color-accent-tint),#eef1f0)]" />
-        )}
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[13px] font-medium text-ink">{project}</span>
-        <span className="block truncate text-[11px] text-muted">
-          {estimate.city}, {estimate.stateCode} · {formatUsd(estimate.total, locale)}
-        </span>
-        <span className="mt-1 inline-block">
-          <EstimateStatusBadge status={estimate.status} label={t(`estimates.detail.status.${estimate.status}`)} />
-        </span>
-      </span>
-      <span className="shrink-0 text-right">
-        <span className="block text-[11px] text-muted">{formatDate(estimate.createdAt, locale)}</span>
-        <ArrowUpRight className="ml-auto mt-1 h-3.5 w-3.5 text-muted opacity-0 transition-opacity group-hover:opacity-100" />
-      </span>
-    </LocaleLink>
+    <div className="overflow-hidden rounded-2xl border border-line bg-surface">
+      <div className="flex items-center gap-2 border-b border-line bg-canvas/60 px-4 py-2.5">
+        <span className="text-ink-soft">{icon}</span>
+        <span className="text-[12px] font-medium text-ink">{title}</span>
+        <span className="ml-auto text-[11px] font-semibold text-muted">{count}</span>
+      </div>
+      {children}
+    </div>
   );
 }

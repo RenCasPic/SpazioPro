@@ -29,5 +29,24 @@
     "open": "Pendientes",
     "lost": "Perdidos",
     "avg_value": "Valor promedio"
+  },
+  "attention": {
+    "title": "Requiere atención",
+    "all_clear": "Todo al día",
+    "estimates_review": "Estimados por revisar",
+    "takeoffs_review": "Takeoffs por verificar",
+    "missing_info": "Información incompleta",
+    "missing_location": "Sin ubicación",
+    "missing_client": "Sin cliente",
+    "missing_estimate": "Sin estimado"
+  },
+  "table": {
+    "project": "Proyecto",
+    "client": "Cliente",
+    "stage": "Etapa",
+    "status": "Estado",
+    "estimate": "Estimado",
+    "updated": "Actualizado",
+    "no_client": "—"
   }
 }

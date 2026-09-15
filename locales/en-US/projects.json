@@ -48,6 +48,25 @@
     "all": "All",
     "search_placeholder": "Search project or client…"
   },
+  "table": {
+    "project": "Project",
+    "client": "Client",
+    "address": "Address",
+    "type": "Type",
+    "status": "Status",
+    "estimate": "Estimate",
+    "margin": "Margin",
+    "updated": "Updated",
+    "no_client": "—",
+    "no_address": "—",
+    "no_estimate": "—",
+    "no_margin": "—"
+  },
+  "view": {
+    "grid": "Grid",
+    "list": "List"
+  },
+  "count": "{n} projects",
   "upload": {
     "title": "Upload a photo of the space you want to transform",
     "hint": "Drag an image, choose one, or use your camera. JPG, PNG or WebP.",

@@ -29,5 +29,24 @@
     "open": "Pending",
     "lost": "Lost",
     "avg_value": "Avg. project value"
+  },
+  "attention": {
+    "title": "Needs attention",
+    "all_clear": "All caught up",
+    "estimates_review": "Estimates awaiting review",
+    "takeoffs_review": "Takeoffs to verify",
+    "missing_info": "Missing information",
+    "missing_location": "No location",
+    "missing_client": "No client",
+    "missing_estimate": "No estimate"
+  },
+  "table": {
+    "project": "Project",
+    "client": "Client",
+    "stage": "Stage",
+    "status": "Status",
+    "estimate": "Estimate",
+    "updated": "Updated",
+    "no_client": "—"
   }
 }
