@@ -167,7 +167,31 @@
       "cad": "Plano CAD",
       "pdf_plan": "Plano PDF",
       "document": "Documento"
+    },
+    "status": {
+      "verified": "Verificada",
+      "needs_verification": "Necesita verificación",
+      "unverified": "Sin verificar"
     }
+  },
+  "takeoffs_page": {
+    "title": "Takeoffs",
+    "subtitle": "Todas las cantidades medidas en tus proyectos — de dónde vienen y si ya fueron verificadas.",
+    "count": "{n} mediciones",
+    "search_placeholder": "Buscar medición o proyecto…",
+    "filter_all": "Todas",
+    "filter_needs_review": "Por revisar",
+    "filter_verified": "Verificadas",
+    "table": {
+      "measurement": "Medición",
+      "project": "Proyecto",
+      "trade": "Trade",
+      "quantity": "Cantidad",
+      "source": "Fuente",
+      "status": "Estado"
+    },
+    "empty_title": "Todavía no hay mediciones de takeoff",
+    "empty_description": "Las mediciones se agregan desde la pestaña Takeoff de cada proyecto — manualmente, desde el modelo 3D o desde un plano importado."
   },
   "scope": {
     "title": "Alcance de trabajo",

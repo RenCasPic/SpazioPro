@@ -167,7 +167,31 @@
       "cad": "CAD drawing",
       "pdf_plan": "PDF plan",
       "document": "Document"
+    },
+    "status": {
+      "verified": "Verified",
+      "needs_verification": "Needs verification",
+      "unverified": "Unverified"
     }
+  },
+  "takeoffs_page": {
+    "title": "Takeoffs",
+    "subtitle": "Every measured quantity across your projects — where it came from, and whether it's been verified.",
+    "count": "{n} measurements",
+    "search_placeholder": "Search measurement or project…",
+    "filter_all": "All",
+    "filter_needs_review": "Needs review",
+    "filter_verified": "Verified",
+    "table": {
+      "measurement": "Measurement",
+      "project": "Project",
+      "trade": "Trade",
+      "quantity": "Quantity",
+      "source": "Source",
+      "status": "Status"
+    },
+    "empty_title": "No takeoff measurements yet",
+    "empty_description": "Measurements are added from a project's Takeoff tab — manually, from the 3D room model, or from an imported plan."
   },
   "scope": {
     "title": "Scope of Work",

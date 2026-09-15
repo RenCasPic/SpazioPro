@@ -35,6 +35,16 @@ export const takeoffService = {
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   },
 
+  /** Every measurement across the user's projects — for the cross-project Takeoffs view. */
+  async listAll(): Promise<TakeoffMeasurement[]> {
+    const userId = await getCurrentUserId();
+    const db = readDb();
+    const ownedIds = new Set(db.projects.filter((p) => p.userId === userId).map((p) => p.id));
+    return db.takeoffMeasurements
+      .filter((m) => ownedIds.has(m.projectId))
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  },
+
   async add(input: NewTakeoffMeasurement): Promise<TakeoffMeasurement> {
     await assertOwner(input.projectId);
     const now = new Date().toISOString();

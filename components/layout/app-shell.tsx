@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   FolderKanban,
+  Ruler,
   LibraryBig,
   Users,
   ReceiptText,
@@ -28,9 +29,10 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { href: "/dashboard", key: "dashboard", icon: LayoutDashboard },
   { href: "/projects", key: "projects", icon: FolderKanban },
-  { href: "/clients", key: "clients", icon: Users },
-  { href: "/catalog", key: "catalog", icon: LibraryBig },
+  { href: "/takeoffs", key: "takeoffs", icon: Ruler },
   { href: "/estimates", key: "estimates", icon: ReceiptText },
+  { href: "/catalog", key: "catalog", icon: LibraryBig },
+  { href: "/clients", key: "clients", icon: Users },
 ];
 
 function NavList({ onNavigate }: { onNavigate?: () => void }) {
